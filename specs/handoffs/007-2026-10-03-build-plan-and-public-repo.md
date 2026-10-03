@@ -12,21 +12,27 @@ Wrote and reviewed the D9–15 build plan, finished Phase 0 (Supabase setup), th
 - **Public repo:** old repo renamed to `xiao-chen-cz/keeping-tabs-on-subs-private` (private; full old history pushed there, also local branch `private-history`). New public repo `https://github.com/xiao-chen-cz/keeping-tabs-on-subs` with one fresh commit `36bb610`. Remotes: `origin` = public, `private` = backup. Project git email set to the GitHub noreply address.
 - **Tooling:** `cursor-grill-plan` / `cursor-grill-diff` re-enabled in `~/.claude/settings.json`; their `run-cursor.sh` now passes the bundle as an argument (cursor-agent ≥ 2026.10 ignores stdin) and uses `--trust` by default. `gpt-5.6-sol-high` stalled twice; `gpt-5.3-codex-high` works.
 
+- **Vercel on the public repo:** connected and verified. Pushes to `origin/main` deploy to production. The first two deploys failed because pnpm 12 rejects unapproved install scripts (`esbuild` via `tsx`); fixed by `esbuild: false` under `allowBuilds` in `pnpm-workspace.yaml` (`0316198`).
+- **README rewritten for non-technical readers** (`d964e36`): problem, idea (capture → review → list → reminders), hypothesis, origin, roadmap, privacy, out of scope; developer commands at the end.
+- **Public demo decided:** the app stays invite-only (the owner's demo account and tester accounts are not public). Added optional **Phase 7** to the plan (`d49f37e`): a public `/demo` page with no login and no database, built in memory from `buildSeed('full', today)`, read-only by construction. Rejected: a shared read-only account with a public password (any logged-in user can change the password via the Supabase Auth API). Phase 7 is first in the cut order.
+- **Write-up drafted** (in chat, not saved): a short high-level post from dropping AppSheet on Oct 2 to the public repo.
+
 ## In Progress
-- **Vercel** is connected to the public repo (CLI confirmed: disconnected `-private`, connected `xiao-chen-cz/keeping-tabs-on-subs`). Not yet verified that a push to the public repo triggers a production deploy.
+- Nothing mid-edit. Working tree clean after this handoff update.
 
 ## Next Steps
-1. Push a commit (e.g. this handoff) and check that production deploys from the public repo.
-2. Read the D10 challenge card first and align the plan with it before building (we are ahead of the challenge: D09 only asked for a locally running skeleton).
-3. Phase 1 of the plan: pure date logic test-first in `src/lib/dates/` and `src/lib/domain/` (E1–E27, E34–E37), domain tests in the Vitest node environment.
-4. Phases 2–6 per the plan: schema + RLS + grants, auth + account scripts + seed, list, detail + add/edit, preview live; Friday Oct 9 stabilisation.
-5. Before Phase 4 (list UI): decide look and feel (recommended Tailwind + shadcn/ui; owner said not to worry about design for now).
-6. Before the tester round (Oct 18): install OrbStack so migrations are tried on a local Supabase stack first.
+1. Read the D10 challenge card first and align the plan with it before building (we are ahead of the challenge: D09 only asked for a locally running skeleton).
+2. Phase 1 of the plan: pure date logic test-first in `src/lib/dates/` and `src/lib/domain/` (E1–E27, E34–E37), domain tests in the Vitest node environment.
+3. Phases 2–6 per the plan: schema + RLS + grants, auth + account scripts + seed, list, detail + add/edit, preview live; Friday Oct 9 stabilisation. Phase 7 (`/demo`) only if time allows.
+4. Before Phase 4 (list UI): decide look and feel (recommended Tailwind + shadcn/ui; owner said not to worry about design for now).
+5. Before the tester round (Oct 18): install OrbStack so migrations are tried on a local Supabase stack first.
 
 ## Key Files
 - `specs/todo/d09-15-core-list-and-preview.md` - the build plan (authoritative for D9–15 execution)
 - `specs/logic-spec.md`, `specs/seed-data.md` - logic and seed answer key (updated this session)
 - `CLAUDE.md` - project rules, incl. the new no-real-data-in-git rule
+- `README.md` - public-facing project description
+- `pnpm-workspace.yaml` - `allowBuilds` list; any new dependency with an install script must be added here or Vercel builds fail
 - `supabase/config.toml` - Supabase CLI config (project linked)
 - `.env.local` - keys (gitignored; Claude cannot read `.env*` files by permission rule, scripts load it via `node --env-file`)
 - `/local-data/private-notes.md`, `/local-data/handoffs/` - private, gitignored
