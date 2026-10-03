@@ -1,5 +1,6 @@
 import type { ComputedSubscription, SubscriptionCore } from "@/lib/domain/types";
 import type { CurrencyTotals } from "@/lib/domain/totals";
+import { DueSoon } from "./due-soon";
 import { EndingRow } from "./ending-row";
 import { RenewalRow } from "./renewal-row";
 import { TotalsCard } from "./totals-card";
@@ -14,6 +15,8 @@ export interface RenewalsListProps<T extends SubscriptionCore> {
   showArchived?: boolean;
   /** Omit to hide every add control. */
   addHref?: string;
+  /** Alert offsets (days before cancel-by) for the Due soon section; omit to hide it. */
+  alertOffsets?: number[];
 }
 
 const h2 = "mb-2 text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400";
@@ -24,6 +27,7 @@ export function RenewalsList<T extends SubscriptionCore>({
   hrefFor,
   showArchived = false,
   addHref,
+  alertOffsets,
 }: RenewalsListProps<T>) {
   const { upcoming, ending, archived } = groups;
   const empty = upcoming.length === 0 && ending.length === 0 && !(showArchived && archived.length > 0);
@@ -44,6 +48,7 @@ export function RenewalsList<T extends SubscriptionCore>({
         </section>
       ) : (
         <>
+          {alertOffsets && <DueSoon rows={upcoming} offsets={alertOffsets} hrefFor={hrefFor} />}
           {upcoming.length > 0 && (
             <section aria-labelledby="h-upcoming">
               <h2 id="h-upcoming" className={h2}>Upcoming</h2>

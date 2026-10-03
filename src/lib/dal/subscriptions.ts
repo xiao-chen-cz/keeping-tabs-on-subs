@@ -76,6 +76,32 @@ export async function getSubscription(id: string): Promise<Subscription | null> 
   return row.data ? rowToSubscription(row.data, lookups) : null;
 }
 
+export interface SubscriptionForEdit {
+  subscription: Subscription;
+  categoryId: string | null;
+  paymentMethodId: string | null;
+}
+
+/** Like getSubscription, plus the lookup ids the edit form needs to preselect its selects. */
+export async function getSubscriptionForEdit(id: string): Promise<SubscriptionForEdit | null> {
+  await requireUser();
+  const supabase = await createClient();
+  const [row, lookups] = await Promise.all([
+    supabase.from("subscriptions").select("*").eq("id", id).maybeSingle(),
+    loadLookups(supabase),
+  ]);
+  if (row.error) {
+    if (row.error.code === "22P02") return null;
+    throw new Error(`Could not load subscription: ${row.error.message}`);
+  }
+  if (!row.data) return null;
+  return {
+    subscription: rowToSubscription(row.data, lookups),
+    categoryId: row.data.category_id,
+    paymentMethodId: row.data.payment_method_id,
+  };
+}
+
 /** Inserts a manual entry for the signed-in user (user_id from auth.uid(), source = manual). */
 export async function createSubscription(data: SubscriptionFormData): Promise<string> {
   await requireUser();
