@@ -1,0 +1,53 @@
+// Pure proposal logic: what is still missing before approval, and whether a proposal updates an
+// existing subscription instead of creating a duplicate (logic-spec §4 rule 10, D16-20 plan step 1).
+import {
+  REQUIRED_FOR_APPROVAL,
+  type Subscription,
+  type SubscriptionDraft,
+} from "@/lib/domain/types";
+
+export type RequiredField = (typeof REQUIRED_FOR_APPROVAL)[number];
+
+const hasText = (v: string | null | undefined): v is string => v != null && v.trim() !== "";
+
+/** Required fields the draft still lacks. The date requirement is met by a last renewal date or a trial end. */
+export function missingRequired(
+  draft: Pick<
+    SubscriptionDraft,
+    "name" | "amountCents" | "currency" | "billingCycle" | "lastRenewalDate" | "trialEnds"
+  >,
+): RequiredField[] {
+  const present: Record<RequiredField, boolean> = {
+    name: hasText(draft.name),
+    amountCents: draft.amountCents !== null,
+    currency: draft.currency !== null,
+    billingCycle: draft.billingCycle !== null,
+    "lastRenewalDate|trialEnds": draft.lastRenewalDate !== null || draft.trialEnds !== null,
+  };
+  return REQUIRED_FOR_APPROVAL.filter((k) => !present[k]);
+}
+
+const norm = (v: string | null | undefined): string | null => (hasText(v) ? v.trim().toLowerCase() : null);
+const keys = (x: { vendor: string | null; name: string | null }): Set<string> =>
+  new Set([norm(x.vendor), norm(x.name)].filter((k): k is string => k !== null));
+
+type Candidate = Pick<Subscription, "id" | "name" | "vendor" | "amountCents" | "currency" | "status">;
+
+/**
+ * Id of the first non-cancelled subscription whose vendor or name equals the draft's vendor or name
+ * (case-insensitive, trimmed) with the same amount and currency; null when none.
+ */
+export function matchExisting(
+  draft: Pick<SubscriptionDraft, "name" | "vendor" | "amountCents" | "currency">,
+  subscriptions: readonly Candidate[],
+): string | null {
+  if (draft.amountCents === null || draft.currency === null) return null;
+  const wanted = keys(draft);
+  if (wanted.size === 0) return null;
+  for (const s of subscriptions) {
+    if (s.status === "cancelled") continue;
+    if (s.amountCents !== draft.amountCents || s.currency !== draft.currency) continue;
+    for (const k of keys(s)) if (wanted.has(k)) return s.id;
+  }
+  return null;
+}

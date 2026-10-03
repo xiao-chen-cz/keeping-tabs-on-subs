@@ -42,8 +42,22 @@ export type Scope = (typeof SCOPES)[number];
 export const CONFIDENCES = ["high", "medium", "low"] as const;
 export type Confidence = (typeof CONFIDENCES)[number];
 
-export const ENTRY_SOURCES = ["manual", "seed"] as const;
+export const ENTRY_SOURCES = ["manual", "seed", "capture"] as const;
 export type EntrySource = (typeof ENTRY_SOURCES)[number];
+
+/** Capture status (a proposal's lifecycle), not to be confused with the subscription status. */
+export const CAPTURE_STATUSES = ["pending", "approved", "rejected"] as const;
+export type CaptureStatus = (typeof CAPTURE_STATUSES)[number];
+
+export const CAPTURE_INPUTS = ["text", "upload", "paste", "seed"] as const;
+export type CaptureInput = (typeof CAPTURE_INPUTS)[number];
+
+/** How the user cancelled with the vendor (D12). */
+export const CANCEL_CHANNELS = ["website_app", "email", "phone", "letter", "in_person", "other"] as const;
+export type CancelChannel = (typeof CANCEL_CHANNELS)[number];
+
+export const SUBSCRIPTION_EVENT_KINDS = ["cancelled", "reopened"] as const;
+export type SubscriptionEventKind = (typeof SUBSCRIPTION_EVENT_KINDS)[number];
 
 /**
  * The inputs the date and price rules read. Every field the user may not know is nullable;

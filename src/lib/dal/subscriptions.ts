@@ -9,10 +9,10 @@ import type { SubscriptionFormData } from "@/lib/validation/subscription-form";
 type Client = Awaited<ReturnType<typeof createClient>>;
 type WritableColumns = Omit<
   Database["public"]["Tables"]["subscriptions"]["Update"],
-  "id" | "user_id" | "source" | "created_at" | "updated_at" | "kept_for_cancel_by"
+  "id" | "user_id" | "source" | "created_at" | "updated_at" | "kept_for_cancel_by" | "status" | "access_until"
 >;
 
-async function loadLookups(supabase: Client): Promise<NameLookups> {
+export async function loadLookups(supabase: Client): Promise<NameLookups> {
   const [cats, pms] = await Promise.all([
     supabase.from("categories").select("id, name"),
     supabase.from("payment_methods").select("id, name"),
@@ -25,11 +25,10 @@ async function loadLookups(supabase: Client): Promise<NameLookups> {
   };
 }
 
-/** Form data -> table columns. Never includes user_id or source (DB defaults apply). */
+/** Form data -> table columns. Never includes user_id, source, status or access_until (DB defaults apply; status changes use setStatus, D12). */
 function formToColumns(d: SubscriptionFormData): WritableColumns {
   return {
     name: d.name,
-    status: d.status,
     amount: d.amount === null ? null : Number(d.amount),
     currency: d.currency,
     billing_cycle: d.billing_cycle,
@@ -38,7 +37,6 @@ function formToColumns(d: SubscriptionFormData): WritableColumns {
     cancel_notice_days: d.cancel_notice_days,
     regular_price: d.regular_price === null ? null : Number(d.regular_price),
     promo_ends: d.promo_ends,
-    access_until: d.access_until,
     category_id: d.category_id,
     payment_method_id: d.payment_method_id,
     scope: d.scope,

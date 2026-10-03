@@ -23,6 +23,7 @@ const row: SubscriptionRow = {
   vendor: "Notely Inc",
   plan: null,
   cancel_url: null,
+  capture_id: null,
   notes: null,
   source: "seed",
   kept_for_cancel_by: null,

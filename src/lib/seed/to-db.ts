@@ -1,6 +1,9 @@
 // Maps a SeedRow to the subscriptions insert shape. Pure; lookup ids come from the caller.
 import type { Database } from "@/lib/supabase/database.types";
+import type { PlainDate } from "@/lib/domain/types";
 import type { SeedRow } from "./build-seed";
+import type { SeedCapture } from "./captures";
+import type { SeedProposal } from "./proposals";
 
 export type SubscriptionInsert = Database["public"]["Tables"]["subscriptions"]["Insert"];
 
@@ -41,5 +44,61 @@ export function seedRowToInsert(
     notes: row.notes,
     source: "seed",
     kept_for_cancel_by: row.keptForCancelBy,
+  };
+}
+
+export type CaptureInsert = Database["public"]["Tables"]["captures"]["Insert"];
+export type ProposalInsert = Database["public"]["Tables"]["proposals"]["Insert"];
+
+export function seedCaptureToInsert(capture: SeedCapture, captureDate: PlainDate, userId: string): CaptureInsert {
+  return {
+    user_id: userId,
+    input: "seed",
+    raw_text: capture.rawText(captureDate),
+    mime_type: capture.mimeType,
+  };
+}
+
+/**
+ * Seed proposal -> proposals insert. `updatesSubscriptionId` is the real id of the inserted subscription
+ * (resolved by the caller from updatesSeedKey); status stays at the default, pending.
+ */
+export function seedProposalToInsert(
+  proposal: SeedProposal,
+  userId: string,
+  captureId: string,
+  updatesSubscriptionId: string | null,
+  categoryIds: ReadonlyMap<string, string>,
+  paymentMethodIds: ReadonlyMap<string, string>,
+): ProposalInsert {
+  const d = proposal.draft;
+  const lookup = (map: ReadonlyMap<string, string>, name: string | null, kind: string) => {
+    if (name === null) return null;
+    const id = map.get(name);
+    if (!id) throw new Error(`Unknown ${kind} "${name}" for proposal ${proposal.key}`);
+    return id;
+  };
+  return {
+    user_id: userId,
+    capture_id: captureId,
+    name: d.name,
+    amount: toNumeric(d.amountCents),
+    currency: d.currency,
+    billing_cycle: d.billingCycle,
+    last_renewal_date: d.lastRenewalDate,
+    trial_ends: d.trialEnds,
+    cancel_notice_days: d.cancelNoticeDays,
+    regular_price: toNumeric(d.regularPriceCents),
+    promo_ends: d.promoEnds,
+    category_id: lookup(categoryIds, d.category, "category"),
+    payment_method_id: lookup(paymentMethodIds, d.paymentMethod, "payment method"),
+    scope: d.scope,
+    confidence: d.confidence,
+    vendor: d.vendor,
+    plan: d.plan,
+    cancel_url: d.cancelUrl,
+    notes: d.notes,
+    field_confidence: d.fieldConfidence,
+    updates_subscription_id: updatesSubscriptionId,
   };
 }

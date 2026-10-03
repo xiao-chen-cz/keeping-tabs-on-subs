@@ -4,7 +4,8 @@ import { appendFileSync } from "node:fs";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isPlainDate, todayIn } from "../src/lib/dates/plain-date";
 import { buildSeed, SEED_CATEGORIES, SEED_PAYMENT_METHODS, type SeedSet } from "../src/lib/seed/build-seed";
-import { seedRowToInsert } from "../src/lib/seed/to-db";
+import { buildSeedProposals } from "../src/lib/seed/proposals";
+import { seedCaptureToInsert, seedProposalToInsert, seedRowToInsert } from "../src/lib/seed/to-db";
 import type { Database } from "../src/lib/supabase/database.types";
 
 export type Db = SupabaseClient<Database>;
@@ -41,8 +42,25 @@ export async function findUserId(db: Db, email: string): Promise<string | null> 
   return null;
 }
 
-/** Inserts lookups and seed rows for a user. Assumes the user has no lookups or subscriptions. */
-export async function insertSeed(db: Db, userId: string, set: SeedSet, today: string): Promise<number> {
+export type SeedCounts = { subscriptions: number; proposals: number };
+
+/** Deletes a user's rows in dependency order (events, proposals, captures, subscriptions, lookups). */
+export async function clearUserData(db: Db, userId: string): Promise<void> {
+  for (const table of [
+    "subscription_events",
+    "proposals",
+    "captures",
+    "subscriptions",
+    "categories",
+    "payment_methods",
+  ] as const) {
+    const res = await db.from(table).delete().eq("user_id", userId);
+    if (res.error) throw res.error;
+  }
+}
+
+/** Inserts lookups, seed rows, captures and proposals for a user. Assumes the user has no data. */
+export async function insertSeed(db: Db, userId: string, set: SeedSet, today: string): Promise<SeedCounts> {
   const cats = await db
     .from("categories")
     .insert(SEED_CATEGORIES.map((name) => ({ user_id: userId, name })))
@@ -55,10 +73,32 @@ export async function insertSeed(db: Db, userId: string, set: SeedSet, today: st
   if (pms.error) throw pms.error;
   const catIds = new Map(cats.data.map((c) => [c.name, c.id]));
   const pmIds = new Map(pms.data.map((p) => [p.name, p.id]));
-  const rows = buildSeed(set, today).map((r) => seedRowToInsert(r, userId, catIds, pmIds));
-  const subs = await db.from("subscriptions").insert(rows);
+  const seedRows = buildSeed(set, today);
+  const rows = seedRows.map((r) => seedRowToInsert(r, userId, catIds, pmIds));
+  const subs = await db.from("subscriptions").insert(rows).select("id, name");
   if (subs.error) throw subs.error;
-  return rows.length;
+  const subIdByName = new Map(subs.data.map((s) => [s.name, s.id]));
+
+  const proposals = buildSeedProposals(set, today);
+  for (const p of proposals) {
+    const cap = await db
+      .from("captures")
+      .insert(seedCaptureToInsert(p.capture, p.captureDate, userId))
+      .select("id")
+      .single();
+    if (cap.error) throw cap.error;
+    let updatesId: string | null = null;
+    if (p.updatesSeedKey !== null) {
+      const target = seedRows.find((r) => r.key === p.updatesSeedKey);
+      updatesId = (target && subIdByName.get(target.name)) ?? null;
+      if (updatesId === null) throw new Error(`Proposal ${p.key} updates seed #${p.updatesSeedKey}, which is not in this set`);
+    }
+    const ins = await db
+      .from("proposals")
+      .insert(seedProposalToInsert(p, userId, cap.data.id, updatesId, catIds, pmIds));
+    if (ins.error) throw ins.error;
+  }
+  return { subscriptions: rows.length, proposals: proposals.length };
 }
 
 export function saveCredentials(out: string | null, entry: { email: string; password: string; set: SeedSet }) {

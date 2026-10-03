@@ -39,6 +39,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      captures: {
+        Row: {
+          extraction: Json | null
+          extraction_error: string | null
+          id: string
+          input: Database["public"]["Enums"]["capture_input"]
+          mime_type: string | null
+          raw_text: string | null
+          received_at: string
+          storage_path: string | null
+          user_id: string
+        }
+        Insert: {
+          extraction?: Json | null
+          extraction_error?: string | null
+          id?: string
+          input: Database["public"]["Enums"]["capture_input"]
+          mime_type?: string | null
+          raw_text?: string | null
+          received_at?: string
+          storage_path?: string | null
+          user_id?: string
+        }
+        Update: {
+          extraction?: Json | null
+          extraction_error?: string | null
+          id?: string
+          input?: Database["public"]["Enums"]["capture_input"]
+          mime_type?: string | null
+          raw_text?: string | null
+          received_at?: string
+          storage_path?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           id: string
@@ -96,6 +132,183 @@ export type Database = {
         }
         Relationships: []
       }
+      proposals: {
+        Row: {
+          amount: number | null
+          billing_cycle: Database["public"]["Enums"]["billing_cycle"] | null
+          cancel_notice_days: number | null
+          cancel_url: string | null
+          capture_id: string
+          category_id: string | null
+          confidence: Database["public"]["Enums"]["confidence"] | null
+          created_at: string
+          currency: Database["public"]["Enums"]["currency"] | null
+          decided_at: string | null
+          field_confidence: Json
+          id: string
+          last_renewal_date: string | null
+          name: string | null
+          notes: string | null
+          payment_method_id: string | null
+          plan: string | null
+          promo_ends: string | null
+          regular_price: number | null
+          scope: Database["public"]["Enums"]["scope"] | null
+          status: Database["public"]["Enums"]["capture_status"]
+          subscription_id: string | null
+          trial_ends: string | null
+          updates_subscription_id: string | null
+          user_id: string
+          vendor: string | null
+        }
+        Insert: {
+          amount?: number | null
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle"] | null
+          cancel_notice_days?: number | null
+          cancel_url?: string | null
+          capture_id: string
+          category_id?: string | null
+          confidence?: Database["public"]["Enums"]["confidence"] | null
+          created_at?: string
+          currency?: Database["public"]["Enums"]["currency"] | null
+          decided_at?: string | null
+          field_confidence?: Json
+          id?: string
+          last_renewal_date?: string | null
+          name?: string | null
+          notes?: string | null
+          payment_method_id?: string | null
+          plan?: string | null
+          promo_ends?: string | null
+          regular_price?: number | null
+          scope?: Database["public"]["Enums"]["scope"] | null
+          status?: Database["public"]["Enums"]["capture_status"]
+          subscription_id?: string | null
+          trial_ends?: string | null
+          updates_subscription_id?: string | null
+          user_id?: string
+          vendor?: string | null
+        }
+        Update: {
+          amount?: number | null
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle"] | null
+          cancel_notice_days?: number | null
+          cancel_url?: string | null
+          capture_id?: string
+          category_id?: string | null
+          confidence?: Database["public"]["Enums"]["confidence"] | null
+          created_at?: string
+          currency?: Database["public"]["Enums"]["currency"] | null
+          decided_at?: string | null
+          field_confidence?: Json
+          id?: string
+          last_renewal_date?: string | null
+          name?: string | null
+          notes?: string | null
+          payment_method_id?: string | null
+          plan?: string | null
+          promo_ends?: string | null
+          regular_price?: number | null
+          scope?: Database["public"]["Enums"]["scope"] | null
+          status?: Database["public"]["Enums"]["capture_status"]
+          subscription_id?: string | null
+          trial_ends?: string | null
+          updates_subscription_id?: string | null
+          user_id?: string
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_capture_fk"
+            columns: ["capture_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "captures"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "proposals_category_fk"
+            columns: ["category_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "proposals_payment_method_fk"
+            columns: ["payment_method_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "proposals_subscription_fk"
+            columns: ["subscription_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "proposals_updates_subscription_fk"
+            columns: ["updates_subscription_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      subscription_events: {
+        Row: {
+          capture_id: string | null
+          channel: Database["public"]["Enums"]["cancel_channel"] | null
+          id: string
+          kind: Database["public"]["Enums"]["subscription_event_kind"]
+          note: string | null
+          occurred_on: string
+          recorded_at: string
+          reference: string | null
+          subscription_id: string
+          user_id: string
+        }
+        Insert: {
+          capture_id?: string | null
+          channel?: Database["public"]["Enums"]["cancel_channel"] | null
+          id?: string
+          kind: Database["public"]["Enums"]["subscription_event_kind"]
+          note?: string | null
+          occurred_on: string
+          recorded_at?: string
+          reference?: string | null
+          subscription_id: string
+          user_id?: string
+        }
+        Update: {
+          capture_id?: string | null
+          channel?: Database["public"]["Enums"]["cancel_channel"] | null
+          id?: string
+          kind?: Database["public"]["Enums"]["subscription_event_kind"]
+          note?: string | null
+          occurred_on?: string
+          recorded_at?: string
+          reference?: string | null
+          subscription_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_events_capture_fk"
+            columns: ["capture_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "captures"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "subscription_events_subscription_fk"
+            columns: ["subscription_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           access_until: string | null
@@ -103,6 +316,7 @@ export type Database = {
           billing_cycle: Database["public"]["Enums"]["billing_cycle"] | null
           cancel_notice_days: number | null
           cancel_url: string | null
+          capture_id: string | null
           category_id: string | null
           confidence: Database["public"]["Enums"]["confidence"] | null
           created_at: string
@@ -130,6 +344,7 @@ export type Database = {
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"] | null
           cancel_notice_days?: number | null
           cancel_url?: string | null
+          capture_id?: string | null
           category_id?: string | null
           confidence?: Database["public"]["Enums"]["confidence"] | null
           created_at?: string
@@ -157,6 +372,7 @@ export type Database = {
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"] | null
           cancel_notice_days?: number | null
           cancel_url?: string | null
+          capture_id?: string | null
           category_id?: string | null
           confidence?: Database["public"]["Enums"]["confidence"] | null
           created_at?: string
@@ -180,6 +396,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "subscriptions_capture_fk"
+            columns: ["capture_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "captures"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
             foreignKeyName: "subscriptions_category_fk"
             columns: ["category_id", "user_id"]
             isOneToOne: false
@@ -200,14 +423,44 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      approve_proposal: {
+        Args: { p_fields: Json; p_proposal_id: string }
+        Returns: string
+      }
+      reject_proposal: {
+        Args: { p_proposal_id: string }
+        Returns: undefined
+      }
+      set_subscription_status: {
+        Args: {
+          p_access_until?: string
+          p_capture_id?: string
+          p_channel?: Database["public"]["Enums"]["cancel_channel"]
+          p_note?: string
+          p_occurred_on?: string
+          p_reference?: string
+          p_status: Database["public"]["Enums"]["subscription_status"]
+          p_subscription_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       billing_cycle: "monthly" | "quarterly" | "every_4_weeks" | "yearly"
+      cancel_channel:
+        | "website_app"
+        | "email"
+        | "phone"
+        | "letter"
+        | "in_person"
+        | "other"
+      capture_input: "text" | "upload" | "paste" | "seed"
+      capture_status: "pending" | "approved" | "rejected"
       confidence: "high" | "medium" | "low"
       currency: "EUR" | "USD" | "GBP" | "CHF"
-      entry_source: "manual" | "seed"
+      entry_source: "manual" | "seed" | "capture"
       scope: "business" | "personal" | "family"
+      subscription_event_kind: "cancelled" | "reopened"
       subscription_status: "confirmed" | "cancelled"
     }
     CompositeTypes: {
@@ -340,10 +593,21 @@ export const Constants = {
   public: {
     Enums: {
       billing_cycle: ["monthly", "quarterly", "every_4_weeks", "yearly"],
+      cancel_channel: [
+        "website_app",
+        "email",
+        "phone",
+        "letter",
+        "in_person",
+        "other",
+      ],
+      capture_input: ["text", "upload", "paste", "seed"],
+      capture_status: ["pending", "approved", "rejected"],
       confidence: ["high", "medium", "low"],
       currency: ["EUR", "USD", "GBP", "CHF"],
-      entry_source: ["manual", "seed"],
+      entry_source: ["manual", "seed", "capture"],
       scope: ["business", "personal", "family"],
+      subscription_event_kind: ["cancelled", "reopened"],
       subscription_status: ["confirmed", "cancelled"],
     },
   },

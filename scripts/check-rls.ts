@@ -10,7 +10,15 @@ import type { Database } from "../src/lib/supabase/database.types";
 
 type Db = SupabaseClient<Database>;
 type Creds = { email: string; password: string };
-const TABLES = ["profiles", "categories", "payment_methods", "subscriptions"] as const;
+const TABLES = [
+  "profiles",
+  "categories",
+  "payment_methods",
+  "subscriptions",
+  "captures",
+  "proposals",
+  "subscription_events",
+] as const;
 
 let failures = 0;
 function report(name: string, ok: boolean, detail = "") {
@@ -74,6 +82,8 @@ async function main() {
 
   // Anything the checks create is removed in `finally` (admin bypasses RLS).
   const createdIds: string[] = [];
+  const captureIds: string[] = []; // deleting a capture cascades to its proposals
+  const eventIds: string[] = [];
 
   try {
     const client = publicClient();
@@ -120,6 +130,23 @@ async function main() {
           .select("id");
         report("A cannot set own subscription's category_id to B's category", !!error || data?.length === 0, "update succeeded");
       }
+      {
+        // D12: status changes only through set_subscription_status (guard trigger, errcode 42501).
+        const { data: cur } = await admin.from("subscriptions").select("status").eq("id", aSubId).single();
+        const flipped = cur?.status === "cancelled" ? "confirmed" : "cancelled";
+        const { data, error } = await client.from("subscriptions").update({ status: flipped }).eq("id", aSubId).select("id");
+        const { data: after } = await admin.from("subscriptions").select("status").eq("id", aSubId).single();
+        report(
+          "A cannot change own subscription's status with a plain update (42501)",
+          error?.code === "42501" && !data?.length && after?.status === cur?.status,
+          error ? `${error.code}: ${error.message}` : "update succeeded",
+        );
+      }
+      {
+        const { data, error } = await client.from("subscriptions").insert({ name: "rls-check-cancelled", status: "cancelled" }).select("id");
+        if (data?.length) createdIds.push(...data.map((r) => r.id));
+        report("A cannot insert a subscription with status cancelled (42501)", error?.code === "42501" && !data?.length, error ? `${error.code}: ${error.message}` : "insert succeeded");
+      }
     } else {
       report("A has a subscription for the update checks", false, "seed account A first");
     }
@@ -143,12 +170,144 @@ async function main() {
       }
     }
 
+    // Review queue and cancellation events (fixtures are created by the admin client for A and B).
+    const fixture = async (userId: string, subId: string | null) => {
+      const cap = await admin.from("captures").insert({ user_id: userId, input: "seed", raw_text: "rls-check" }).select("id").single();
+      if (cap.error) throw cap.error;
+      captureIds.push(cap.data.id);
+      const prop = await admin
+        .from("proposals")
+        .insert({ user_id: userId, capture_id: cap.data.id, name: "rls-check-proposal" })
+        .select("id")
+        .single();
+      if (prop.error) throw prop.error;
+      let eventId: string | null = null;
+      if (subId) {
+        const ev = await admin
+          .from("subscription_events")
+          .insert({ user_id: userId, subscription_id: subId, kind: "cancelled", occurred_on: "2026-01-01", channel: "other" })
+          .select("id")
+          .single();
+        if (ev.error) throw ev.error;
+        eventIds.push(ev.data.id);
+        eventId = ev.data.id;
+      }
+      return { captureId: cap.data.id, proposalId: prop.data.id, eventId };
+    };
+    const bFix = await fixture(bId, bSubId);
+    const aFix = await fixture(aId, aSubId);
+
+    for (const [table, id, label] of [
+      ["captures", bFix.captureId, "capture"],
+      ["proposals", bFix.proposalId, "proposal"],
+      ["subscription_events", bFix.eventId!, "event"],
+    ] as const) {
+      const { data, error } = await client.from(table).select("id").eq("id", id);
+      report(`A cannot read B's ${label} by id`, !error && data?.length === 0, error?.message ?? `${data?.length} rows`);
+    }
+    {
+      const { error } = await client.rpc("approve_proposal", { p_proposal_id: bFix.proposalId, p_fields: { name: "stolen" } });
+      const { data } = await admin.from("proposals").select("status").eq("id", bFix.proposalId).single();
+      report("A cannot approve B's proposal via rpc", !!error && data?.status === "pending", error ? `status ${data?.status}` : "rpc succeeded");
+    }
+    {
+      const { error } = await client.rpc("reject_proposal", { p_proposal_id: bFix.proposalId });
+      const { data } = await admin.from("proposals").select("status").eq("id", bFix.proposalId).single();
+      report("A cannot reject B's proposal via rpc", !!error && data?.status === "pending", error ? `status ${data?.status}` : "rpc succeeded");
+    }
+    {
+      const { data: before } = await admin.from("subscriptions").select("status").eq("id", bSubId).single();
+      const { error } = await client.rpc("set_subscription_status", {
+        p_subscription_id: bSubId, p_status: before?.status === "cancelled" ? "confirmed" : "cancelled",
+        p_occurred_on: "2026-01-01", p_channel: "other",
+      });
+      const { data: after } = await admin.from("subscriptions").select("status").eq("id", bSubId).single();
+      report("A cannot call set_subscription_status on B's subscription", !!error && after?.status === before?.status, error ? "status changed" : "rpc succeeded");
+    }
+    {
+      const { data, error } = await client
+        .from("subscription_events")
+        .insert({ user_id: bId, subscription_id: bSubId, kind: "cancelled", occurred_on: "2026-01-01", channel: "other" })
+        .select("id");
+      if (data?.length) eventIds.push(...data.map((r) => r.id));
+      report("A cannot insert an event with user_id = B", !!error && !(data as unknown[] | null)?.length, "insert succeeded");
+    }
+    {
+      const { data, error } = await client
+        .from("subscription_events")
+        .insert({ subscription_id: bSubId, kind: "cancelled", occurred_on: "2026-01-01", channel: "other" })
+        .select("id");
+      if (data?.length) eventIds.push(...data.map((r) => r.id));
+      report("A cannot insert an event on B's subscription", !!error && !(data as unknown[] | null)?.length, "insert succeeded");
+    }
+    {
+      const { data, error } = await client
+        .from("proposals")
+        .insert({ capture_id: bFix.captureId, name: "rls-check" })
+        .select("id");
+      report("A cannot insert a proposal on B's capture", !!error && !(data as unknown[] | null)?.length, "insert succeeded");
+    }
+    if (aFix.eventId) {
+      {
+        const { data, error } = await client.from("subscription_events").update({ note: "tampered" }).eq("id", aFix.eventId).select("id");
+        report("A cannot update own event (append-only)", !!error || !data?.length, "update succeeded");
+      }
+      {
+        const { data, error } = await client.from("subscription_events").delete().eq("id", aFix.eventId).select("id");
+        report("A cannot delete own event (append-only)", !!error || !data?.length, "delete succeeded");
+      }
+      {
+        const { data } = await admin.from("subscription_events").select("id, note").eq("id", aFix.eventId).single();
+        report("A's event is intact after the attempts", data?.note === null, "event changed or gone");
+      }
+    }
+    {
+      // Controls: A's own approve, reject-after-approve and status round trip work, so the denials above mean something.
+      const { data: id, error } = await client.rpc("approve_proposal", {
+        p_proposal_id: aFix.proposalId,
+        p_fields: { name: "rls-check-approved", amount: "1.00", currency: "EUR", billing_cycle: "monthly", last_renewal_date: "2026-11-01" },
+      });
+      if (id) createdIds.push(id);
+      report("Control: A can approve own proposal", !error && !!id, error?.message ?? "");
+      const again = await client.rpc("approve_proposal", { p_proposal_id: aFix.proposalId, p_fields: { name: "twice" } });
+      report("A cannot approve an already approved proposal", !!again.error, "second approval succeeded");
+      if (id) {
+        const sub = await admin.from("subscriptions").select("source, capture_id").eq("id", id).single();
+        report("Approved subscription has source capture and its capture link", sub.data?.source === "capture" && sub.data?.capture_id === aFix.captureId, JSON.stringify(sub.data));
+        const noChannel = await client.rpc("set_subscription_status", { p_subscription_id: id, p_status: "cancelled" });
+        const cancel = await client.rpc("set_subscription_status", { p_subscription_id: id, p_status: "cancelled", p_occurred_on: "2026-10-01", p_channel: "email", p_reference: "RLS-1" });
+        const same = await client.rpc("set_subscription_status", { p_subscription_id: id, p_status: "cancelled", p_occurred_on: "2026-10-01", p_channel: "email" });
+        const reopen = await client.rpc("set_subscription_status", { p_subscription_id: id, p_status: "confirmed" });
+        const evs = await admin.from("subscription_events").select("id, kind").eq("subscription_id", id);
+        report(
+          "Control: A can cancel and reopen own subscription, one event each",
+          !cancel.error && !reopen.error && evs.data?.length === 2,
+          `${cancel.error?.message ?? ""} ${reopen.error?.message ?? ""} events=${evs.data?.length}`,
+        );
+        report("Cancelling an already cancelled subscription is refused", !!same.error, "unchanged status accepted");
+        report("Cancelling without a channel is refused", !!noChannel.error, "accepted");
+      }
+    }
+
     const anon = publicClient();
+    {
+      const fakeId = "00000000-0000-4000-8000-000000000000";
+      const calls = {
+        approve_proposal: await anon.rpc("approve_proposal", { p_proposal_id: fakeId, p_fields: {} }),
+        reject_proposal: await anon.rpc("reject_proposal", { p_proposal_id: fakeId }),
+        set_subscription_status: await anon.rpc("set_subscription_status", { p_subscription_id: fakeId, p_status: "confirmed" }),
+      };
+      for (const [name, res] of Object.entries(calls)) {
+        report(`anon cannot execute ${name}`, res.error?.code === "42501", res.error?.message ?? "rpc succeeded");
+      }
+    }
     for (const t of TABLES) {
       const { data, error } = await anon.from(t).select("*");
       report(`anon gets no rows from ${t}`, !!error || (data?.length ?? 0) === 0, `${data?.length} rows`);
     }
   } finally {
+    if (eventIds.length) await admin.from("subscription_events").delete().in("id", eventIds);
+    if (captureIds.length) await admin.from("captures").delete().in("id", captureIds);
     if (createdIds.length) await admin.from("subscriptions").delete().in("id", createdIds);
   }
 

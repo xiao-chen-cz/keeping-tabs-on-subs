@@ -21,8 +21,8 @@ async function main() {
   try {
     const profile = await db.from("profiles").insert({ user_id: userId });
     if (profile.error) throw profile.error;
-    const n = await insertSeed(db, userId, set, today);
-    console.log(`Created ${email} with the ${set} set (${n} subscriptions, today = ${today}).`);
+    const counts = await insertSeed(db, userId, set, today);
+    console.log(`Created ${email} with the ${set} set (${counts.subscriptions} subscriptions, ${counts.proposals} proposals, today = ${today}).`);
   } catch (err) {
     await db.auth.admin.deleteUser(userId); // cascades to any rows already written
     throw err;
