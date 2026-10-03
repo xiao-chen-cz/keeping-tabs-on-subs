@@ -1,6 +1,7 @@
 import type { DueAlert } from "@/lib/domain/alerts";
 import { dueSoon } from "@/lib/domain/alerts";
 import type { ComputedSubscription, Currency, SubscriptionCore } from "@/lib/domain/types";
+import { formatMoney } from "@/lib/domain/totals";
 import { formatDay, relativeDays } from "./format";
 import { RowShell } from "./renewal-row";
 
@@ -30,7 +31,7 @@ function Amount({ row, alert }: { row: Row<SubscriptionCore>; alert: DueAlert })
   const cents = row.computed.renewalAmountCents;
   return cents !== null && currency ? (
     <p className="text-sm font-medium tabular-nums">
-      {money(cents)} {currency}
+      {formatMoney(cents, currency)}
     </p>
   ) : null;
 }
