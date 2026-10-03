@@ -22,7 +22,7 @@ Next.js (TypeScript strict, Tailwind, mobile-first), Supabase (Postgres, auth, s
 - Reminders (D10): alerts at 3, 1, 0 days before cancel-by (per-user list), once per renewal. One tap Keep (silences this renewal only) or Cancelled. Price rises ride in the same alert. Tags: Trial (active trial) and Needs update (no next renewal; sorted to the top) are computed, never stored (D2, D3).
 - Promo: Regular price applies at the first renewal on or after Promo ends. Only the next renewal is computed.
 - No currency conversion; totals are per currency (EUR and USD separately, monthly and yearly, excluding cancelled and active trials; D7).
-- Cancelled rows have no renewals or alerts; optional `access_until` date shows them in an "Ending" group (D6). "Today" is the user's local date, default Europe/Berlin (D8).
+- Cancelled rows have no renewals or alerts; optional `access_until` date shows them in an "Ending" group (D6). Every cancellation is recorded as proof in an append-only log: date, channel, optional reference/note/confirmation capture (D12). "Today" is the user's local date, default Europe/Berlin (D8).
 - Pure date logic takes an injected "today". Tests cover every edge case in logic-spec §5. Fix the time zone for "today" (D8).
 - Enums/check constraints: Scope (Business, Personal, Family), Confidence (High, Medium, Low), Currency, Billing cycle, subscription Status. Category and Payment method are lookup tables.
 - Two different statuses: subscription status (Confirmed / Cancelled) vs capture status (pending / approved / rejected).

@@ -35,6 +35,7 @@ One record per subscription. "Input" fields are entered by a person or by the Gm
 | U | Renewal amount | Computed | decimal | §2.6 |
 | V | Price rises? | Computed | enum Yes/No | §2.7 |
 | W | Access until | Input | date | Only when Status = Cancelled: the vendor keeps access until this date (D6). Not in the Sheet yet; added in the app |
+| — | Cancellation record | Input (app only) | event | When and how the user cancelled with the vendor: date, channel, optional confirmation reference and note, optional linked capture of the confirmation (D12). Append-only, kept even if the row is reopened |
 
 "Today" = the current date in the Sheet's time zone (see D8). All tests must inject a fixed "today".
 
@@ -189,6 +190,7 @@ Today = 2026-10-01 unless stated. "Current" is the Sheet's output; where a Decis
 - **D9 After a promo: DECIDED 2026-10-02.** The price must be updated: when the first full-price receipt arrives, the review queue proposes a new Amount and clears Regular price / Promo ends; the user approves. Until then Price rises? stays Yes (E23) so alerts keep showing the higher price. Not chosen: deriving the current price automatically from Regular price after the promo date.
 - **D10 Reminders: DECIDED 2026-10-02.** Alerts at 3, 1 and 0 days before Cancel-by (per-user list, default 3,1,0), each once per renewal; Keep or Cancelled in one tap stops the rest; price rises are part of the same alert, not a separate one (§3.2, E28–E33).
 - **D11 Status list: DECIDED 2026-10-02.** Status = Confirmed, Cancelled; Billing cycle per D3.
+- **D12 Cancellation record: DECIDED 2026-10-04.** Every change to Cancelled records, as proof, when the user cancelled with the vendor and how: `cancelled_on` (date, defaults to today, user can correct it), `channel` (Website / app, Email, Phone, Letter, In person, Other), optional `reference` (confirmation or ticket number, never card or account numbers) and `note`, optional link to a capture of the confirmation (email or screenshot), and `recorded_at` (timestamp, set by the system). Stored as an append-only event log (no edit, no delete), so reopening or editing the subscription never erases it; reopening (Cancelled → Confirmed) is recorded as its own event. The detail page shows the history. The Sheet does not track this.
 
 ## 7. Data issues spotted while writing this
 Not logic issues; fix in the Sheet:
