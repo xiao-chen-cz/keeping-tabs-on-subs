@@ -203,7 +203,7 @@ export function parseSubscriptionForm(
       !errors.last_renewal_date &&
       !errors.trial_ends
     ) {
-      addError(errors, "last_renewal_date", "Enter the last renewal date or the trial end date");
+      addError(errors, "last_renewal_date", "Enter a billing date or the trial end date");
     }
   }
 

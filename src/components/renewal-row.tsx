@@ -68,7 +68,6 @@ export function RenewalRow<T extends SubscriptionCore>({ row, href }: { row: Com
             </p>
           )}
           {cancel}
-          {c.planStartsLater && input.lastRenewalDate && <p>plan starts on {formatDay(input.lastRenewalDate)}</p>}
         </div>
       )}
     </RowShell>

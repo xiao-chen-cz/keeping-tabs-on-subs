@@ -71,7 +71,7 @@ export function SubscriptionDetail({
         <Item label="Notice">
           {!cancelled && `${c.noticeDays} days ${c.noticeIsDefault ? "(default)" : "(custom)"}`}
         </Item>
-        <Item label="Last renewal">{s.lastRenewalDate && formatDayLong(s.lastRenewalDate)}</Item>
+        <Item label={c.anchorInFuture ? "Next charge" : "Last charge"}>{s.lastRenewalDate && formatDayLong(s.lastRenewalDate)}</Item>
         <Item label="Trial ends">{s.trialEnds && formatDayLong(s.trialEnds)}</Item>
         <Item label="Regular price">{money(s.regularPriceCents)}</Item>
         <Item label="Promo ends">{s.promoEnds && formatDayLong(s.promoEnds)}</Item>

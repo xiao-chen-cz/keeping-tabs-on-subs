@@ -38,7 +38,7 @@ const FIELD_LABELS: Record<string, string> = {
   amount: "Amount",
   currency: "Currency",
   billing_cycle: "Billing cycle",
-  last_renewal_date: "Last renewal date (or trial end date)",
+  last_renewal_date: "Billing date (or trial end date)",
 };
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -156,8 +156,9 @@ export function SubscriptionForm({ mode, action, initialValues, lookups, cancelH
         </select>
       </Field>
 
-      <Field name="last_renewal_date" label="Last renewal date" errors={errors.last_renewal_date}>
+      <Field name="last_renewal_date" label="Billing date (last or next charge)" errors={errors.last_renewal_date}>
         <input {...bind("last_renewal_date")} type="date" className={inputClass} />
+        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">The most recent charge, or the next one if you know it.</p>
       </Field>
 
       <Field name="trial_ends" label="Trial ends" errors={errors.trial_ends}>

@@ -26,7 +26,7 @@ export function computeSubscription<T extends SubscriptionCore>(
       renewalAmountCents: renewal,
       priceRises: priceRises(input.amountCents, renewal),
       // D4: a future anchor is the first charge of a new plan
-      planStartsLater:
+      anchorInFuture:
         input.status === "confirmed" &&
         input.lastRenewalDate !== null &&
         compare(input.lastRenewalDate, today) > 0 &&

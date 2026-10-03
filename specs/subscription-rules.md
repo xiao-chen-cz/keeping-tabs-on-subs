@@ -38,7 +38,7 @@ Every 4 weeks is a day interval, not a month interval: renewals are anchor + 28Â
 - **Only one of regular price / promo ends:** neither applies (the database rejects it).
 - **No notice days:** the default by cycle.
 - **Approval** of a proposed entry needs name, amount, currency, cycle and one date (last renewal or trial end). Missing ones are asked as fixed questions; only the user supplies them.
-- **A stated next renewal date** (e.g. "renews on 30 Oct" on a billing page) is stored as `lastRenewalDate` with that future date. By the rule for an anchor today or later, it is the next renewal, and it rolls forward after the charge. No past charge is invented.
+- **A stated next renewal date** (e.g. "renews on 30 Oct" on a billing page) is stored as `lastRenewalDate` with that future date. By the rule for an anchor today or later, it is the next renewal, and it rolls forward after the charge. No past charge is invented. The UI calls this field **Billing date (last or next charge)** and shows it as "Next charge" or "Last charge"; there is no "plan starts on" hint, because a future date does not always mean a plan change (decided 2026-10-04).
 
 ## The five sample cases (starter set)
 

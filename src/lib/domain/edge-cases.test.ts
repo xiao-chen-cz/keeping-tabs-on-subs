@@ -87,8 +87,8 @@ describe("logic-spec §5 edge cases", () => {
 
   it("E10 shows a plan starting later, E10b no longer", () => {
     const i = { billingCycle: "yearly", amountCents: 2999, lastRenewalDate: "2026-10-11" } as const;
-    expect(calc(i, "2026-10-02").computed.planStartsLater).toBe(true);
-    expect(calc(i, "2026-10-12").computed.planStartsLater).toBe(false);
+    expect(calc(i, "2026-10-02").computed.anchorInFuture).toBe(true);
+    expect(calc(i, "2026-10-12").computed.anchorInFuture).toBe(false);
   });
 
   it("E11 notice default is flagged, an override is not", () => {

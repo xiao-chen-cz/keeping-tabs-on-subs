@@ -73,7 +73,7 @@ describe("P1 NoteForge proposal", () => {
     expect(draft.fieldConfidence).toEqual({ amountCents: "high", billingCycle: "medium", category: "low" });
     const core: SubscriptionCore = { ...draft, name: draft.name ?? "", status: "confirmed" };
     const { computed } = computeSubscription(core, T);
-    expect(computed).toMatchObject({ nextRenewal: "2026-10-30", daysUntilRenewal: 28, noticeDays: 3, cancelBy: "2026-10-27", planStartsLater: true });
+    expect(computed).toMatchObject({ nextRenewal: "2026-10-30", daysUntilRenewal: 28, noticeDays: 3, cancelBy: "2026-10-27", anchorInFuture: true });
     expect(computed.tags.needsUpdate).toBe(false);
   });
 });

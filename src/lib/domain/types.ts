@@ -100,8 +100,8 @@ export interface ComputedFields {
   renewalAmountCents: number | null;
   /** Null when there is no amount to compare. */
   priceRises: boolean | null;
-  /** Last renewal date is in the future: the first charge of a new plan (D4, UI hint only). */
-  planStartsLater: boolean;
+  /** The billing date is a future charge (a new plan's first charge, D4, or a stated next charge). Label only. */
+  anchorInFuture: boolean;
   tags: {
     trial: boolean;
     needsUpdate: boolean;
