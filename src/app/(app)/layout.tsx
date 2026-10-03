@@ -15,6 +15,9 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
           </button>
         </form>
       </header>
+      <p className="bg-amber-50 px-4 py-2 text-center text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        Demo: alerts show in the app only, no emails are sent yet.
+      </p>
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6">{children}</div>
     </>
   );
