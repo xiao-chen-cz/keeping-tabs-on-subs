@@ -146,7 +146,7 @@ One migration, `core_schema.sql`:
 
 ### Phase 3: Auth, accounts, seed (Mon Oct 5 – Tue Oct 6)
 1. `lib/supabase/server.ts` per the `@supabase/ssr` guide (await `cookies()`, which is async in Next 16).
-2. `src/proxy.ts`: refresh the session cookie and redirect unauthenticated requests to `/login` (optimistic check only). The matcher excludes `_next/static`, `_next/image`, `favicon.ico`, `/login`.
+2. `src/proxy.ts`: refresh the session cookie and redirect unauthenticated requests to `/login` (optimistic check only). The matcher excludes `_next/static`, `_next/image`, `favicon.ico`, `/login` (and `/demo` if Phase 7 is built).
 3. `dal/auth.ts`: `getUser = cache(async () => ...)` using a verified check (`auth.getUser()` or `getClaims()` per the current Supabase docs, never an unverified `getSession()`); `requireUser()` redirects to `/login`. **Every page and every Server Action calls the DAL**; layouts do not do auth checks (Next docs: layouts don't re-render on navigation).
 4. `/login`: email + password form with `useActionState`, a generic error message ("Email or password is wrong"), and a redirect to `/` on success. A sign-out button in the `(app)` header calls a server action.
 5. `lib/seed/sets.ts` + `build-seed.ts`: the 12 rows from seed-data.md as offset specs.
@@ -235,6 +235,23 @@ One migration, `core_schema.sql`:
 
 **Done when:** a second phone, logged in with a starter account, sees only the 4 starter rows; the logged-out URL shows only the login page.
 
+### Phase 7 (optional): Public read-only demo at `/demo`
+Decided 2026-10-03. A public page anyone can open without a login, showing the full fictional set. **First to cut**: do it only if Phase 6 is done early, otherwise after Oct 9.
+
+- **No database, no login.** `/demo` builds its rows in memory with `buildSeed('full', today)` and the domain functions, so nothing can be changed and nothing is shared. Rejected alternative: a shared read-only account with a public password. Anyone logged in can change that account's password through the Supabase Auth API, and read-only would have to be enforced in RLS too.
+- **Today:** `todayIn('Europe/Berlin', new Date())`, so the demo is always current (something is always due in 3 days).
+- **Routes:**
+  - `/demo` reuses the list components with the in-memory view-models.
+  - `/demo/[n]` reuses the detail component. The id is the seed row's stable key, not a UUID.
+  - There are no edit, add or cancel controls.
+  - A banner reads "Demo with sample data. Sign in for your own."
+- **Proxy:** add `/demo` to the matcher exclusions next to `/login`.
+- **Data:** the presentational components already take computed view-models (Phase 4), so the demo needs no data-layer changes. Keep the components free of Supabase types so both sources fit.
+- **Later (D16+):** show the seeded proposals P1–P3 read-only. Live capture stays login-only because of AI cost and abuse.
+- **Tests:** one RTL test that `/demo` renders the full set's order and tags, and one that no edit links are present.
+
+**Done when:** logged out, `/demo` on a phone shows the 12 fictional subscriptions with correct tags and totals, and there is no way to change anything.
+
 ## 6. Testing strategy
 
 | Layer | Tool | What |
@@ -263,6 +280,7 @@ Async Server Components are not unit-tested (Vitest does not support them, per t
 Already cut at plan start: `alerts.ts` + E28–E33 (moved to D21–23).
 
 If behind, cut in this order (first cut first):
+0. Phase 7, the public `/demo` page (optional from the start).
 1. "Show cancelled" archive view.
 2. Component (RTL) tests beyond list ordering and tags.
 3. Less important form fields: vendor, plan, scope, confidence (keep them in the schema and fill them from the seed).
