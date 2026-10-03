@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check-rls": "tsx --env-file=.env.local scripts/check-rls.ts"
+    "check-rls": "tsx --env-file=.env.local scripts/check-rls.ts",
+    "create-account": "tsx --env-file=.env.local scripts/create-account.ts",
+    "reset-account": "tsx --env-file=.env.local scripts/reset-account.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

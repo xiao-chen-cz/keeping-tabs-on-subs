@@ -28,7 +28,7 @@ The seed script takes a set name.
 | 8 | PixelStock | 9.99 USD | (empty) | Trial ends −5, Last renewal empty | Software / SaaS, Business, Confidence Low | Needs update tag, sorted to the top; excluded from totals |
 | 9 | Cloudly Storage | 9.99 EUR | Monthly | Anchored on the 31st: Last renewal = the latest 31st on or before T | Infrastructure / Hosting, Business, Business account | Month-end clamping (next renewal on the last day of a short month) |
 | 10 | SafeHome Insurance | 62.00 EUR | Quarterly | Next +50 | Insurance, Personal, Private account | Quarterly; notice 7 |
-| 11 | EuroServer Hosting | 11.47 EUR | Monthly | Next +30 | Infrastructure / Hosting, Business, Business account; Notes: "Billed in arrears, amount varies. Was 10.34 until last quarter" | Varying amounts, price change in notes |
+| 11 | EuroServer Hosting | 11.47 EUR | Monthly | Next +20 (was +30 until 2026-10-03: about one month ahead, no past anchor reproduces it on some days) | Infrastructure / Hosting, Business, Business account; Notes: "Billed in arrears, amount varies. Was 10.34 until last quarter" | Varying amounts, price change in notes |
 | 12 | ChatPal Plus | 23.00 EUR | Monthly | Next +1 | AI, Business, Confidence Low; Notes: "Looks re-activated, confirm" | Cancel-by −2: renewal ahead, deadline passed, no alert |
 
 ## What a tester sees on first login (starter set)
