@@ -312,3 +312,36 @@ Never cut: domain tests for E1–E27 and E34–E37, RLS + grants + `check-rls`, 
 - [ ] `check-rls` passes against production: no cross-user reads or writes, anon denied.
 - [ ] Demo account (full set) and one starter account work on a phone: list, detail, add, edit, cancel → Ending.
 - [ ] No computed field is stored or typed; the secret key exists only in `.env.local`; none of the owner's real data anywhere in the repo or the hosted project.
+
+## 11. Status and 30-day challenge coverage (updated 2026-10-03, night)
+
+Phases 0–5 were built on Oct 3 (ahead of schedule), plus the pure alert logic and a Due soon section pulled forward from D21–23. Verified locally against the hosted project: login, list (starter set matches the answer key), Due soon, add with validation errors, edit to Cancelled → Ending, no horizontal scroll at 320 px, no console errors. `check-rls` passes (15 checks) with two throwaway accounts.
+
+Open in this plan: Phase 6 (needs the owner: Vercel env vars, demo account email, merge of `build/d09-15`), Phase 7 `/demo` (optional).
+
+Each challenge card mapped to where it is covered. "Brief" = the Demo Build Brief milestone, which stays authoritative for scope.
+
+| Card | Topic | Status | Where |
+|---|---|---|---|
+| D10 | Subscription type + rules note | Done | `src/lib/domain/types.ts`, `specs/subscription-rules.md` |
+| D11 | Date/price tests (4-week, 30-day notice, trial, promo on renewal, future promo) | Done | `edge-cases.test.ts`, `sample-cases.test.ts`, `alerts.test.ts` |
+| D12 | Five sample subscriptions as seed | Done | `src/lib/seed/`, `pnpm create-account --set starter` |
+| D13 | Renewal list | Done | `(app)/page.tsx`, `renewals-list.tsx` |
+| D14 | Detail view | Done | `subscriptions/[id]`; unknown fields are hidden, not defaulted |
+| D15 | Manual add form | Done | `subscriptions/new`, zod validation |
+| D16 | Edits persist | Done | Supabase, `subscriptions/[id]/edit` |
+| D17 | Review flow for a proposed entry | **Gap** | Plan `d16-20-capture-and-review.md` Part A (draft, needs owner review) |
+| D18 | In-app alerts, price change shown | Done (no Keep/Cancelled yet) | `alerts.ts`, `due-soon.tsx`; Keep/Cancelled actions + email in D21–23 plan |
+| D19 | Connect to Supabase | Done | migration applied, RLS |
+| D20 | Data access check + security checklist | Done | `check-rls` passes; `specs/security-checklist.md` |
+| D21 | End-to-end run | Partly | manual flow run locally; rerun once the review flow exists and on production |
+| D22 | Usable at phone width | Done for list/detail/form | recheck review screen when built |
+| D23 | Safe demo dataset + demo note | Done | fictional seed only; in-app note "alerts show in the app only" |
+| D24 | Deploy a first usable demo | **Blocked on owner** | Phase 6: Vercel env vars, demo account, merge |
+| D25–D26 | First and second tester | Proposed earlier: first tester ~Oct 9–10 on list/add/edit/review; capture round stays D24–27 per brief | owner |
+| D27 | One feedback-driven change | After D25 | — |
+| D28 | Final date and data sanity check | Covered by tests; rerun on production | `pnpm test`, seed tier-1/tier-2 |
+| D29 | Stabilise + tester instructions | **Gap** | write `docs/tester-guide.md` before the first tester |
+| D30 | Ship + capture what's next | Later | handoff + README |
+
+Brief items the cards do not ask for, still in scope: capture by typed description / upload / paste with one extraction call (D16–20), missing-field questions, update-not-duplicate matching, link to original capture, email alerts with Keep/Cancelled (D21–23).
