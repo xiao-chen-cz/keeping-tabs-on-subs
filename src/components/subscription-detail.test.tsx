@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
+import type { SubscriptionEvent } from "@/lib/dal/map-proposal";
 import { computeSubscription } from "@/lib/domain/compute";
 import { core } from "@/lib/domain/fixtures";
 import type { Subscription } from "@/lib/domain/types";
@@ -40,5 +41,61 @@ describe("SubscriptionDetail", () => {
     render(<SubscriptionDetail row={r} editHref="/subscriptions/1/edit" />);
     expect(screen.getByText("20 Oct 2026")).toBeTruthy();
     expect(screen.getByText("Edit").getAttribute("href")).toBe("/subscriptions/1/edit");
+  });
+
+  it("offers Mark as cancelled for confirmed rows and Reopen for cancelled rows", () => {
+    const reopen = async () => {};
+    const { unmount } = render(
+      <SubscriptionDetail row={computeSubscription(sub({}), "2026-10-03")} cancelHref="/subscriptions/1/cancel" reopenAction={reopen} />,
+    );
+    expect(screen.getByText("Mark as cancelled").getAttribute("href")).toBe("/subscriptions/1/cancel");
+    expect(screen.queryByText("Reopen")).toBeNull();
+    unmount();
+    render(
+      <SubscriptionDetail
+        row={computeSubscription(sub({ status: "cancelled" }), "2026-10-03")}
+        cancelHref="/subscriptions/1/cancel"
+        reopenAction={reopen}
+      />,
+    );
+    expect(screen.queryByText("Mark as cancelled")).toBeNull();
+    expect(screen.getByRole("button", { name: "Reopen" })).toBeTruthy();
+  });
+
+  it("renders the history newest first and the original capture", () => {
+    const ev = (over: Partial<SubscriptionEvent>): SubscriptionEvent => ({
+      id: "e",
+      subscriptionId: "1",
+      kind: "cancelled",
+      occurredOn: "2026-10-04",
+      channel: "website_app",
+      reference: "ABC-123",
+      note: null,
+      captureId: null,
+      recordedAt: "2026-10-04T10:00:00Z",
+      ...over,
+    });
+    render(
+      <SubscriptionDetail
+        row={computeSubscription(sub({}), "2026-10-06")}
+        events={[
+          ev({ id: "2", kind: "reopened", occurredOn: "2026-10-05", channel: null, reference: null }),
+          ev({ id: "1", note: "Called support first" }),
+        ]}
+        captureText="Receipt text from the vendor"
+      />,
+    );
+    expect(screen.getByRole("heading", { name: "History" })).toBeTruthy();
+    const items = screen.getAllByRole("listitem").map((li) => li.textContent);
+    expect(items[0]).toBe("Reopened on 5 Oct 2026");
+    expect(items[1]).toBe("Cancelled on 4 Oct 2026 via Website / app · ref ABC-123Called support first");
+    expect(screen.getByText("Original capture")).toBeTruthy();
+    expect(screen.getByText("Receipt text from the vendor")).toBeTruthy();
+  });
+
+  it("shows no History or Original capture without events or a capture", () => {
+    render(<SubscriptionDetail row={computeSubscription(sub({}), "2026-10-03")} events={[]} />);
+    expect(screen.queryByText("History")).toBeNull();
+    expect(screen.queryByText("Original capture")).toBeNull();
   });
 });

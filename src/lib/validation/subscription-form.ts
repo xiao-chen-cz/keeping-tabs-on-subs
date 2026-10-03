@@ -1,6 +1,6 @@
 // Validation for the add and edit subscription forms. Server action and client hints share it.
 // Input is FormData-like strings (empty string = not set). Output maps to DB insert columns.
-// Never accepts user_id, source or computed fields: unknown keys are dropped.
+// Never accepts user_id, source, status, access_until or computed fields: unknown keys are dropped.
 import { z } from "zod";
 import {
   BILLING_CYCLES,
@@ -8,14 +8,12 @@ import {
   CURRENCIES,
   REQUIRED_FOR_APPROVAL,
   SCOPES,
-  SUBSCRIPTION_STATUSES,
 } from "@/lib/domain/types";
 
 export type FormMode = "create" | "edit";
 
 export interface SubscriptionFormData {
   name: string;
-  status: (typeof SUBSCRIPTION_STATUSES)[number];
   amount: string | null;
   currency: (typeof CURRENCIES)[number] | null;
   billing_cycle: (typeof BILLING_CYCLES)[number] | null;
@@ -24,7 +22,6 @@ export interface SubscriptionFormData {
   cancel_notice_days: number | null;
   regular_price: string | null;
   promo_ends: string | null;
-  access_until: string | null;
   category_id: string | null;
   payment_method_id: string | null;
   scope: (typeof SCOPES)[number] | null;
@@ -127,10 +124,6 @@ const cancelUrl = z.preprocess(
 
 const fieldsSchema = z.object({
   name: z.preprocess(trimmed, z.string({ error: "Enter a name" }).min(1, "Enter a name")),
-  status: z.preprocess(
-    trimmed,
-    z.enum(SUBSCRIPTION_STATUSES, { error: "Choose a status" }).default("confirmed"),
-  ),
   amount: moneyField("Enter an amount like 9.99"),
   currency: enumField(CURRENCIES, "Choose a currency"),
   billing_cycle: enumField(BILLING_CYCLES, "Choose a billing cycle"),
@@ -139,7 +132,6 @@ const fieldsSchema = z.object({
   cancel_notice_days: noticeDays,
   regular_price: moneyField("Enter a price like 9.99"),
   promo_ends: dateField,
-  access_until: dateField,
   category_id: uuidField,
   payment_method_id: uuidField,
   scope: enumField(SCOPES, "Choose a scope"),
@@ -184,12 +176,9 @@ export function parseSubscriptionForm(
     addError(errors, "regular_price", "Enter the regular price, or clear the promo end date");
   }
 
-  // On edit a missing status must not silently default to confirmed (it would reopen a cancelled row).
-  if (mode === "edit" && !values.status?.trim() && !errors.status) {
-    addError(errors, "status", "Choose a status");
-  }
-
-  if (mode === "create" && p.status !== "cancelled") {
+  // Status is not a form field (D12): new rows start confirmed, and status changes go through the cancel
+  // flow (set_subscription_status). A submitted status or access_until is ignored.
+  if (mode === "create") {
     if (p.amount === undefined && !errors.amount) addError(errors, "amount", "Enter an amount");
     if (p.currency === undefined && !errors.currency) {
       addError(errors, "currency", "Choose a currency");
@@ -214,7 +203,6 @@ export function parseSubscriptionForm(
   const d = result.data;
   const data: SubscriptionFormData = {
     name: d.name,
-    status: d.status,
     amount: d.amount ?? null,
     currency: d.currency ?? null,
     billing_cycle: d.billing_cycle ?? null,
@@ -223,8 +211,6 @@ export function parseSubscriptionForm(
     cancel_notice_days: d.cancel_notice_days ?? null,
     regular_price: d.regular_price ?? null,
     promo_ends: d.promo_ends ?? null,
-    // Cleared when the status is (or goes back to) confirmed.
-    access_until: d.status === "cancelled" ? (d.access_until ?? null) : null,
     category_id: d.category_id ?? null,
     payment_method_id: d.payment_method_id ?? null,
     scope: d.scope ?? null,

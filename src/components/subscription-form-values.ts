@@ -1,6 +1,7 @@
 // Pure helpers and types shared by the subscription form (client) and its pages/actions (server).
 import type { Subscription } from "@/lib/domain/types";
 
+// "status" is display-only (read-only text on edit); it is never submitted or accepted (D12).
 export const FORM_FIELDS = [
   "name",
   "status",
@@ -12,7 +13,6 @@ export const FORM_FIELDS = [
   "cancel_notice_days",
   "regular_price",
   "promo_ends",
-  "access_until",
   "category_id",
   "payment_method_id",
   "scope",
@@ -55,7 +55,6 @@ export function formValuesFromSubscription(
     cancel_notice_days: s.cancelNoticeDays === null ? "" : String(s.cancelNoticeDays),
     regular_price: cents(s.regularPriceCents),
     promo_ends: s.promoEnds ?? "",
-    access_until: s.accessUntil ?? "",
     category_id: ids.categoryId ?? "",
     payment_method_id: ids.paymentMethodId ?? "",
     scope: s.scope ?? "",

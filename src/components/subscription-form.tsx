@@ -8,8 +8,8 @@ import {
   CONFIDENCES,
   CURRENCIES,
   SCOPES,
-  SUBSCRIPTION_STATUSES,
   type BillingCycle,
+  type Confidence,
 } from "@/lib/domain/types";
 import { missingForApproval, type SubscriptionFormData } from "@/lib/validation/subscription-form";
 import {
@@ -31,6 +31,17 @@ export interface SubscriptionFormProps {
   initialValues: FormValues;
   lookups: { categories: LookupOption[]; paymentMethods: LookupOption[] };
   cancelHref: string;
+  /** Hide the read-only status line (review: approval always yields a Confirmed row). */
+  hideStatus?: boolean;
+  /** Submit button text; defaults to "Add subscription" / "Save changes". */
+  submitLabel?: string;
+  /** Disables the submit button (review: until every question is answered). */
+  submitDisabled?: boolean;
+  /** Controlled mode: the parent owns the values (review answers fill the form). */
+  values?: FormValues;
+  onValuesChange?: (values: FormValues) => void;
+  /** Small "low" / "medium" marker next to fields whose extraction confidence is not high. */
+  confidenceFlags?: Partial<Record<FormField, Exclude<Confidence, "high">>>;
 }
 
 const FIELD_LABELS: Record<string, string> = {
@@ -50,19 +61,36 @@ function Field({
   label,
   errors,
   hint,
+  flag,
   children,
 }: {
   name: string;
   label: string;
   errors?: string[];
   hint?: string;
+  flag?: "low" | "medium";
   children: ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={name} className="text-sm font-medium">
-        {label}
-      </label>
+      <div className="flex items-center gap-2">
+        <label htmlFor={name} className="text-sm font-medium">
+          {label}
+        </label>
+        {flag && (
+          <span
+            data-confidence={flag}
+            title="How sure the capture reading was"
+            className={`rounded-full px-2 py-0.5 text-xs ${
+              flag === "low"
+                ? "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200"
+                : "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
+            }`}
+          >
+            {flag}
+          </span>
+        )}
+      </div>
       {children}
       {hint && <p className="text-xs text-zinc-500 dark:text-zinc-400">{hint}</p>}
       {errors?.map((e) => (
@@ -74,17 +102,34 @@ function Field({
   );
 }
 
-export function SubscriptionForm({ mode, action, initialValues, lookups, cancelHref }: SubscriptionFormProps) {
+export function SubscriptionForm({
+  mode,
+  action,
+  initialValues,
+  lookups,
+  cancelHref,
+  hideStatus,
+  submitLabel,
+  submitDisabled,
+  values,
+  onValuesChange,
+  confidenceFlags,
+}: SubscriptionFormProps) {
   const [state, formAction, pending] = useActionState(action, INITIAL_FORM_STATE);
   // Controlled, so React's post-action form reset cannot wipe what the user typed.
-  const [vals, setVals] = useState<FormValues>(initialValues);
+  const [inner, setInner] = useState<FormValues>(initialValues);
+  const vals = values ?? inner;
   const errors = state.fieldErrors;
 
   const bind = (name: FormField) => ({
     id: name,
     name,
     value: vals[name],
-    onChange: (e: { target: { value: string } }) => setVals((v) => ({ ...v, [name]: e.target.value })),
+    onChange: (e: { target: { value: string } }) => {
+      const next = { ...vals, [name]: e.target.value };
+      setInner(next);
+      onValuesChange?.(next);
+    },
     "aria-invalid": errors[name] ? (true as const) : undefined,
     "aria-describedby": errors[name] ? `${name}-error` : undefined,
   });
@@ -115,25 +160,24 @@ export function SubscriptionForm({ mode, action, initialValues, lookups, cancelH
         </p>
       )}
 
-      <Field name="name" label="Name *" errors={errors.name}>
+      <Field name="name" flag={confidenceFlags?.name} label="Name *" errors={errors.name}>
         <input {...bind("name")} type="text" required autoComplete="off" className={inputClass} />
       </Field>
 
-      <Field name="status" label="Status" errors={errors.status}>
-        <select {...bind("status")} className={inputClass}>
-          {SUBSCRIPTION_STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {cap(s)}
-            </option>
-          ))}
-        </select>
-      </Field>
+      {mode === "edit" && !hideStatus && (
+        <p className="text-sm">
+          <span className="font-medium">Status:</span> {cap(vals.status || "confirmed")}
+          <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+            To cancel or reopen, use the buttons on the subscription page.
+          </span>
+        </p>
+      )}
 
       <div className="grid grid-cols-[2fr_1fr] gap-3">
-        <Field name="amount" label="Amount" errors={errors.amount}>
+        <Field name="amount" flag={confidenceFlags?.amount} label="Amount" errors={errors.amount}>
           <input {...bind("amount")} type="text" inputMode="decimal" placeholder="9.99" className={inputClass} />
         </Field>
-        <Field name="currency" label="Currency" errors={errors.currency}>
+        <Field name="currency" flag={confidenceFlags?.currency} label="Currency" errors={errors.currency}>
           <select {...bind("currency")} className={inputClass}>
             <option value="">-</option>
             {CURRENCIES.map((c) => (
@@ -145,7 +189,7 @@ export function SubscriptionForm({ mode, action, initialValues, lookups, cancelH
         </Field>
       </div>
 
-      <Field name="billing_cycle" label="Billing cycle" errors={errors.billing_cycle}>
+      <Field name="billing_cycle" flag={confidenceFlags?.billing_cycle} label="Billing cycle" errors={errors.billing_cycle}>
         <select {...bind("billing_cycle")} className={inputClass}>
           <option value="">Choose...</option>
           {BILLING_CYCLES.map((c) => (
@@ -156,12 +200,12 @@ export function SubscriptionForm({ mode, action, initialValues, lookups, cancelH
         </select>
       </Field>
 
-      <Field name="last_renewal_date" label="Billing date (last or next charge)" errors={errors.last_renewal_date}>
+      <Field name="last_renewal_date" flag={confidenceFlags?.last_renewal_date} label="Billing date (last or next charge)" errors={errors.last_renewal_date}>
         <input {...bind("last_renewal_date")} type="date" className={inputClass} />
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">The most recent charge, or the next one if you know it.</p>
       </Field>
 
-      <Field name="trial_ends" label="Trial ends" errors={errors.trial_ends}>
+      <Field name="trial_ends" flag={confidenceFlags?.trial_ends} label="Trial ends" errors={errors.trial_ends}>
         <input {...bind("trial_ends")} type="date" className={inputClass} />
       </Field>
 
@@ -181,21 +225,15 @@ export function SubscriptionForm({ mode, action, initialValues, lookups, cancelH
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
-        <Field name="regular_price" label="Regular price" errors={errors.regular_price}>
+        <Field name="regular_price" flag={confidenceFlags?.regular_price} label="Regular price" errors={errors.regular_price}>
           <input {...bind("regular_price")} type="text" inputMode="decimal" className={inputClass} />
         </Field>
-        <Field name="promo_ends" label="Promo ends" errors={errors.promo_ends}>
+        <Field name="promo_ends" flag={confidenceFlags?.promo_ends} label="Promo ends" errors={errors.promo_ends}>
           <input {...bind("promo_ends")} type="date" className={inputClass} />
         </Field>
       </div>
 
-      {vals.status === "cancelled" && (
-        <Field name="access_until" label="Access until" errors={errors.access_until}>
-          <input {...bind("access_until")} type="date" className={inputClass} />
-        </Field>
-      )}
-
-      <Field name="category_id" label="Category" errors={errors.category_id}>
+      <Field name="category_id" flag={confidenceFlags?.category_id} label="Category" errors={errors.category_id}>
         <select {...bind("category_id")} className={inputClass}>
           <option value="">-</option>
           {lookups.categories.map((o) => (
@@ -217,7 +255,7 @@ export function SubscriptionForm({ mode, action, initialValues, lookups, cancelH
         </select>
       </Field>
 
-      <Field name="scope" label="Scope" errors={errors.scope}>
+      <Field name="scope" flag={confidenceFlags?.scope} label="Scope" errors={errors.scope}>
         <select {...bind("scope")} className={inputClass}>
           <option value="">-</option>
           {SCOPES.map((s) => (
@@ -258,10 +296,10 @@ export function SubscriptionForm({ mode, action, initialValues, lookups, cancelH
       <div className="flex items-center gap-4 pb-8 pt-2">
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || submitDisabled}
           className="min-h-12 rounded-full bg-indigo-600 px-6 font-medium text-white active:bg-indigo-700 disabled:opacity-60"
         >
-          {pending ? "Saving..." : mode === "create" ? "Add subscription" : "Save changes"}
+          {pending ? "Saving..." : (submitLabel ?? (mode === "create" ? "Add subscription" : "Save changes"))}
         </button>
         <Link href={cancelHref} className="inline-flex min-h-12 items-center text-sm text-zinc-600 underline dark:text-zinc-400">
           Cancel

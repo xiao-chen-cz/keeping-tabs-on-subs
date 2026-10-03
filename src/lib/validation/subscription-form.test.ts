@@ -4,7 +4,6 @@ import { missingForApproval, parseSubscriptionForm } from "./subscription-form";
 
 const full = {
   name: "Daily Ledger",
-  status: "confirmed",
   amount: "9.99",
   currency: "EUR",
   billing_cycle: "monthly",
@@ -37,17 +36,21 @@ describe("parseSubscriptionForm", () => {
     expect(parseSubscriptionForm({ ...rest, trial_ends: "2026-10-10" }, "create").ok).toBe(true);
   });
 
-  it("edit requires only the name (and the status the form always sends)", () => {
-    expect(parseSubscriptionForm({ name: "X", status: "confirmed", notes: "hi" }, "edit").ok).toBe(true);
-    expect(errorsOf({ name: "  ", status: "confirmed" }, "edit").name).toEqual(["Enter a name"]);
+  it("edit requires only the name", () => {
+    expect(parseSubscriptionForm({ name: "X", notes: "hi" }, "edit").ok).toBe(true);
+    expect(errorsOf({ name: "  " }, "edit").name).toEqual(["Enter a name"]);
   });
 
-  it("edit without a status is rejected, so a cancelled row is never reopened by accident", () => {
-    expect(errorsOf({ name: "X" }, "edit").status).toEqual(["Choose a status"]);
-  });
-
-  it("cancelled create needs only a name", () => {
-    expect(parseSubscriptionForm({ name: "X", status: "cancelled" }, "create").ok).toBe(true);
+  it("create cannot make a cancelled row: a submitted status is ignored and the create rules still apply (D12)", () => {
+    expect(Object.keys(errorsOf({ name: "X", status: "cancelled" }, "create")).sort()).toEqual([
+      "amount",
+      "billing_cycle",
+      "currency",
+      "last_renewal_date",
+    ]);
+    const r = parseSubscriptionForm({ ...full, status: "cancelled" }, "create");
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data).not.toHaveProperty("status");
   });
 
   it("amount needs a currency, even on edit", () => {
@@ -106,15 +109,17 @@ describe("parseSubscriptionForm", () => {
     );
     expect(r.ok).toBe(true);
     if (r.ok) {
-      for (const k of ["user_id", "source", "next_renewal", "cancel_by"]) expect(r.data).not.toHaveProperty(k);
+      for (const k of ["user_id", "source", "status", "next_renewal", "cancel_by"]) expect(r.data).not.toHaveProperty(k);
     }
   });
 
-  it("clears access_until unless cancelled", () => {
-    const a = parseSubscriptionForm({ ...full, access_until: "2026-12-01" }, "edit");
-    expect(a.ok && a.data.access_until).toBeNull();
-    const b = parseSubscriptionForm({ name: "X", status: "cancelled", access_until: "2026-12-01" }, "edit");
-    expect(b.ok && b.data.access_until).toBe("2026-12-01");
+  it("never returns status or access_until, even when submitted (edit cannot change status, D12)", () => {
+    const r = parseSubscriptionForm({ ...full, status: "cancelled", access_until: "2026-12-01" }, "edit");
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data).not.toHaveProperty("status");
+      expect(r.data).not.toHaveProperty("access_until");
+    }
   });
 
   it("rejects non-uuid category and bad enums", () => {

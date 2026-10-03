@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { RenewalsList } from "@/components/renewals-list";
 import { requireUser } from "@/lib/dal/auth";
+import { countPendingProposals } from "@/lib/dal/proposals";
 import { getProfile } from "@/lib/dal/profile";
 import { listSubscriptions } from "@/lib/dal/subscriptions";
 import { todayIn } from "@/lib/dates/plain-date";
@@ -13,7 +14,11 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const { show } = await searchParams;
   const showArchived = show === "cancelled";
 
-  const [profile, subscriptions] = await Promise.all([getProfile(), listSubscriptions()]);
+  const [profile, subscriptions, pendingCount] = await Promise.all([
+    getProfile(),
+    listSubscriptions(),
+    countPendingProposals(),
+  ]);
   const today = todayIn(profile.timeZone, new Date());
   const rows = subscriptions.map((s) => computeSubscription(s, today));
   const groups = groupAndSort(rows);
@@ -21,6 +26,16 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
   return (
     <main className="flex flex-1 flex-col">
+      {pendingCount > 0 && (
+        <div className="mx-auto w-full max-w-md px-4 pt-2">
+          <Link
+            href="/review"
+            className="flex min-h-12 items-center justify-center rounded-full bg-indigo-600 px-6 font-medium text-white active:bg-indigo-700"
+          >
+            Review ({pendingCount})
+          </Link>
+        </div>
+      )}
       <RenewalsList
         groups={groups}
         totals={totals}

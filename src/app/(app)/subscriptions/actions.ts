@@ -1,7 +1,11 @@
 "use server";
 import { notFound, redirect } from "next/navigation";
 import { requireUser } from "@/lib/dal/auth";
+import { setStatus } from "@/lib/dal/events";
+import { getProfile } from "@/lib/dal/profile";
 import { createSubscription, updateSubscription } from "@/lib/dal/subscriptions";
+import { todayIn } from "@/lib/dates/plain-date";
+import { parseCancelForm, type CancelFormState } from "@/lib/validation/cancel-form";
 import { parseSubscriptionForm, type FormMode } from "@/lib/validation/subscription-form";
 import type { SubscriptionFormState } from "@/components/subscription-form-values";
 
@@ -42,4 +46,26 @@ export async function updateSubscriptionAction(
   const updated = await updateSubscription(id, parsed.data);
   if (updated === null) notFound();
   redirect(`/subscriptions/${updated}`);
+}
+
+/** Bind the id first. Records the cancellation (event) and the status change in one transaction (D12). */
+export async function cancelSubscriptionAction(
+  id: string,
+  _prev: CancelFormState,
+  formData: FormData,
+): Promise<CancelFormState> {
+  await requireUser();
+  const values = readValues(formData);
+  const profile = await getProfile();
+  const parsed = parseCancelForm(values, todayIn(profile.timeZone, new Date()));
+  if (!parsed.ok) return { fieldErrors: parsed.fieldErrors, values };
+  await setStatus({ subscriptionId: id, status: "cancelled", record: parsed.record, accessUntil: parsed.accessUntil });
+  redirect(`/subscriptions/${id}`);
+}
+
+/** Bind the id first. Sets the status back to confirmed and records a "reopened" event. */
+export async function reopenSubscriptionAction(id: string): Promise<void> {
+  await requireUser();
+  await setStatus({ subscriptionId: id, status: "confirmed" });
+  redirect(`/subscriptions/${id}`);
 }

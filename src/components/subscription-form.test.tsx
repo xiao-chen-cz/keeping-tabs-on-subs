@@ -42,13 +42,27 @@ describe("SubscriptionForm", () => {
     expect(screen.queryByText(/Enter a name/)).toBeNull();
   });
 
-  it("shows access until only when status is Cancelled", () => {
+  it("has no status control and no Cancelled option on create (D12)", () => {
     setup();
-    expect(screen.queryByLabelText("Access until")).toBeNull();
-    fireEvent.change(screen.getByLabelText("Status"), { target: { value: "cancelled" } });
-    expect(screen.getByLabelText("Access until")).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("Status"), { target: { value: "confirmed" } });
-    expect(screen.queryByLabelText("Access until")).toBeNull();
+    expect(screen.queryByLabelText("Status")).toBeNull();
+    expect(screen.queryByRole("option", { name: /cancelled/i })).toBeNull();
+    expect(screen.queryByLabelText(/Access until/)).toBeNull();
+  });
+
+  it("shows status as read-only text on edit and never submits it", () => {
+    render(
+      <SubscriptionForm
+        mode="edit"
+        action={vi.fn()}
+        initialValues={{ ...emptyFormValues(), name: "Demo Sub", status: "cancelled" }}
+        lookups={lookups}
+        cancelHref="/"
+      />,
+    );
+    expect(screen.getByText("Cancelled")).toBeTruthy();
+    expect(screen.queryByLabelText("Status")).toBeNull();
+    expect(screen.queryByLabelText(/Access until/)).toBeNull();
+    expect(document.querySelector('[name="status"]')).toBeNull();
   });
 
   it("shows the computed default notice as placeholder for the selected cycle", () => {

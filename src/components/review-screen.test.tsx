@@ -1,0 +1,97 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { proposal } from "./review-fixtures";
+import { ReviewScreen } from "./review-screen";
+import { missingFromValues, proposalFormValues } from "./review-values";
+import type { Proposal } from "@/lib/dal/map-proposal";
+import type { SubscriptionFormState } from "./subscription-form-values";
+
+afterEach(cleanup);
+
+const lookups = { categories: [{ id: "c1", name: "Software" }], paymentMethods: [] };
+
+function setup(p: Proposal, updatesName: string | null = null) {
+  const initialValues = proposalFormValues(p, null);
+  const approve = vi.fn<(prev: SubscriptionFormState, f: FormData) => Promise<SubscriptionFormState>>();
+  render(
+    <ReviewScreen
+      proposal={p}
+      updatesName={updatesName}
+      captureText="Your Gymbox membership: 30.00 per month"
+      initialValues={initialValues}
+      questions={missingFromValues(initialValues)}
+      lookups={lookups}
+      approveAction={approve}
+      rejectAction={vi.fn(async () => {})}
+    />,
+  );
+  return approve;
+}
+
+const approveButton = () => screen.getByRole("button", { name: "Approve" }) as HTMLButtonElement;
+
+describe("ReviewScreen", () => {
+  it("asks no questions when nothing is missing, and Approve is enabled", () => {
+    setup(proposal({ name: "NoteForge", amountCents: 799, currency: "EUR", billingCycle: "monthly", lastRenewalDate: "2026-10-31" }));
+    expect(screen.queryByRole("heading", { name: /question/ })).toBeNull();
+    expect(approveButton().disabled).toBe(false);
+  });
+
+  it("asks one fixed question per missing field and keeps Approve disabled until all are answered", () => {
+    setup(proposal({ name: "Gymbox", amountCents: 3000 }));
+    expect(screen.getByRole("heading", { name: "3 questions" })).toBeTruthy();
+    expect(screen.getByText("Which currency?")).toBeTruthy();
+    expect(screen.getByText("How often is it charged?")).toBeTruthy();
+    expect(screen.getByText("When was the last charge, or when is the next one?")).toBeTruthy();
+    expect(screen.queryByText("What is the subscription called?")).toBeNull();
+    expect(screen.queryByText("How much is each charge?")).toBeNull();
+    expect(approveButton().disabled).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "EUR" }));
+    fireEvent.click(screen.getByRole("button", { name: "Monthly" }));
+    expect(approveButton().disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText("When was the last charge, or when is the next one?"), { target: { value: "2026-10-31" } });
+    expect(approveButton().disabled).toBe(false);
+  });
+
+  it("tapping an option fills the form field below", () => {
+    setup(proposal({ name: "Gymbox", amountCents: 3000 }));
+    fireEvent.click(screen.getByRole("button", { name: "EUR" }));
+    fireEvent.click(screen.getByRole("button", { name: "Monthly" }));
+    expect((screen.getByLabelText("Currency") as HTMLSelectElement).value).toBe("EUR");
+    expect((screen.getByLabelText("Billing cycle") as HTMLSelectElement).value).toBe("monthly");
+    expect(screen.getByRole("button", { name: "EUR" }).getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("a typed amount that does not parse does not unlock Approve", () => {
+    setup(proposal({ name: "X", currency: "EUR", billingCycle: "monthly", lastRenewalDate: "2026-10-31" }));
+    expect(approveButton().disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText("How much is each charge?"), { target: { value: "abc" } });
+    expect(approveButton().disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText("How much is each charge?"), { target: { value: "9,99" } });
+    expect(approveButton().disabled).toBe(false);
+    expect((screen.getByLabelText("Amount") as HTMLInputElement).value).toBe("9,99");
+  });
+
+  it("shows the capture text, the update banner, confidence markers and a Reject button; no status field", () => {
+    setup(
+      proposal({ name: "CodePilot Pro", amountCents: 1900, currency: "EUR", billingCycle: "monthly", lastRenewalDate: "2026-10-03", fieldConfidence: { billingCycle: "medium", category: "low", amountCents: "high" } }),
+      "CodePilot Pro",
+    );
+    expect(screen.getByText("What the app read")).toBeTruthy();
+    expect(screen.getByText("Your Gymbox membership: 30.00 per month")).toBeTruthy();
+    expect(screen.getByText("This will update CodePilot Pro.")).toBeTruthy();
+    expect(document.querySelector('[data-confidence="medium"]')?.textContent).toBe("medium");
+    expect(document.querySelector('[data-confidence="low"]')?.textContent).toBe("low");
+    expect(document.querySelectorAll("[data-confidence]").length).toBe(2);
+    expect(screen.getByRole("button", { name: "Reject" })).toBeTruthy();
+    expect(screen.queryByText(/Status/)).toBeNull();
+  });
+
+  it("shows Unnamed until a name is answered", () => {
+    setup(proposal({ amountCents: 100 }));
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Unnamed");
+    fireEvent.change(screen.getByLabelText("What is the subscription called?"), { target: { value: "Gymbox" } });
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Gymbox");
+  });
+});

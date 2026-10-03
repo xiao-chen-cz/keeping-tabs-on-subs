@@ -12,13 +12,15 @@ Xiao will send you an email address and password privately. Open the link Xiao g
 
 If you only want a look around first, the link plus `/demo` shows a read-only sample with no sign-in.
 
-## Three things to try
+## Four things to try
 
 **1. Find your next decision.** Look at the list and the "Due soon" section. Which subscription do you have to decide on first, and by what date? Say it out loud before you tap anything.
 
 **2. Add one you made up.** Tap the add button and enter a subscription. Invent everything, for example "PhotoVault, 4.99 EUR, monthly". Please never type in your real subscriptions or any real account details.
 
-**3. Change the notice period, then cancel it.** Open the subscription you just added and edit it. Give it a different notice period (days before renewal you need to cancel by) and watch the cancel-by date move. Then mark it as cancelled and set an "access until" date. It should move to an "Ending" group.
+**3. Change the notice period, then cancel it.** Open the subscription you just added and edit it. Give it a different notice period (days before renewal you need to cancel by) and watch the cancel-by date move. Then open it again and tap "Mark as cancelled": enter the date, how you cancelled (a made-up confirmation number is fine) and, if you like, an "access until" date. It should move to an "Ending" group, and the subscription page now shows a History entry with what you entered. "Reopen" brings it back.
+
+**4. Review a proposed entry.** The list shows a "Review (1)" button. Open it, read what the app picked up, answer any question it asks (the form below it is pre-filled; you can pick a category there) and approve the entry. It should now appear in your list. (Rejecting it instead leaves the list unchanged.)
 
 ## What it does not do yet
 
