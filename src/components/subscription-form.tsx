@@ -136,6 +136,8 @@ export function SubscriptionForm({
   const [state, formAction, pending] = useActionState(action ?? noopAction, INITIAL_FORM_STATE);
   // Controlled, so React's post-action form reset cannot wipe what the user typed.
   const [inner, setInner] = useState<FormValues>(initialValues);
+  // Demo only: the submit button works once the form is complete, but shows what would happen instead of saving.
+  const [demoSubmitted, setDemoSubmitted] = useState(false);
   const vals = values ?? inner;
   const errors = state.fieldErrors;
 
@@ -178,7 +180,14 @@ export function SubscriptionForm({
   return (
     <form
       action={readOnly ? undefined : formAction}
-      onSubmit={readOnly ? (e) => e.preventDefault() : undefined}
+      onSubmit={
+        readOnly
+          ? (e) => {
+              e.preventDefault();
+              setDemoSubmitted(true);
+            }
+          : undefined
+      }
       className="flex flex-col gap-3">
       {mode === "edit" && !missingFields && missing.length > 0 && (
         <p className="rounded-control border border-warn-line bg-warn-bg p-3 text-sm text-warn-ink">
@@ -323,18 +332,28 @@ export function SubscriptionForm({
       <div className="flex items-center gap-4 pb-8 pt-1">
         <button
           type="submit"
-          disabled={readOnly || pending || submitDisabled}
+          disabled={(!readOnly && pending) || submitDisabled}
           className="btn-primary"
         >
-          {pending ? "Saving..." : (submitLabel ?? (mode === "create" ? "Add subscription" : "Save changes"))}
+          {readOnly
+            ? `${submitLabel ?? "Save"} (demo)`
+            : pending
+              ? "Saving..."
+              : (submitLabel ?? (mode === "create" ? "Add subscription" : "Save changes"))}
         </button>
         <Link href={cancelHref} className="link inline-flex min-h-11 items-center text-sm">
           Cancel
         </Link>
       </div>
-      {readOnly && (
+      {readOnly && !demoSubmitted && (
         <p className="-mt-6 pb-8 text-xs text-mid">
-          Demo: <Link href="/login" className="link">sign in</Link> to approve or reject.
+          Demo: nothing is saved. <Link href="/login" className="link">Sign in</Link> to approve or reject for real.
+        </p>
+      )}
+      {readOnly && demoSubmitted && (
+        <p role="status" className="-mt-6 mb-8 rounded-control border border-green-ink/30 bg-green-light p-3 text-sm text-green-ink">
+          In your own account, this would now be saved to your list. Nothing was saved here.{" "}
+          <Link href="/login" className="link">Sign in</Link> to try it with your own subscriptions.
         </p>
       )}
     </form>

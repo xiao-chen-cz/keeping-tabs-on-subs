@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { RenewalsList } from "@/components/renewals-list";
 import { SubscriptionDetail } from "@/components/subscription-detail";
 import { DEFAULT_ALERT_OFFSETS } from "@/lib/domain/alerts";
@@ -89,12 +89,16 @@ describe("demo review queue", () => {
     expect(screen.getAllByText(/Missing/).length).toBeGreaterThan(0);
   });
 
-  it("has no enabled Approve and no Reject", () => {
+  it("demo Approve waits for the answers, then explains instead of saving; no Reject", () => {
     view("P1");
-    const approve = screen.getByRole("button", { name: "Approve" }) as HTMLButtonElement;
-    expect(approve.disabled).toBe(true);
+    const approve = screen.getByRole("button", { name: "Approve (demo)" }) as HTMLButtonElement;
+    expect(approve.disabled).toBe(true); // the billing-cycle question is still open
     expect(screen.queryByRole("button", { name: /reject/i })).toBeNull();
-    expect(screen.getByText(/sign in/i).getAttribute("href")).toBe("/login");
+    fireEvent.click(screen.getByRole("button", { name: "Monthly" }));
+    expect(approve.disabled).toBe(false);
+    fireEvent.click(approve);
+    expect(screen.getByRole("status").textContent).toMatch(/Nothing was saved here/);
+    expect(screen.getByRole("link", { name: "Sign in" }).getAttribute("href")).toBe("/login");
   });
 
   it("P2 shows the update notice", () => {
