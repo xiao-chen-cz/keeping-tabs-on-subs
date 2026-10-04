@@ -30,21 +30,30 @@ describe("missingRequired", () => {
 
 describe("matchExisting", () => {
   const subs = [
-    { id: "a", name: "CodePilot Pro", vendor: null, amountCents: 2000, currency: "USD" as const, status: "confirmed" as const },
-    { id: "b", name: "Other", vendor: "CodePilot", amountCents: 2000, currency: "USD" as const, status: "confirmed" as const },
-    { id: "c", name: "Gone", vendor: null, amountCents: 500, currency: "EUR" as const, status: "cancelled" as const },
+    { id: "a", name: "CodePilot Pro", vendor: null, currency: "USD" as const, status: "confirmed" as const },
+    { id: "b", name: "Other", vendor: "CodePilot", currency: "USD" as const, status: "confirmed" as const },
+    { id: "c", name: "Gone", vendor: null, currency: "EUR" as const, status: "cancelled" as const },
   ];
-  it("matches name or vendor case-insensitively after trimming, with the same amount and currency", () => {
-    expect(matchExisting(draft({ name: "  codepilot PRO ", amountCents: 2000 }), subs)).toBe("a");
-    expect(matchExisting(draft({ name: "Something", vendor: "codepilot", amountCents: 2000 }), subs)).toBe("b");
+  it("matches name or vendor case-insensitively, trimmed, with spaces collapsed", () => {
+    expect(matchExisting(draft({ name: "  codepilot   PRO " }), subs)).toBe("a");
+    expect(matchExisting(draft({ name: "Something", vendor: "codepilot" }), subs)).toBe("b");
   });
-  it("needs the same amount and currency", () => {
-    expect(matchExisting(draft({ name: "CodePilot Pro", amountCents: 2100 }), subs)).toBeNull();
-    expect(matchExisting(draft({ name: "CodePilot Pro", amountCents: 2000, currency: "EUR" }), subs)).toBeNull();
-    expect(matchExisting(draft({ name: "CodePilot Pro", amountCents: null }), subs)).toBeNull();
+  it("also compares the draft vendor against the subscription name", () => {
+    expect(matchExisting(draft({ name: "x", vendor: "CodePilot Pro" }), subs)).toBe("a");
+  });
+  it("ignores the amount: same vendor, different amount still matches", () => {
+    expect(matchExisting(draft({ name: "CodePilot Pro", amountCents: 2500 }), subs)).toBe("a");
+    expect(matchExisting(draft({ name: "CodePilot Pro", amountCents: null }), subs)).toBe("a");
+  });
+  it("needs the same currency unless the draft has none", () => {
+    expect(matchExisting(draft({ name: "CodePilot Pro", currency: "EUR" }), subs)).toBeNull();
+    expect(matchExisting(draft({ name: "CodePilot Pro", currency: null }), subs)).toBe("a");
+  });
+  it("returns the first candidate sorted by name", () => {
+    expect(matchExisting(draft({ name: "CodePilot Pro", vendor: "CodePilot" }), [subs[1], subs[0]])).toBe("a");
   });
   it("ignores cancelled subscriptions and empty names", () => {
-    expect(matchExisting(draft({ name: "Gone", amountCents: 500, currency: "EUR" }), subs)).toBeNull();
+    expect(matchExisting(draft({ name: "Gone", currency: "EUR" }), subs)).toBeNull();
     expect(matchExisting(draft({ name: null, vendor: null }), subs)).toBeNull();
   });
 });

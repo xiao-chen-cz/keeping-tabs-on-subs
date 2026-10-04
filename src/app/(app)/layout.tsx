@@ -8,7 +8,7 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
       <header className="border-b border-line">
         <div className="mx-auto flex w-full max-w-xl items-center justify-between px-4 py-3">
           <Link href="/" className="font-heading text-lg font-semibold text-primary-ink">
-            Keeping Tabs
+            Keeping Tabs on Subs
           </Link>
           <form action={signOut}>
             <button type="submit" className="link text-sm">

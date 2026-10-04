@@ -1,4 +1,5 @@
 import "server-only";
+import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/dal/auth";
 import {
   rowToCapture,
@@ -125,4 +126,21 @@ export async function rejectProposal(id: string): Promise<void> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("reject_proposal", { p_proposal_id: id });
   if (error) throw new Error(`Could not reject: ${error.message}`);
+}
+
+/** Detach a pending update proposal from its subscription, so approving adds a new subscription. */
+export async function detachProposal(id: string): Promise<void> {
+  await requireUser();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("proposals")
+    .update({ updates_subscription_id: null })
+    .eq("id", id)
+    .eq("status", "pending")
+    .select("id");
+  if (error) {
+    if (error.code === "22P02") notFound();
+    throw new Error(`Could not detach: ${error.message}`);
+  }
+  if (!data || data.length === 0) notFound();
 }

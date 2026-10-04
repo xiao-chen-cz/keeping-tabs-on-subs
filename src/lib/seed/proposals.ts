@@ -33,7 +33,7 @@ const blank: SubscriptionDraft = {
 export function buildSeedProposals(set: SeedSet, today: PlainDate): SeedProposal[] {
   const p1Date = addDays(today, 28);
   // P2 is the receipt for CodePilot's most recent charge, so approving it keeps the schedule
-  // (it confirms the amount and links the receipt) instead of inventing a charge today.
+  // (it records the new $25.00 price against the old $20.00 and links the receipt) instead of inventing a charge today.
   const codePilotLastCharge = buildSeed("full", today).find((r) => r.key === 1)!.lastRenewalDate!;
   const p1: SeedProposal = {
     key: "P1",
@@ -63,7 +63,7 @@ export function buildSeedProposals(set: SeedSet, today: PlainDate): SeedProposal
         ...blank,
         name: "CodePilot Pro",
         vendor: "CodePilot",
-        amountCents: 2000,
+        amountCents: 2500,
         currency: "USD",
         billingCycle: "monthly",
         lastRenewalDate: codePilotLastCharge,

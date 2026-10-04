@@ -3,7 +3,9 @@
 import { emptyFormValues, formValuesFromSubscription, type FormField, type FormValues } from "./subscription-form-values";
 import type { Proposal } from "@/lib/dal/map-proposal";
 import { parseAnswer } from "@/lib/domain/questions";
-import { REQUIRED_FOR_APPROVAL, type Confidence, type Subscription } from "@/lib/domain/types";
+import { formatDay } from "./format";
+import { formatMoney } from "@/lib/domain/totals";
+import { BILLING_CYCLE_LABELS, REQUIRED_FOR_APPROVAL, type Confidence, type Subscription } from "@/lib/domain/types";
 
 type RequiredField = (typeof REQUIRED_FOR_APPROVAL)[number];
 
@@ -99,6 +101,51 @@ export function confidenceFlags(
   for (const [key, level] of Object.entries(fieldConfidence)) {
     const field = CONFIDENCE_FIELD[key];
     if (field && (level === "low" || level === "medium")) out[field] = level;
+  }
+  return out;
+}
+
+export interface ProposalChange {
+  key: "amount" | "cycle" | "billingDate";
+  label: string;
+  from: string;
+  to: string;
+  /** Price rise = "rise" (shown in the danger colour); everything else is neutral. */
+  tone: "rise" | "neutral";
+}
+
+/** Values the capture would change on the matched subscription. Only non-null draft values count. */
+export function proposalChanges(proposal: Proposal, existing: Subscription): ProposalChange[] {
+  const d = proposal.draft;
+  const out: ProposalChange[] = [];
+  if (d.amountCents !== null && d.amountCents !== existing.amountCents) {
+    const cur = d.currency ?? existing.currency;
+    const fmt = (c: number | null) => (c === null || cur === null ? "unknown" : formatMoney(c, cur));
+    out.push({
+      key: "amount",
+      label: "Price",
+      from: fmt(existing.amountCents),
+      to: fmt(d.amountCents),
+      tone: existing.amountCents !== null && d.amountCents > existing.amountCents ? "rise" : "neutral",
+    });
+  }
+  if (d.billingCycle !== null && d.billingCycle !== existing.billingCycle) {
+    out.push({
+      key: "cycle",
+      label: "Billing cycle",
+      from: existing.billingCycle ? BILLING_CYCLE_LABELS[existing.billingCycle] : "unknown",
+      to: BILLING_CYCLE_LABELS[d.billingCycle],
+      tone: "neutral",
+    });
+  }
+  if (d.lastRenewalDate !== null && d.lastRenewalDate !== existing.lastRenewalDate) {
+    out.push({
+      key: "billingDate",
+      label: "Billing date",
+      from: existing.lastRenewalDate ? formatDay(existing.lastRenewalDate) : "unknown",
+      to: formatDay(d.lastRenewalDate),
+      tone: "neutral",
+    });
   }
   return out;
 }

@@ -34,7 +34,7 @@ export const CODEPILOT_RECEIPT: SeedCapture = {
       "Thanks for your payment.",
       `Date: ${chargeDate}`,
       "Plan: CodePilot Pro, monthly",
-      "Amount: $20.00 USD",
+      "Amount: $25.00 USD",
       "Paid with: Business account",
     ].join("\n"),
 };

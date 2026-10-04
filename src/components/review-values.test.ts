@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { existingSub, proposal } from "./review-fixtures";
-import { applyAnswer, confidenceFlags, isAnswered, missingFromValues, proposalFormValues } from "./review-values";
+import { applyAnswer, confidenceFlags, isAnswered, missingFromValues, proposalChanges, proposalFormValues } from "./review-values";
 import { missingRequired } from "@/lib/domain/proposal";
 
 describe("proposalFormValues", () => {
@@ -75,5 +75,25 @@ describe("confidenceFlags", () => {
       category_id: "low",
       name: "low",
     });
+  });
+});
+
+describe("proposalChanges", () => {
+  const sub = existingSub({ amountCents: 2000, currency: "USD", billingCycle: "monthly", lastRenewalDate: "2026-09-29" });
+  it("reports a price rise in the danger tone", () => {
+    expect(proposalChanges(proposal({ amountCents: 2500, currency: "USD" }), sub)).toEqual([
+      { key: "amount", label: "Price", from: "$20.00", to: "$25.00", tone: "rise" },
+    ]);
+  });
+  it("reports a price drop as neutral", () => {
+    expect(proposalChanges(proposal({ amountCents: 1500, currency: "USD" }), sub)[0]).toMatchObject({ to: "$15.00", tone: "neutral" });
+  });
+  it("reports cycle and billing date changes, ignoring nulls and equal values", () => {
+    const c = proposalChanges(proposal({ amountCents: 2000, billingCycle: "yearly", lastRenewalDate: "2026-10-01" }), sub);
+    expect(c.map((x) => [x.key, x.from, x.to])).toEqual([
+      ["cycle", "Monthly", "Yearly"],
+      ["billingDate", "29 Sep", "1 Oct"],
+    ]);
+    expect(proposalChanges(proposal({}), sub)).toEqual([]);
   });
 });

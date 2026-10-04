@@ -4,7 +4,7 @@ import { missingFromValues, proposalFormValues } from "@/components/review-value
 import { requireUser } from "@/lib/dal/auth";
 import { listCategories, listPaymentMethods } from "@/lib/dal/lookups";
 import { getProposalForReview } from "@/lib/dal/proposals";
-import { approveProposalAction, rejectProposalAction } from "../actions";
+import { approveProposalAction, detachProposalAction, rejectProposalAction } from "../actions";
 import Link from "next/link";
 
 export default async function ReviewProposalPage({ params }: PageProps<"/review/[id]">) {
@@ -27,12 +27,14 @@ export default async function ReviewProposalPage({ params }: PageProps<"/review/
       <ReviewScreen
         proposal={found.proposal}
         updatesName={found.existing?.subscription.name ?? null}
+        existing={found.existing?.subscription ?? null}
         captureText={found.capture?.rawText ?? null}
         initialValues={initialValues}
         questions={missingFromValues(initialValues)}
         lookups={{ categories, paymentMethods }}
         approveAction={approveProposalAction.bind(null, id)}
         rejectAction={rejectProposalAction.bind(null, id)}
+        detachAction={detachProposalAction.bind(null, id)}
       />
     </main>
   );

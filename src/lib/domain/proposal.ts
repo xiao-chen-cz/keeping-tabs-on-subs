@@ -27,27 +27,27 @@ export function missingRequired(
   return REQUIRED_FOR_APPROVAL.filter((k) => !present[k]);
 }
 
-const norm = (v: string | null | undefined): string | null => (hasText(v) ? v.trim().toLowerCase() : null);
-const keys = (x: { vendor: string | null; name: string | null }): Set<string> =>
-  new Set([norm(x.vendor), norm(x.name)].filter((k): k is string => k !== null));
+const norm = (v: string | null | undefined): string | null =>
+  hasText(v) ? v.trim().toLowerCase().replace(/\s+/g, " ") : null;
 
-type Candidate = Pick<Subscription, "id" | "name" | "vendor" | "amountCents" | "currency" | "status">;
+type Candidate = Pick<Subscription, "id" | "name" | "vendor" | "currency" | "status">;
 
 /**
- * Id of the first non-cancelled subscription whose vendor or name equals the draft's vendor or name
- * (case-insensitive, trimmed) with the same amount and currency; null when none.
+ * Id of the first non-cancelled subscription (sorted by name) whose vendor or name equals the draft's
+ * vendor or name (either side may match on either field) (case-insensitive, trimmed, spaces collapsed) in the same currency; null when none.
+ * The amount does not matter: a different amount is a price change. A null draft currency matches any.
  */
 export function matchExisting(
-  draft: Pick<SubscriptionDraft, "name" | "vendor" | "amountCents" | "currency">,
+  draft: Pick<SubscriptionDraft, "name" | "vendor" | "currency">,
   subscriptions: readonly Candidate[],
 ): string | null {
-  if (draft.amountCents === null || draft.currency === null) return null;
-  const wanted = keys(draft);
+  const wanted = new Set([norm(draft.vendor), norm(draft.name)].filter((k): k is string => k !== null));
   if (wanted.size === 0) return null;
-  for (const s of subscriptions) {
+  const sorted = [...subscriptions].sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+  for (const s of sorted) {
     if (s.status === "cancelled") continue;
-    if (s.amountCents !== draft.amountCents || s.currency !== draft.currency) continue;
-    for (const k of keys(s)) if (wanted.has(k)) return s.id;
+    if (draft.currency !== null && s.currency !== draft.currency) continue;
+    for (const k of [norm(s.vendor), norm(s.name)]) if (k !== null && wanted.has(k)) return s.id;
   }
   return null;
 }

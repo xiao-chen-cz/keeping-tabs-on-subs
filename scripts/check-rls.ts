@@ -211,6 +211,17 @@ async function main() {
       report("A cannot approve B's proposal via rpc", !!error && data?.status === "pending", error ? `status ${data?.status}` : "rpc succeeded");
     }
     {
+      await admin.from("proposals").update({ updates_subscription_id: bSubId }).eq("id", bFix.proposalId);
+      const { data: hit } = await client
+        .from("proposals")
+        .update({ updates_subscription_id: null })
+        .eq("id", bFix.proposalId)
+        .eq("status", "pending")
+        .select("id");
+      const { data } = await admin.from("proposals").select("updates_subscription_id").eq("id", bFix.proposalId).single();
+      report("A cannot detach (update) B's proposal", !hit?.length && data?.updates_subscription_id === bSubId, "detach succeeded");
+    }
+    {
       const { error } = await client.rpc("reject_proposal", { p_proposal_id: bFix.proposalId });
       const { data } = await admin.from("proposals").select("status").eq("id", bFix.proposalId).single();
       report("A cannot reject B's proposal via rpc", !!error && data?.status === "pending", error ? `status ${data?.status}` : "rpc succeeded");

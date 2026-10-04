@@ -35,7 +35,7 @@ Shared rules for all paths:
 - **Missing fields.** Required fields are name, amount, currency, billing cycle and one date (last renewal, next renewal or trial end). For each one that extraction returns as `null`, the app asks a fixed question (cycle: tappable options). The model only parses free-text answers; only the user supplies a missing value, so nothing is guessed. Same flow for every input and for the sparse sample capture.
 
 - Extraction returns `null` for any field it can't find; it never guesses dates or prices.
-- If a vendor + amount matches an existing subscription, the proposal is an update, not a new entry.
+- If the vendor or name matches an existing subscription (same currency), the proposal is an update, not a new entry; a different amount is shown as a price change (changed 2026-10-04: matching on the amount too would turn a price-rise receipt into a duplicate). The user can still choose to add it as a separate subscription.
 - The original capture stays linked to the entry, so the user can check what the model read.
 
 ## Out of scope

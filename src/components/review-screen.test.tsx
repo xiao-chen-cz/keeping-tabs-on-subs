@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { proposal } from "./review-fixtures";
+import { existingSub, proposal } from "./review-fixtures";
 import { ReviewScreen } from "./review-screen";
 import { missingFromValues, proposalFormValues } from "./review-values";
 import type { Proposal } from "@/lib/dal/map-proposal";
@@ -109,5 +109,35 @@ describe("ReviewScreen", () => {
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Unnamed");
     fireEvent.change(screen.getByLabelText("What is the subscription called?"), { target: { value: "Gymbox" } });
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Gymbox");
+  });
+});
+
+describe("ReviewScreen update proposals", () => {
+  const sub = existingSub({ amountCents: 2000, currency: "USD" });
+  const draft = { name: "CodePilot Pro", amountCents: 2500, currency: "USD" as const, billingCycle: "monthly" as const, lastRenewalDate: "2026-09-03" };
+  const renderIt = (updatesName: string | null, existing = sub, detach = vi.fn(async () => {})) => {
+    const p = proposal(draft);
+    const initialValues = proposalFormValues(p, updatesName ? { subscription: existing, categoryId: null, paymentMethodId: null } : null);
+    render(
+      <ReviewScreen proposal={p} updatesName={updatesName} existing={updatesName ? existing : null} captureText="x"
+        initialValues={initialValues} questions={missingFromValues(initialValues)} lookups={lookups}
+        approveAction={vi.fn()} rejectAction={vi.fn(async () => {})} detachAction={detach} />,
+    );
+    return detach;
+  };
+
+  it("shows the price change with the danger tone for a rise, and the detach button", () => {
+    renderIt("CodePilot Pro");
+    const li = screen.getByText(/Price changed: \$20\.00 → \$25\.00/);
+    expect(li.getAttribute("data-tone")).toBe("rise");
+    expect(screen.getByText("Not the same subscription?")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Add as a separate subscription" })).toBeTruthy();
+  });
+
+  it("offers no detach button on a new proposal", () => {
+    renderIt(null);
+    expect(screen.queryByText("Not the same subscription?")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Add as a separate subscription" })).toBeNull();
+    expect(screen.queryByText(/Price changed/)).toBeNull();
   });
 });

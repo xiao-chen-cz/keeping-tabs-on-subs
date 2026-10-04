@@ -67,7 +67,8 @@ describe("demo review queue", () => {
     const initialValues = proposalFormValues(f.proposal, f.existing);
     return render(
       <ReviewScreen readOnly backHref="/demo/review" proposal={f.proposal}
-        updatesName={f.existing?.subscription.name ?? null} captureText={f.captureText}
+        updatesName={f.existing?.subscription.name ?? null} existing={f.existing?.subscription ?? null}
+        asNewHref={`/demo/review/${key}?as=new`} captureText={f.captureText}
         initialValues={initialValues} questions={missingFromValues(initialValues)} lookups={DEMO_LOOKUPS} />,
     );
   };
@@ -101,8 +102,27 @@ describe("demo review queue", () => {
     expect(screen.getByRole("link", { name: "Sign in" }).getAttribute("href")).toBe("/login");
   });
 
-  it("P2 shows the update notice", () => {
+  it("P2 shows the update notice and the price change", () => {
     view("P2");
     expect(screen.getByText(/This will update CodePilot Pro/)).toBeTruthy();
+    expect(screen.getByText(/Price changed: \$20\.00 → \$25\.00/)).toBeTruthy();
+  });
+
+  it("P2 links to ?as=new, which shows no update notice", async () => {
+    const { default: Page } = await import("./review/[key]/page");
+    const props = (q: Record<string, string>) =>
+      ({ params: Promise.resolve({ key: "P2" }), searchParams: Promise.resolve(q) }) as never;
+    const first = render(await Page(props({})));
+    expect(screen.getByRole("link", { name: "Add as a separate subscription" }).getAttribute("href")).toBe("/demo/review/P2?as=new");
+    first.unmount();
+    render(await Page(props({ as: "new" })));
+    expect(screen.queryByText(/This will update/)).toBeNull();
+    expect(screen.queryByText(/Price changed/)).toBeNull();
+    expect(screen.queryByRole("link", { name: "Add as a separate subscription" })).toBeNull();
+  });
+
+  it("P1 (new entry) has no separate-subscription block", () => {
+    view("P1");
+    expect(screen.queryByText("Not the same subscription?")).toBeNull();
   });
 });

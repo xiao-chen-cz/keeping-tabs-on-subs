@@ -27,12 +27,15 @@ describe("buildSeedProposals", () => {
     expect(p1.capture.rawText(p1.captureDate)).toContain(addDays(TODAY, 28));
   });
 
-  it("P2 matches CodePilot Pro (seed #1) and is the receipt for its last charge, so approval keeps the schedule", () => {
+  it("P2 matches CodePilot Pro (seed #1) despite the different amount ($25.00 vs $20.00), and is the receipt for its last charge, so approval keeps the schedule", () => {
     const p2 = buildSeedProposals("full", TODAY)[1]!;
     const subs = buildSeed("full", TODAY);
     const hit = matchExisting(p2.draft, subs);
     expect(hit).toBe(subs.find((s) => s.key === p2.updatesSeedKey)!.id);
     expect(subs.find((s) => s.id === hit)!.name).toBe("CodePilot Pro");
+    expect(p2.draft.amountCents).toBe(2500);
+    expect(subs.find((s) => s.key === 1)!.amountCents).toBe(2000);
+    expect(p2.capture.rawText(p2.captureDate)).toContain("Amount: $25.00 USD");
     const codePilot = subs.find((s) => s.key === 1)!;
     expect(p2.draft.lastRenewalDate).toBe(codePilot.lastRenewalDate);
     expect(p2.captureDate).toBe(codePilot.lastRenewalDate);

@@ -1,7 +1,7 @@
 "use server";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/dal/auth";
-import { approveProposal, rejectProposal } from "@/lib/dal/proposals";
+import { approveProposal, detachProposal, rejectProposal } from "@/lib/dal/proposals";
 import { parseSubscriptionForm } from "@/lib/validation/subscription-form";
 import type { SubscriptionFormState } from "@/components/subscription-form-values";
 
@@ -31,4 +31,10 @@ export async function rejectProposalAction(id: string): Promise<void> {
   await requireUser();
   await rejectProposal(id);
   redirect("/review");
+}
+
+export async function detachProposalAction(id: string): Promise<void> {
+  await requireUser();
+  await detachProposal(id);
+  redirect(`/review/${id}`);
 }

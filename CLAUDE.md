@@ -2,6 +2,8 @@
 
 # Keeping Tabs on Subs
 
+The app name is always written in full, "Keeping Tabs on Subs" (headers, titles, docs), never shortened to "Keeping Tabs".
+
 Mobile-first subscription tracker. Pain point: forgetting subscriptions until they renew, sometimes at a higher price. Owner: Xiao Chen. Built for personal use first, possibly for others later.
 
 **Goal:** by 2026-10-24 ship a private, invite-only demo where subscriptions arrive by capture (type a short description, upload a screenshot/PDF, or paste email text), land in a review queue, and approved entries show in a renewal-sorted list with cancel-by dates. Manual entry is only a fallback and for corrections. Brief: `Keeping Tabs on Subs — Demo Build Brief.md` (authoritative for scope and milestones).
@@ -31,7 +33,7 @@ Next.js (TypeScript strict, Tailwind, mobile-first), Supabase (Postgres, auth, s
 - All paths (type, upload, paste) end in one extraction call, then a proposed entry in the review queue. Nothing reaches the list without user approval.
 - Missing required fields (name, amount, currency, cycle, one date) get fixed questions in the review flow, from code; the model only parses free-text answers. Only the user supplies a missing value.
 - Extraction returns `null` for anything not found; never guess dates or prices. Per-field confidence flag.
-- Vendor + amount matching an existing subscription proposes an update, not a new entry.
+- A capture whose vendor or name matches an existing subscription (same currency) proposes an update, not a new entry; a different amount shows as a price change. The user can still choose to add it as a separate subscription.
 - Original capture stays linked to the entry.
 - Extraction rules (logic-spec §4): only fill Category/Scope/Confidence when empty, only from fixed lists; Scope evidence rules; Confidence is the lower of Category and Scope; Regular price/Promo ends only when the source states both; payment method as nickname only, never card or account numbers.
 

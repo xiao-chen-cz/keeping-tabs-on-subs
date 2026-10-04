@@ -7,7 +7,7 @@ export default function DemoLayout({ children }: LayoutProps<"/demo">) {
       <header className="border-b border-line">
         <div className="mx-auto w-full max-w-xl px-4 py-3">
           <Link href="/demo" className="font-heading text-lg font-semibold text-primary-ink">
-            Keeping Tabs · Demo
+            Keeping Tabs on Subs · Demo
           </Link>
         </div>
       </header>
