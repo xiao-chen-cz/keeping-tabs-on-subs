@@ -35,9 +35,9 @@ describe("seedProposalToInsert", () => {
     const ins = seedProposalToInsert(props[0]!, "user-1", "cap-1", null, cats, pms);
     expect(ins).toMatchObject({
       user_id: "user-1", capture_id: "cap-1", name: "NoteForge", amount: 12, currency: "USD",
-      billing_cycle: "monthly", last_renewal_date: "2026-10-30", category_id: null,
+      billing_cycle: null, last_renewal_date: "2026-10-30", category_id: null,
       cancel_url: "https://noteforge.example/billing", updates_subscription_id: null,
-      field_confidence: { amountCents: "high", billingCycle: "medium", category: "low" },
+      field_confidence: { amountCents: "high", category: "low" },
     });
     expect(ins.id).toBeUndefined();
     expect(ins.status).toBeUndefined();

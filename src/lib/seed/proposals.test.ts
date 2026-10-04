@@ -13,15 +13,16 @@ describe("buildSeedProposals", () => {
     expect(buildSeedProposals("full", TODAY).map((p) => p.key)).toEqual(["P1", "P2", "P3"]);
   });
 
-  it("P1 is complete except the category, with the stated next charge as a future anchor", () => {
+  it("P1 lacks only the billing cycle (one question), with the stated next charge as a future anchor", () => {
     const p1 = buildSeedProposals("starter", TODAY)[0]!;
-    expect(missingRequired(p1.draft)).toEqual([]);
+    // see the missing-field assertion below
     expect(p1.draft).toMatchObject({
-      name: "NoteForge", amountCents: 1200, currency: "USD", billingCycle: "monthly",
+      name: "NoteForge", amountCents: 1200, currency: "USD", billingCycle: null,
       lastRenewalDate: addDays(TODAY, 28), cancelUrl: "https://noteforge.example/billing",
       cancelNoticeDays: null, category: null,
     });
-    expect(p1.draft.fieldConfidence).toEqual({ amountCents: "high", billingCycle: "medium", category: "low" });
+    expect(p1.draft.fieldConfidence).toEqual({ amountCents: "high", category: "low" });
+    expect(missingRequired(p1.draft)).toEqual(["billingCycle"]);
     expect(p1.capture.rawText(p1.captureDate)).toContain(addDays(TODAY, 28));
   });
 

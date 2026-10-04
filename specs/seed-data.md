@@ -50,7 +50,7 @@ The seed script takes a set name.
 
 | # | Proposal | Source capture | Extracted fields | Confidence | Review path |
 |---|---|---|---|---|---|
-| P1 | New: NoteForge | Screenshot of a billing page (`seed/captures/noteforge-billing.png`) | Name, 12.00 USD, Monthly, next renewal, cancel URL; notice null | Price High, cycle Medium, category Low | Approve after confirming the category |
+| P1 | New: NoteForge | Screenshot of a billing page (`seed/captures/noteforge-billing.png`) | Name, 12.00 USD, next renewal, cancel URL; cycle null (the page does not state it, changed 2026-10-04 so testers meet one question), notice null | Price High, category Low | Answer the billing-cycle question, confirm the category, approve |
 | P2 | Update: CodePilot Pro | Pasted receipt email text (`seed/captures/codepilot-receipt.txt`) | Vendor + amount 20.00 USD match #1 → proposes updating Last renewal date, no new entry | High | Approve as an update |
 | P3 | New: Gymbox | Sparse PDF invoice (`seed/captures/gymbox-invoice.pdf`) | Name and amount only; cycle, dates, currency null | Low on all missing fields | Edit to complete, or reject |
 

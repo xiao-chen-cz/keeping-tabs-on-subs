@@ -16,8 +16,8 @@ export const NOTEFORGE_BILLING: SeedCapture = {
     [
       "[Screenshot of a billing page]",
       "NoteForge - Billing",
-      "Plan: Pro (monthly)",
-      "Price: $12.00 / month",
+      "Plan: Pro",
+      "Price: $12.00",
       `Next charge: ${nextCharge}`,
       "Manage or cancel: https://noteforge.example/billing",
     ].join("\n"),

@@ -24,7 +24,7 @@ const blank: SubscriptionDraft = {
 };
 
 /**
- * P1 NoteForge: new entry; the stated next charge (T+28) is stored as the anchor (future, D4/A3).
+ * P1 NoteForge: new entry, cycle not stated (asked as a question); the stated next charge (T+28) is stored as the anchor (future, D4/A3).
  * P2 CodePilot Pro: a receipt for a charge dated today (T). The current anchor is about a month back, so
  *    "anchor + 1 month" is still in the future and the rule would leave the date unchanged; a receipt
  *    dated today is the one case where approving visibly moves Last renewal date (next renewal becomes T + 1 month).
@@ -42,10 +42,10 @@ export function buildSeedProposals(set: SeedSet, today: PlainDate): SeedProposal
       name: "NoteForge",
       amountCents: 1200,
       currency: "USD",
-      billingCycle: "monthly",
+      billingCycle: null, // the billing page does not state the cycle: one question for the tester
       lastRenewalDate: p1Date,
       cancelUrl: "https://noteforge.example/billing",
-      fieldConfidence: { amountCents: "high", billingCycle: "medium", category: "low" },
+      fieldConfidence: { amountCents: "high", category: "low" },
     },
   };
   if (set === "starter") return [p1];

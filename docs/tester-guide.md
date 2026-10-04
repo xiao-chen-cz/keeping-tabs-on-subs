@@ -20,7 +20,7 @@ If you only want a look around first, the link plus `/demo` shows a read-only sa
 
 **3. Change the notice period, then cancel it.** Open the subscription you just added and edit it. Give it a different notice period (days before renewal you need to cancel by) and watch the cancel-by date move. Then open it again and tap "Mark as cancelled": enter the date, how you cancelled (a made-up confirmation number is fine) and, if you like, an "access until" date. It should move to an "Ending" group, and the subscription page now shows a History entry with what you entered. "Reopen" brings it back.
 
-**4. Review a proposed entry.** The list shows a "Review (1)" button. Open it, read what the app picked up, answer any question it asks (the form below it is pre-filled; you can pick a category there) and approve the entry. It should now appear in your list. (Rejecting it instead leaves the list unchanged.)
+**4. Review a proposed entry.** The list shows a "Review (1)" button. Open it, read what the app picked up, answer the question it asks (the billing page it read did not say how often you pay), check the pre-filled form below and pick a category and approve the entry. It should now appear in your list. (Rejecting it instead leaves the list unchanged.)
 
 ## What it does not do yet
 
