@@ -8,6 +8,7 @@
   --mid: #6b7889;
   --line: #dde3e8;
   --light: #f5f7f8;
+  --chip: #e8ecf0;
   --primary: #0b435e;
   --primary-dark: #072e42;
   --primary-light: #e8f1f5;
@@ -33,6 +34,7 @@
     --mid: #9aa8b6;
     --line: #24323d;
     --light: #16242e;
+    --chip: #1f303c;
     --primary: #1c6285;
     --primary-dark: #154e6b;
     --primary-light: #12303f;
@@ -58,6 +60,7 @@
   --color-mid: var(--mid);
   --color-line: var(--line);
   --color-light: var(--light);
+  --color-chip: var(--chip);
   --color-primary: var(--primary);
   --color-primary-dark: var(--primary-dark);
   --color-primary-light: var(--primary-light);
@@ -85,6 +88,12 @@ body {
 }
 
 @layer components {
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
   .btn-primary {
     @apply inline-flex min-h-11 items-center justify-center rounded-control border px-5 text-[15px] font-medium disabled:opacity-60 border-primary bg-primary text-on-primary active:bg-primary-dark;
   }

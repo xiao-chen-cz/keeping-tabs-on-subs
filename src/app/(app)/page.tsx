@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { RenewalsList } from "@/components/renewals-list";
 import { requireUser } from "@/lib/dal/auth";
@@ -6,12 +7,18 @@ import { getProfile } from "@/lib/dal/profile";
 import { listSubscriptions } from "@/lib/dal/subscriptions";
 import { todayIn } from "@/lib/dates/plain-date";
 import { computeSubscription } from "@/lib/domain/compute";
+import { listHref, parseListFilters } from "@/lib/domain/filters";
+import { TABS_COOKIE, tabsEnabledFrom } from "@/lib/tabs-pref";
 import { totalsByCurrency } from "@/lib/domain/totals";
 import { groupAndSort } from "@/lib/domain/upcoming";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
   await requireUser();
-  const { show } = await searchParams;
+  const sp = await searchParams;
+  const { show } = sp;
+  const filters = parseListFilters(sp);
+  const tabsEnabled = tabsEnabledFrom((await cookies()).get(TABS_COOKIE)?.value);
+  const linkFilters = { cat: tabsEnabled ? filters.category : null, q: filters.q, scope: filters.scope };
   const showArchived = show === "cancelled";
 
   const [profile, subscriptions, pendingCount] = await Promise.all([
@@ -38,10 +45,13 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         addHref="/subscriptions/new"
         showArchived={showArchived}
         alertOffsets={profile.reminderOffsets}
+        filters={filters}
+        tabsEnabled={tabsEnabled}
+        basePath="/"
       />
       {groups.archived.length > 0 && (
         <div className="pb-24">
-          <Link href={showArchived ? "/" : "/?show=cancelled"} className="link inline-flex min-h-10 items-center text-sm">
+          <Link href={listHref("/", { ...linkFilters, showCancelled: !showArchived })} className="link inline-flex min-h-10 items-center text-sm">
             {showArchived ? "Hide cancelled" : "Show cancelled"}
           </Link>
         </div>

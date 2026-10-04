@@ -1,6 +1,19 @@
 import type { ComputedSubscription, SubscriptionCore } from "@/lib/domain/types";
 import type { CurrencyTotals } from "@/lib/domain/totals";
 import { dueSoon } from "@/lib/domain/alerts";
+import {
+  applyBaseFilters,
+  applyFilters,
+  categoryTabs,
+  isFiltered,
+  listHref,
+  NO_CATEGORY,
+  type Filterable,
+  type ListFilters,
+} from "@/lib/domain/filters";
+import { totalsByCurrency } from "@/lib/domain/totals";
+import { CategoryTabs, TabsSwitch } from "./category-tabs";
+import { FilterBar } from "./filter-bar";
 import { DueSoon } from "./due-soon";
 import { EndingRow } from "./ending-row";
 import { RenewalRow } from "./renewal-row";
@@ -8,7 +21,7 @@ import { TotalsCard } from "./totals-card";
 
 type Row<T extends SubscriptionCore> = ComputedSubscription<T>;
 
-export interface RenewalsListProps<T extends SubscriptionCore> {
+export interface RenewalsListProps<T extends SubscriptionCore & Filterable> {
   groups: { upcoming: Row<T>[]; ending: Row<T>[]; archived: Row<T>[] };
   totals: CurrencyTotals;
   /** Omit for a read-only view (public demo): rows are then not links. */
@@ -18,6 +31,12 @@ export interface RenewalsListProps<T extends SubscriptionCore> {
   addHref?: string;
   /** Alert offsets (days before cancel-by) for the Due soon section; omit to hide it. */
   alertOffsets?: number[];
+  /** Omit to hide the tabs and filter bar. Totals then come from `totals`. */
+  filters?: ListFilters;
+  /** Category tabs on or off (the `kts_tabs` cookie). Off ignores `filters.category`. Default on. */
+  tabsEnabled?: boolean;
+  /** Path of the list page, for tab / clear links and the filter form. Default "/". */
+  basePath?: string;
 }
 
 function SectionHeading({ id, count, children }: { id: string; count: number; children: string }) {
@@ -33,27 +52,58 @@ function SectionHeading({ id, count, children }: { id: string; count: number; ch
   );
 }
 
-export function RenewalsList<T extends SubscriptionCore>({
+export function RenewalsList<T extends SubscriptionCore & Filterable>({
   groups,
   totals,
   hrefFor,
   showArchived = false,
   addHref,
   alertOffsets,
+  filters,
+  tabsEnabled = true,
+  basePath = "/",
 }: RenewalsListProps<T>) {
-  const { ending, archived } = groups;
-  // Rows shown under Due soon are not repeated under Upcoming.
+  // Due soon is never filtered. Everything else (lists, tab counts, totals) follows the filters.
+  const f: ListFilters | null = filters ? { ...filters, category: tabsEnabled ? filters.category : null } : null;
   const dueRows = alertOffsets ? new Set(dueSoon(groups.upcoming, alertOffsets).map((d) => d.row)) : null;
-  const upcoming = dueRows ? groups.upcoming.filter((r) => !dueRows.has(r)) : groups.upcoming;
-  const hasDue = dueRows !== null && dueRows.size > 0;
-  const empty = upcoming.length === 0 && !hasDue && ending.length === 0 && !(showArchived && archived.length > 0);
+  const keepAll = <R extends { input: Filterable }>(rows: R[]) => (f ? applyFilters(rows, f) : rows);
+  const filteredUpcomingAll = keepAll(groups.upcoming);
+  // Rows shown under Due soon are not repeated under Upcoming.
+  const upcoming = dueRows ? filteredUpcomingAll.filter((r) => !dueRows.has(r)) : filteredUpcomingAll;
+  const ending = keepAll(groups.ending);
+  const archived = keepAll(groups.archived);
+  const filtered = f !== null && isFiltered(f);
+  const shownTotals = filtered ? totalsByCurrency(filteredUpcomingAll) : totals;
+  const totalsLabel = f && filtered
+    ? [
+        f.category === NO_CATEGORY ? "No category" : f.category,
+        f.scope && f.scope.charAt(0).toUpperCase() + f.scope.slice(1),
+        f.q && `“${f.q}”`,
+        "total",
+      ].filter(Boolean).join(" · ")
+    : undefined;
+  const unfilteredEmpty =
+    groups.upcoming.length === 0 && groups.ending.length === 0 && !(showArchived && groups.archived.length > 0);
+    const nothingMatches =
+    filtered && upcoming.length === 0 && ending.length === 0 && !(showArchived && archived.length > 0);
+  const hrefWith = (over: { cat?: string | null }) =>
+    listHref(basePath, {
+      cat: "cat" in over ? over.cat : f?.category,
+      q: f?.q,
+      scope: f?.scope,
+      showCancelled: showArchived,
+    });
+  const currentHref = hrefWith({});
+  const tabRows = f ? [...applyBaseFilters(groups.upcoming, f).filter((r) => !dueRows?.has(r)), ...applyBaseFilters(groups.ending, f)] : [];
+  const clearHref = filtered ? listHref(basePath, { showCancelled: showArchived, cat: null }) : null;
   const key = (r: Row<T>, i: number) => `${r.input.name}-${i}`;
 
   return (
     <div className={`space-y-5 ${addHref ? "pb-20" : "pb-8"}`}>
-      <TotalsCard totals={totals} />
+      {/* Without filters the totals lead the page; with filters they sit under the controls that change them. */}
+      {!f && <TotalsCard totals={shownTotals} label={totalsLabel} />}
 
-      {empty ? (
+      {unfilteredEmpty ? (
         <section className="py-10 text-center">
           <p className="text-lg font-semibold">No subscriptions yet</p>
           {addHref && (
@@ -65,6 +115,35 @@ export function RenewalsList<T extends SubscriptionCore>({
       ) : (
         <>
           {alertOffsets && <DueSoon rows={groups.upcoming} offsets={alertOffsets} hrefFor={hrefFor} />}
+          {f &&
+            (tabsEnabled ? (
+              <CategoryTabs tabs={categoryTabs(tabRows)} active={f.category} hrefFor={(cat) => hrefWith({ cat })} currentHref={currentHref} />
+            ) : (
+              <div className="flex justify-end">
+                <TabsSwitch on={false} currentHref={currentHref} />
+              </div>
+            ))}
+          {f && (
+            <FilterBar
+              action={basePath}
+              q={f.q}
+              scope={f.scope}
+              cat={f.category}
+              showCancelled={showArchived}
+              clearHref={clearHref}
+            />
+          )}
+          {f && <TotalsCard totals={shownTotals} label={totalsLabel} />}
+          {nothingMatches && (
+            <section className="py-8 text-center">
+              <p className="font-semibold">Nothing matches these filters.</p>
+              {clearHref && (
+                <a href={clearHref} className="link mt-2 inline-flex min-h-11 items-center">
+                  Clear
+                </a>
+              )}
+            </section>
+          )}
           {upcoming.length > 0 && (
             <section aria-labelledby="h-upcoming">
               <SectionHeading id="h-upcoming" count={upcoming.length}>Upcoming</SectionHeading>
