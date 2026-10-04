@@ -6,7 +6,7 @@ import type { SubscriptionDraft } from "./types";
 const draft = (over: Partial<SubscriptionDraft> = {}): SubscriptionDraft => ({
   name: "NoteForge", amountCents: 1200, currency: "USD", billingCycle: "monthly",
   lastRenewalDate: "2026-11-01", trialEnds: null, cancelNoticeDays: null, regularPriceCents: null,
-  promoEnds: null, accessUntil: null, vendor: null, plan: null, category: null, paymentMethod: null,
+  promoEnds: null, accessUntil: null, vendor: null, plan: null, accountLabel: null, category: null, paymentMethod: null,
   scope: null, confidence: null, cancelUrl: null, notes: null, fieldConfidence: {},
   updatesSubscriptionId: null, ...over,
 });
@@ -51,6 +51,21 @@ describe("matchExisting", () => {
   });
   it("returns the first candidate sorted by name", () => {
     expect(matchExisting(draft({ name: "CodePilot Pro", vendor: "CodePilot" }), [subs[1], subs[0]])).toBe("a");
+  });
+  it("does not match a different non-null account label (case-insensitive, trimmed)", () => {
+    const two = [
+      { id: "a", name: "CodePilot Pro", vendor: null, currency: "USD" as const, status: "confirmed" as const, accountLabel: "me@example.com" },
+      { id: "b", name: "CodePilot Pro", vendor: null, currency: "USD" as const, status: "confirmed" as const, accountLabel: "work@example.com" },
+    ];
+    expect(matchExisting(draft({ name: "CodePilot Pro", accountLabel: "WORK@example.com " }), two)).toBe("b");
+    expect(matchExisting(draft({ name: "CodePilot Pro", accountLabel: "other@example.com" }), two)).toBeNull();
+    expect(matchExisting(draft({ name: "CodePilot Pro", accountLabel: "me@example.com" }), [two[1], two[0]])).toBe("a");
+  });
+  it("matches when either side has no account label", () => {
+    const labelled = [{ ...subs[0], accountLabel: "me@example.com" }];
+    expect(matchExisting(draft({ name: "CodePilot Pro", accountLabel: null }), labelled)).toBe("a");
+    expect(matchExisting(draft({ name: "CodePilot Pro", accountLabel: "me@example.com" }), [subs[0]])).toBe("a");
+    expect(matchExisting(draft({ name: "CodePilot Pro", accountLabel: "me@example.com" }), [{ ...subs[0], accountLabel: null }])).toBe("a");
   });
   it("ignores cancelled subscriptions and empty names", () => {
     expect(matchExisting(draft({ name: "Gone", currency: "EUR" }), subs)).toBeNull();

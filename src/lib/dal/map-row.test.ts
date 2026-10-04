@@ -22,6 +22,7 @@ const row: SubscriptionRow = {
   confidence: "high",
   vendor: "Notely Inc",
   plan: null,
+  account_label: "me@example.com",
   cancel_url: null,
   capture_id: null,
   notes: null,
@@ -50,6 +51,7 @@ describe("rowToSubscription", () => {
       paymentMethod: null,
       source: "seed",
     });
+    expect(s.accountLabel).toBe("me@example.com");
     expect(s).not.toHaveProperty("user_id");
     expect(s).not.toHaveProperty("userId");
   });

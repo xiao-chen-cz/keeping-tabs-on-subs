@@ -6,7 +6,7 @@ import type { Subscription, SubscriptionDraft } from "@/lib/domain/types";
 export const blankDraft: SubscriptionDraft = {
   name: null, amountCents: null, currency: null, billingCycle: null, lastRenewalDate: null,
   trialEnds: null, cancelNoticeDays: null, regularPriceCents: null, promoEnds: null, accessUntil: null,
-  vendor: null, plan: null, category: null, paymentMethod: null, scope: null, confidence: null,
+  vendor: null, plan: null, accountLabel: null, category: null, paymentMethod: null, scope: null, confidence: null,
   cancelUrl: null, notes: null, fieldConfidence: {}, updatesSubscriptionId: null,
 };
 
@@ -31,6 +31,7 @@ export function existingSub(over: Partial<Subscription> = {}): Subscription {
     id: "s1",
     vendor: "CodePilot",
     plan: "Pro",
+    accountLabel: null,
     category: "Software",
     paymentMethod: null,
     scope: "business",

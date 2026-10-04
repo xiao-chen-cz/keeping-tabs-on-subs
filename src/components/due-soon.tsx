@@ -3,16 +3,18 @@ import { dueSoon } from "@/lib/domain/alerts";
 import type { ComputedSubscription, Currency, SubscriptionCore } from "@/lib/domain/types";
 import { formatMoney } from "@/lib/domain/totals";
 import { formatDay, relativeDays } from "./format";
-import { MetaLine, RowShell } from "./renewal-row";
+import { accountPart, MetaLine, RowShell } from "./renewal-row";
 
 type Row<T extends SubscriptionCore> = ComputedSubscription<T>;
 
-export interface DueSoonProps<T extends SubscriptionCore & { keptForCancelBy?: string | null }> {
+export interface DueSoonProps<T extends SubscriptionCore & { keptForCancelBy?: string | null; accountLabel?: string | null }> {
   rows: Row<T>[];
   /** Alert offsets in days before cancel-by (user setting, default [3, 1, 0]). */
   offsets: number[];
   /** Omit for read-only rows. */
   hrefFor?: (row: Row<T>) => string;
+  /** Names shared by several rows (duplicateNames): their account label is shown. */
+  duplicates?: ReadonlySet<string>;
 }
 
 const money = (cents: number) => (cents / 100).toFixed(2);
@@ -35,10 +37,11 @@ function amountPart(row: Row<SubscriptionCore>, alert: DueAlert) {
 }
 
 /** "Due soon" section for the top of the list. Hidden when nothing is due. */
-export function DueSoon<T extends SubscriptionCore & { keptForCancelBy?: string | null }>({
+export function DueSoon<T extends SubscriptionCore & { keptForCancelBy?: string | null; accountLabel?: string | null }>({
   rows,
   offsets,
   hrefFor,
+  duplicates,
 }: DueSoonProps<T>) {
   const due = dueSoon(rows, offsets);
   if (due.length === 0) return null;
@@ -68,6 +71,7 @@ export function DueSoon<T extends SubscriptionCore & { keptForCancelBy?: string 
                   <span key="c">
                     cancel by {formatDay(alert.cancelBy)}
                   </span>,
+                  accountPart(duplicates, row.input),
                 ]}
               />
               {/* TODO(D21): Keep / Cancelled one-tap buttons once the server action exists. */}

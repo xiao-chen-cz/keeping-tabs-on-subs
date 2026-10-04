@@ -85,6 +85,7 @@ function buildRow(spec: SeedSpec, today: PlainDate): SeedRow {
     accessUntil: spec.accessUntilOffset === null ? null : addDays(today, spec.accessUntilOffset),
     vendor: null,
     plan: null,
+    accountLabel: spec.accountLabel ?? null,
     category: spec.category,
     paymentMethod: spec.paymentMethod,
     scope: spec.scope,

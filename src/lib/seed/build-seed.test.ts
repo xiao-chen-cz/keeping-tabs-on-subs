@@ -42,7 +42,7 @@ describe("tier 1: snapshot at 2026-10-02 (seed-data.md answer key)", () => {
 
   it("full set: order, tags, totals", () => {
     const v = view("full", T);
-    expect(v.rows).toHaveLength(12);
+    expect(v.rows).toHaveLength(13);
     const up = v.groups.upcoming;
     expect(names(up).slice(0, 5)).toEqual(["PixelStock", "ChatPal Plus", "BudgetBuddy", "The Daily Ledger", "VoiceDraft Pro"]);
     expect(up.slice(1, 5).map((r) => r.computed.daysUntilCancelBy)).toEqual([-2, 2, 3, 3]);
@@ -53,7 +53,18 @@ describe("tier 1: snapshot at 2026-10-02 (seed-data.md answer key)", () => {
     expect(v.groups.archived).toEqual([]);
     expect(names(up)).not.toContain("FitClub Online");
     expect(money(v.totals, "EUR")).toEqual(["€89.79", "€1,077.51"]);
-    expect(money(v.totals, "USD")).toEqual(["$30.00", "$360.00"]);
+    expect(money(v.totals, "USD")).toEqual(["$50.00", "$600.00"]);
+  });
+
+  it("gives the second CodePilot Pro (#13) its own account, +12 days, in the order after VoiceDraft Pro", () => {
+    const v = view("full", T);
+    const cp = v.rows.filter((r) => r.input.name === "CodePilot Pro");
+    expect(cp.map((r) => r.input.accountLabel)).toEqual(["me@example.com", "work@example.com"]);
+    expect(cp.map((r) => r.computed.daysUntilRenewal)).toEqual([27, 12]);
+    expect(cp.map((r) => r.computed.daysUntilCancelBy)).toEqual([24, 9]);
+    expect(v.rows.filter((r) => r.input.accountLabel !== null)).toHaveLength(2);
+    expect(buildSeed("starter", T).filter((r) => r.accountLabel !== null)).toHaveLength(1);
+    expect(buildSeed("starter", T)).toHaveLength(4);
   });
 
   it("derives the documented edge-row anchors", () => {
@@ -65,9 +76,9 @@ describe("tier 1: snapshot at 2026-10-02 (seed-data.md answer key)", () => {
   });
 });
 
-// Expected relative order of the 11 non-Cloudly rows (derived from the offsets in seed-data.md).
+// Expected relative order of the 12 non-Cloudly rows (CodePilot Pro twice: #13 at +12, then #1 at +27) (derived from the offsets in seed-data.md).
 const ORDER_WITHOUT_CLOUDLY = [
-  "PixelStock", "ChatPal Plus", "BudgetBuddy", "The Daily Ledger", "VoiceDraft Pro", "StreamBox Prime",
+  "PixelStock", "ChatPal Plus", "BudgetBuddy", "The Daily Ledger", "VoiceDraft Pro", "CodePilot Pro", "StreamBox Prime",
   "EuroServer Hosting", "CodePilot Pro", "SafeHome Insurance", "Notely Teams",
 ];
 const NEXT_OFFSETS: Record<string, number> = {
@@ -97,10 +108,10 @@ describe.each(["2026-10-31", "2027-02-28", "2028-02-29", "2027-01-01", "2026-12-
       expect(v.groups.upcoming[0]?.input.name).toBe("PixelStock");
       expect(names(v.groups.upcoming)).not.toContain("FitClub Online");
       expect(names(v.groups.ending)).toEqual(["FitClub Online"]);
-      expect(v.groups.upcoming).toHaveLength(11);
+      expect(v.groups.upcoming).toHaveLength(12);
     });
 
-    it("keeps the 11 other rows in their documented relative order", () => {
+    it("keeps the 12 other rows in their documented relative order", () => {
       expect(names(v.groups.upcoming).filter((n) => n !== "Cloudly Storage")).toEqual(ORDER_WITHOUT_CLOUDLY);
     });
 

@@ -16,6 +16,22 @@ function errorsOf(values: Record<string, string>, mode: "create" | "edit") {
   return r.fieldErrors;
 }
 
+describe("account_label", () => {
+  const base = { name: "X", amount: "1", currency: "EUR", billing_cycle: "monthly", last_renewal_date: "2026-10-01" };
+  it("is optional, trimmed, and null when blank", () => {
+    const blank = parseSubscriptionForm({ ...base, account_label: "  " }, "create");
+    expect(blank.ok && blank.data.account_label).toBeNull();
+    const set = parseSubscriptionForm({ ...base, account_label: "  me@example.com " }, "create");
+    expect(set.ok && set.data.account_label).toBe("me@example.com");
+  });
+  it("rejects more than 200 characters", () => {
+    const r = parseSubscriptionForm({ ...base, account_label: "a".repeat(201) }, "create");
+    expect(r.ok).toBe(false);
+    expect(!r.ok && r.fieldErrors.account_label).toBeTruthy();
+    expect(parseSubscriptionForm({ ...base, account_label: "a".repeat(200) }, "create").ok).toBe(true);
+  });
+});
+
 describe("parseSubscriptionForm", () => {
   it("accepts a full create and maps to columns", () => {
     const r = parseSubscriptionForm(full, "create");

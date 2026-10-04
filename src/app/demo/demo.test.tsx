@@ -50,7 +50,7 @@ describe("demo list", () => {
 describe("demo detail", () => {
   it("finds rows by key and rejects unknown keys", () => {
     expect(demoRow("8", TODAY)?.input.name).toBe("PixelStock");
-    expect(demoRow("13", TODAY)).toBeUndefined();
+    expect(demoRow("14", TODAY)).toBeUndefined();
     expect(demoRow("abc", TODAY)).toBeUndefined();
   });
 

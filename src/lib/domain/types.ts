@@ -89,6 +89,8 @@ export interface Subscription extends SubscriptionCore {
   id: string;
   vendor: string | null;
   plan: string | null;
+  /** Optional login email or username used with the vendor. Never a password. */
+  accountLabel: string | null;
   category: string | null;
   paymentMethod: string | null;
   scope: Scope | null;

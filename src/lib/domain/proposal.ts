@@ -30,23 +30,29 @@ export function missingRequired(
 const norm = (v: string | null | undefined): string | null =>
   hasText(v) ? v.trim().toLowerCase().replace(/\s+/g, " ") : null;
 
-type Candidate = Pick<Subscription, "id" | "name" | "vendor" | "currency" | "status">;
+type Candidate = Pick<Subscription, "id" | "name" | "vendor" | "currency" | "status"> &
+  Partial<Pick<Subscription, "accountLabel">>;
 
 /**
  * Id of the first non-cancelled subscription (sorted by name) whose vendor or name equals the draft's
  * vendor or name (either side may match on either field) (case-insensitive, trimmed, spaces collapsed) in the same currency; null when none.
+ * A draft account label and a different non-null candidate label are not a match (either side null matches).
  * The amount does not matter: a different amount is a price change. A null draft currency matches any.
  */
 export function matchExisting(
-  draft: Pick<SubscriptionDraft, "name" | "vendor" | "currency">,
+  draft: Pick<SubscriptionDraft, "name" | "vendor" | "currency"> & Partial<Pick<SubscriptionDraft, "accountLabel">>,
   subscriptions: readonly Candidate[],
 ): string | null {
   const wanted = new Set([norm(draft.vendor), norm(draft.name)].filter((k): k is string => k !== null));
   if (wanted.size === 0) return null;
+  const wantedAccount = norm(draft.accountLabel);
   const sorted = [...subscriptions].sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
   for (const s of sorted) {
     if (s.status === "cancelled") continue;
     if (draft.currency !== null && s.currency !== draft.currency) continue;
+    // Two different logins at the same vendor are two subscriptions. A missing label on either side still matches.
+    const theirs = norm(s.accountLabel);
+    if (wantedAccount !== null && theirs !== null && theirs !== wantedAccount) continue;
     for (const k of [norm(s.vendor), norm(s.name)]) if (k !== null && wanted.has(k)) return s.id;
   }
   return null;

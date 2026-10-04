@@ -19,7 +19,7 @@ export interface SeedProposal {
 const blank: SubscriptionDraft = {
   name: null, amountCents: null, currency: null, billingCycle: null, lastRenewalDate: null,
   trialEnds: null, cancelNoticeDays: null, regularPriceCents: null, promoEnds: null, accessUntil: null,
-  vendor: null, plan: null, category: null, paymentMethod: null, scope: null, confidence: null,
+  vendor: null, plan: null, accountLabel: null, category: null, paymentMethod: null, scope: null, confidence: null,
   cancelUrl: null, notes: null, fieldConfidence: {}, updatesSubscriptionId: null,
 };
 
@@ -63,6 +63,7 @@ export function buildSeedProposals(set: SeedSet, today: PlainDate): SeedProposal
         ...blank,
         name: "CodePilot Pro",
         vendor: "CodePilot",
+        accountLabel: "me@example.com",
         amountCents: 2500,
         currency: "USD",
         billingCycle: "monthly",

@@ -43,6 +43,7 @@ function formToColumns(d: SubscriptionFormData): WritableColumns {
     confidence: d.confidence,
     vendor: d.vendor,
     plan: d.plan,
+    account_label: d.account_label,
     cancel_url: d.cancel_url,
     notes: d.notes,
   };

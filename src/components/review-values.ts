@@ -45,6 +45,7 @@ export function proposalFormValues(proposal: Proposal, existing: ExistingForRevi
   set("confidence", d.confidence);
   set("vendor", d.vendor);
   set("plan", d.plan);
+  set("account_label", d.accountLabel);
   set("cancel_url", d.cancelUrl);
   set("notes", d.notes);
   return { ...base, ...over };
@@ -106,7 +107,7 @@ export function confidenceFlags(
 }
 
 export interface ProposalChange {
-  key: "amount" | "cycle" | "billingDate";
+  key: "amount" | "cycle" | "billingDate" | "account";
   label: string;
   from: string;
   to: string;
@@ -144,6 +145,16 @@ export function proposalChanges(proposal: Proposal, existing: Subscription): Pro
       label: "Billing date",
       from: existing.lastRenewalDate ? formatDay(existing.lastRenewalDate) : "unknown",
       to: formatDay(d.lastRenewalDate),
+      tone: "neutral",
+    });
+  }
+  if (d.accountLabel !== null && d.accountLabel.trim() !== "" &&
+    d.accountLabel.trim().toLowerCase() !== (existing.accountLabel ?? "").trim().toLowerCase()) {
+    out.push({
+      key: "account",
+      label: "Account",
+      from: existing.accountLabel ?? "none",
+      to: d.accountLabel,
       tone: "neutral",
     });
   }

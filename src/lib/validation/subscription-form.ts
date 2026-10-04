@@ -28,6 +28,7 @@ export interface SubscriptionFormData {
   confidence: (typeof CONFIDENCES)[number] | null;
   vendor: string | null;
   plan: string | null;
+  account_label: string | null;
   cancel_url: string | null;
   notes: string | null;
 }
@@ -138,6 +139,7 @@ const fieldsSchema = z.object({
   confidence: enumField(CONFIDENCES, "Choose a confidence"),
   vendor: text,
   plan: text,
+  account_label: z.preprocess(trimmed, z.string().max(200, "Keep it under 200 characters").optional()),
   cancel_url: cancelUrl,
   notes: text,
 });
@@ -217,6 +219,7 @@ export function parseSubscriptionForm(
     confidence: d.confidence ?? null,
     vendor: d.vendor ?? null,
     plan: d.plan ?? null,
+    account_label: d.account_label ?? null,
     cancel_url: d.cancel_url ?? null,
     notes: d.notes ?? null,
   };

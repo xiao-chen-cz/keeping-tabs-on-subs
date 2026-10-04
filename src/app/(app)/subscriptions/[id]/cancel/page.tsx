@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { CancelIntro } from "@/components/cancel-intro";
 import { CancelForm } from "@/components/cancel-form";
 import { requireUser } from "@/lib/dal/auth";
 import { getProfile } from "@/lib/dal/profile";
@@ -21,17 +22,7 @@ export default async function CancelSubscriptionPage({ params, searchParams }: P
   return (
     <main className="flex flex-1 flex-col gap-3">
       <h1 className="font-heading text-2xl font-semibold text-primary-ink">Cancel {subscription.name}</h1>
-      <p className="text-sm text-mid">
-        This records that you cancelled with the vendor. It does not cancel anything for you.
-        {subscription.cancelUrl && (
-          <>
-            {" "}
-            <a href={subscription.cancelUrl} target="_blank" rel="noopener noreferrer" className="link">
-              Open the vendor&apos;s cancel link
-            </a>
-          </>
-        )}
-      </p>
+      <CancelIntro cancelUrl={subscription.cancelUrl} accountLabel={subscription.accountLabel} />
       <CancelForm
         action={cancelSubscriptionAction.bind(null, id)}
         today={today}

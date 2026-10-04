@@ -6,7 +6,7 @@ const row: ProposalRow = {
   id: "p1", user_id: "u1", capture_id: "c1", status: "pending", name: "NoteForge", amount: 12,
   currency: "USD", billing_cycle: "monthly", last_renewal_date: "2026-10-31", trial_ends: null,
   cancel_notice_days: null, regular_price: null, promo_ends: null, category_id: "cat1",
-  payment_method_id: null, scope: null, confidence: null, vendor: null, plan: null,
+  payment_method_id: null, scope: null, confidence: null, vendor: null, plan: null, account_label: null,
   cancel_url: "https://noteforge.example/billing", notes: null,
   field_confidence: { amountCents: "high", category: "low", bogus: "certain", other: 3 },
   updates_subscription_id: null, subscription_id: null, decided_at: null, created_at: "2026-10-03T08:00:00Z",

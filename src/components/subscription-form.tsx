@@ -321,6 +321,16 @@ export function SubscriptionForm({
         <input {...bind("plan")} type="text" className={ic("plan")} />
       </Field>
 
+      <Field
+        name="account_label"
+        missing={miss("account_label")}
+        label="Account (optional)"
+        hint="The login email or username you use with this vendor. Never a password."
+        errors={errors.account_label}
+      >
+        <input {...bind("account_label")} type="text" autoComplete="off" className={ic("account_label")} />
+      </Field>
+
       <Field name="cancel_url" missing={miss("cancel_url")} label="Cancel link" errors={errors.cancel_url}>
         <input {...bind("cancel_url")} type="url" inputMode="url" placeholder="https://" className={ic("cancel_url")} />
       </Field>

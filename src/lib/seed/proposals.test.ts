@@ -33,6 +33,9 @@ describe("buildSeedProposals", () => {
     const hit = matchExisting(p2.draft, subs);
     expect(hit).toBe(subs.find((s) => s.key === p2.updatesSeedKey)!.id);
     expect(subs.find((s) => s.id === hit)!.name).toBe("CodePilot Pro");
+    expect(p2.draft.accountLabel).toBe("me@example.com");
+    expect(p2.capture.rawText(p2.captureDate)).toContain("Account: me@example.com");
+    expect(matchExisting(p2.draft, [subs.find((s) => s.key === 13)!])).toBeNull(); // #13 is the work login
     expect(p2.draft.amountCents).toBe(2500);
     expect(subs.find((s) => s.key === 1)!.amountCents).toBe(2000);
     expect(p2.capture.rawText(p2.captureDate)).toContain("Amount: $25.00 USD");

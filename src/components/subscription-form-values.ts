@@ -19,6 +19,7 @@ export const FORM_FIELDS = [
   "confidence",
   "vendor",
   "plan",
+  "account_label",
   "cancel_url",
   "notes",
 ] as const;
@@ -61,6 +62,7 @@ export function formValuesFromSubscription(
     confidence: s.confidence ?? "",
     vendor: s.vendor ?? "",
     plan: s.plan ?? "",
+    account_label: s.accountLabel ?? "",
     cancel_url: s.cancelUrl ?? "",
     notes: s.notes ?? "",
   };

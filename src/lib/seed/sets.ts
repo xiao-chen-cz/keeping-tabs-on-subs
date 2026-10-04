@@ -1,4 +1,4 @@
-// The 12 demo subscriptions from specs/seed-data.md as offset specs (days from today, T).
+// The 13 demo subscriptions from specs/seed-data.md as offset specs (days from today, T).
 // Fictional data only. Proposals P1-P3 arrive with the capture milestone (D16-20).
 import type { BillingCycle, Confidence, Currency, Scope } from "@/lib/domain/types";
 
@@ -29,6 +29,7 @@ export type SeedSpec = {
   confidence: Confidence;
   paymentMethod: string | null;
   notes: string | null;
+  accountLabel?: string | null;
 };
 
 export const SEED_CATEGORIES = [
@@ -60,7 +61,8 @@ const base = {
 
 export const SEED_SPECS: readonly SeedSpec[] = [
   { ...base, key: 1, name: "CodePilot Pro", amountCents: 2000, currency: "USD", cycle: "monthly",
-    dates: { kind: "next", offset: 27 }, category: "AI", scope: "business", paymentMethod: BUSINESS },
+    dates: { kind: "next", offset: 27 }, category: "AI", scope: "business", paymentMethod: BUSINESS,
+    accountLabel: "me@example.com" },
   { ...base, key: 2, name: "Notely Teams", amountCents: 24000, currency: "EUR", cycle: "yearly",
     dates: { kind: "next", offset: 195 }, cancelNoticeDays: 30, category: "Software / SaaS",
     scope: "business", paymentMethod: BUSINESS },
@@ -93,6 +95,10 @@ export const SEED_SPECS: readonly SeedSpec[] = [
   { ...base, key: 12, name: "ChatPal Plus", amountCents: 2300, currency: "EUR", cycle: "monthly",
     dates: { kind: "next", offset: 1 }, category: "AI", scope: "business", confidence: "low",
     paymentMethod: null, notes: "Looks re-activated, confirm" },
+  // Same vendor as #1, a second login: shows the Account label in the list and keeps P2 matching #1.
+  { ...base, key: 13, name: "CodePilot Pro", amountCents: 2000, currency: "USD", cycle: "monthly",
+    dates: { kind: "next", offset: 12 }, category: "AI", scope: "business", paymentMethod: BUSINESS,
+    accountLabel: "work@example.com" },
 ];
 
 export const STARTER_KEYS: readonly number[] = [1, 2, 3, 4];

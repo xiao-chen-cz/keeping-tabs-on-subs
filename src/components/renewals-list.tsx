@@ -11,6 +11,7 @@ import {
   type Filterable,
   type ListFilters,
 } from "@/lib/domain/filters";
+import { duplicateNames } from "@/lib/domain/duplicates";
 import { totalsByCurrency } from "@/lib/domain/totals";
 import { CategoryTabs, TabsSwitch } from "./category-tabs";
 import { FilterBar } from "./filter-bar";
@@ -21,7 +22,9 @@ import { TotalsCard } from "./totals-card";
 
 type Row<T extends SubscriptionCore> = ComputedSubscription<T>;
 
-export interface RenewalsListProps<T extends SubscriptionCore & Filterable> {
+type Accounted = { accountLabel?: string | null };
+
+export interface RenewalsListProps<T extends SubscriptionCore & Filterable & Accounted> {
   groups: { upcoming: Row<T>[]; ending: Row<T>[]; archived: Row<T>[] };
   totals: CurrencyTotals;
   /** Omit for a read-only view (public demo): rows are then not links. */
@@ -52,7 +55,7 @@ function SectionHeading({ id, count, children }: { id: string; count: number; ch
   );
 }
 
-export function RenewalsList<T extends SubscriptionCore & Filterable>({
+export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted>({
   groups,
   totals,
   hrefFor,
@@ -96,6 +99,8 @@ export function RenewalsList<T extends SubscriptionCore & Filterable>({
   const currentHref = hrefWith({});
   const tabRows = f ? [...applyBaseFilters(groups.upcoming, f).filter((r) => !dueRows?.has(r)), ...applyBaseFilters(groups.ending, f)] : [];
   const clearHref = filtered ? listHref(basePath, { showCancelled: showArchived, cat: null }) : null;
+  // Same name on several visible rows (any section, ignoring filters): show each row's account label.
+  const duplicates = duplicateNames([...groups.upcoming, ...groups.ending, ...(showArchived ? groups.archived : [])]);
   const key = (r: Row<T>, i: number) => `${r.input.name}-${i}`;
 
   return (
@@ -114,7 +119,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable>({
         </section>
       ) : (
         <>
-          {alertOffsets && <DueSoon rows={groups.upcoming} offsets={alertOffsets} hrefFor={hrefFor} />}
+          {alertOffsets && <DueSoon rows={groups.upcoming} offsets={alertOffsets} hrefFor={hrefFor} duplicates={duplicates} />}
           {f &&
             (tabsEnabled ? (
               <CategoryTabs tabs={categoryTabs(tabRows)} active={f.category} hrefFor={(cat) => hrefWith({ cat })} currentHref={currentHref} />
@@ -150,7 +155,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable>({
               <ul>
                 {upcoming.map((r, i) => (
                   <li key={key(r, i)}>
-                    <RenewalRow row={r} href={hrefFor?.(r)} />
+                    <RenewalRow row={r} href={hrefFor?.(r)} duplicates={duplicates} />
                   </li>
                 ))}
               </ul>
@@ -162,7 +167,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable>({
               <ul>
                 {ending.map((r, i) => (
                   <li key={key(r, i)}>
-                    <EndingRow row={r} href={hrefFor?.(r)} />
+                    <EndingRow row={r} href={hrefFor?.(r)} duplicates={duplicates} />
                   </li>
                 ))}
               </ul>
@@ -174,7 +179,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable>({
               <ul>
                 {archived.map((r, i) => (
                   <li key={key(r, i)}>
-                    <EndingRow row={r} href={hrefFor?.(r)} />
+                    <EndingRow row={r} href={hrefFor?.(r)} duplicates={duplicates} />
                   </li>
                 ))}
               </ul>

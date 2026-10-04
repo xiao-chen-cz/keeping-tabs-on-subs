@@ -97,3 +97,23 @@ describe("proposalChanges", () => {
     expect(proposalChanges(proposal({}), sub)).toEqual([]);
   });
 });
+
+describe("account label in review", () => {
+  const existing = { subscription: existingSub({ accountLabel: "me@example.com" }), categoryId: null, paymentMethodId: null };
+
+  it("overlays the proposal's account on the form values, and keeps the existing one when the proposal has none", () => {
+    expect(proposalFormValues(proposal({ name: "CodePilot Pro", accountLabel: "work@example.com" }), existing).account_label).toBe("work@example.com");
+    expect(proposalFormValues(proposal({ name: "CodePilot Pro" }), existing).account_label).toBe("me@example.com");
+    expect(proposalFormValues(proposal({ name: "New", accountLabel: "me@example.com" }), null).account_label).toBe("me@example.com");
+  });
+
+  it("reports an account change, not a same (case-insensitive) or missing label", () => {
+    const keys = (label: string | null) =>
+      proposalChanges(proposal({ accountLabel: label }), existing.subscription).map((c) => c.key);
+    expect(keys("work@example.com")).toEqual(["account"]);
+    expect(keys("ME@example.com")).toEqual([]);
+    expect(keys(null)).toEqual([]);
+    const c = proposalChanges(proposal({ accountLabel: "work@example.com" }), existing.subscription)[0];
+    expect([c.label, c.from, c.to]).toEqual(["Account", "me@example.com", "work@example.com"]);
+  });
+});

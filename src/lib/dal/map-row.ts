@@ -30,6 +30,7 @@ export function rowToSubscription(row: SubscriptionRow, lookups: NameLookups): S
     accessUntil: row.access_until,
     vendor: row.vendor,
     plan: row.plan,
+    accountLabel: row.account_label,
     category: row.category_id ? (lookups.categories.get(row.category_id) ?? null) : null,
     paymentMethod: row.payment_method_id
       ? (lookups.paymentMethods.get(row.payment_method_id) ?? null)

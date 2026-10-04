@@ -84,6 +84,7 @@ export function rowToProposal(row: ProposalRow, lookups: NameLookups): Proposal 
       accessUntil: null, // a capture never proposes a cancelled row
       vendor: row.vendor,
       plan: row.plan,
+      accountLabel: row.account_label,
       category: row.category_id ? (lookups.categories.get(row.category_id) ?? null) : null,
       paymentMethod: row.payment_method_id ? (lookups.paymentMethods.get(row.payment_method_id) ?? null) : null,
       scope: row.scope,

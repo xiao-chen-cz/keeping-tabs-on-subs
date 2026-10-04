@@ -42,6 +42,21 @@ describe("SubscriptionForm", () => {
     expect(screen.queryByText(/Enter a name/)).toBeNull();
   });
 
+  it("has an Account field with a hint, placed right after Plan, that is submitted", async () => {
+    const action = vi.fn<(p: SubscriptionFormState, f: FormData) => Promise<SubscriptionFormState>>(async () => ({ fieldErrors: {}, values: null }));
+    setup(action);
+    const account = screen.getByLabelText("Account (optional)") as HTMLInputElement;
+    expect(screen.getByText("The login email or username you use with this vendor. Never a password.")).toBeTruthy();
+    const plan = screen.getByLabelText("Plan");
+    expect(plan.compareDocumentPosition(account) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Name *"), { target: { value: "Demo Sub" } });
+    fireEvent.change(account, { target: { value: "me@example.com" } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Add subscription" }));
+    });
+    expect(action.mock.calls[0][1].get("account_label")).toBe("me@example.com");
+  });
+
   it("has no status control and no Cancelled option on create (D12)", () => {
     setup();
     expect(screen.queryByLabelText("Status")).toBeNull();

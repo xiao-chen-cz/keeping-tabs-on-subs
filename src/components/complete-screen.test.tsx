@@ -14,6 +14,7 @@ const sub: Subscription = {
   id: "px",
   vendor: null,
   plan: null,
+  accountLabel: null,
   category: null,
   paymentMethod: null,
   scope: null,

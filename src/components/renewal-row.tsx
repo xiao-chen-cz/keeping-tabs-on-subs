@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import type { ComputedSubscription, SubscriptionCore } from "@/lib/domain/types";
+import { accountToShow } from "@/lib/domain/duplicates";
 import { formatMoney } from "@/lib/domain/totals";
 import { formatDay, relativeDays } from "./format";
 import { Tag } from "./tag";
@@ -35,7 +36,24 @@ export function MetaLine({ parts }: { parts: ReactNode[] }) {
   );
 }
 
-export function RenewalRow<T extends SubscriptionCore>({ row, href }: { row: ComputedSubscription<T>; href?: string }) {
+type WithAccount = { accountLabel?: string | null };
+
+/** The account segment of the meta line (null unless the name is shared with another row). */
+export function accountPart(duplicates: ReadonlySet<string> | undefined, input: { name: string } & WithAccount): ReactNode {
+  const label = accountToShow(duplicates, input);
+  return label ? <span key="acct">{label}</span> : null;
+}
+
+export function RenewalRow<T extends SubscriptionCore & WithAccount>({
+  row,
+  href,
+  duplicates,
+}: {
+  row: ComputedSubscription<T>;
+  href?: string;
+  /** Names shared by several rows (duplicateNames); their account label is shown. */
+  duplicates?: ReadonlySet<string>;
+}) {
   const { input, computed: c } = row;
   const { amountCents, currency } = input;
   const amount =
@@ -84,7 +102,12 @@ export function RenewalRow<T extends SubscriptionCore>({ row, href }: { row: Com
         {c.tags.needsUpdate && <Tag kind="needsUpdate" />}
         {c.tags.trial && <Tag kind="trial" />}
       </div>
-      <MetaLine parts={c.tags.needsUpdate ? [amount, <span key="m">Missing renewal date or cycle</span>] : c.daysUntilRenewal === 0 ? [amount, ...chargedToday] : [amount, renews, cancel]} />
+      <MetaLine
+        parts={[
+          ...(c.tags.needsUpdate ? [amount, <span key="m">Missing renewal date or cycle</span>] : c.daysUntilRenewal === 0 ? [amount, ...chargedToday] : [amount, renews, cancel]),
+          accountPart(duplicates, input),
+        ]}
+      />
     </RowShell>
   );
 }

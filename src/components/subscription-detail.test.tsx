@@ -13,6 +13,7 @@ const sub = (over: Partial<Subscription>): Subscription => ({
   id: "1",
   vendor: null,
   plan: null,
+  accountLabel: null,
   category: "Software",
   paymentMethod: null,
   scope: "personal",
@@ -34,6 +35,15 @@ describe("SubscriptionDetail", () => {
     expect(link.getAttribute("target")).toBe("_blank");
     expect(screen.queryByText("Edit")).toBeNull();
     expect(screen.queryByText("Access until")).toBeNull();
+  });
+
+  it("shows an Account row only when set", () => {
+    const { unmount } = render(<SubscriptionDetail row={computeSubscription(sub({}), "2026-10-03")} />);
+    expect(screen.queryByText("Account")).toBeNull();
+    unmount();
+    render(<SubscriptionDetail row={computeSubscription(sub({ accountLabel: "me@example.com" }), "2026-10-03")} />);
+    expect(screen.getByText("Account")).toBeTruthy();
+    expect(screen.getByText("me@example.com")).toBeTruthy();
   });
 
   it("shows access until for cancelled rows and Edit when editHref is given", () => {

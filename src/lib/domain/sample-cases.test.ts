@@ -12,7 +12,7 @@ const T = "2026-10-02";
 const sub = (over: Partial<Subscription> & Pick<Subscription, "id" | "name">): Subscription => ({
   status: "confirmed", amountCents: null, currency: null, billingCycle: null, lastRenewalDate: null,
   trialEnds: null, cancelNoticeDays: null, regularPriceCents: null, promoEnds: null, accessUntil: null,
-  vendor: null, plan: null, category: null, paymentMethod: null, scope: null, confidence: "high",
+  vendor: null, plan: null, accountLabel: null, category: null, paymentMethod: null, scope: null, confidence: "high",
   cancelUrl: null, notes: null, source: "seed", keptForCancelBy: null, ...over,
 });
 
@@ -59,7 +59,7 @@ describe("starter set at 2026-10-02", () => {
 
 describe("P1 NoteForge proposal", () => {
   const draft: SubscriptionDraft = {
-    name: "NoteForge", vendor: null, plan: null, category: null, paymentMethod: null, scope: null, confidence: null,
+    name: "NoteForge", vendor: null, plan: null, accountLabel: null, category: null, paymentMethod: null, scope: null, confidence: null,
     amountCents: 1200, currency: "USD", billingCycle: "monthly",
     lastRenewalDate: "2026-10-30", // stated next renewal, stored as a future anchor (D4)
     trialEnds: null, cancelNoticeDays: null, regularPriceCents: null, promoEnds: null, accessUntil: null,

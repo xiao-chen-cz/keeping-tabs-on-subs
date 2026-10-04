@@ -144,3 +144,46 @@ describe("RenewalsList", () => {
     expect(within(upcoming).queryByText("deadline passed")).toBeNull();
   });
 });
+
+describe("RenewalsList account labels", () => {
+  const withAccount = (r: Partial<SubscriptionCore>, accountLabel: string | null) => ({ ...core(r), accountLabel });
+  const render3 = (inputs: ReturnType<typeof withAccount>[], extra: Partial<React.ComponentProps<typeof RenewalsList>> = {}) => {
+    const computed = inputs.map((r) => computeSubscription(r, TODAY));
+    render(<RenewalsList groups={groupAndSort(computed)} totals={totalsByCurrency(computed)} {...extra} />);
+  };
+
+  it("shows the account only on rows whose name is shared (case-insensitive), in Upcoming and Ending", () => {
+    render3([
+      withAccount({ name: "CodePilot Pro", ...monthly, lastRenewalDate: "2026-09-20" }, "me@example.com"),
+      withAccount({ name: "codepilot pro", ...monthly, lastRenewalDate: "2026-09-25" }, "work@example.com"),
+      withAccount({ name: "Solo", ...monthly, lastRenewalDate: "2026-09-22" }, "solo@example.com"),
+      withAccount({ name: "Solo Two", ...monthly, lastRenewalDate: "2026-09-22" }, null),
+    ]);
+    const text = document.body.textContent ?? "";
+    expect(text).toContain("me@example.com");
+    expect(text).toContain("work@example.com");
+    expect(text).not.toContain("solo@example.com");
+  });
+
+  it("counts an Ending row as the other row with the same name", () => {
+    render3([
+      withAccount({ name: "FitClub", ...monthly, lastRenewalDate: "2026-09-20" }, "me@example.com"),
+      withAccount({ name: "FitClub", ...monthly, status: "cancelled", accessUntil: "2026-10-20" }, "old@example.com"),
+    ]);
+    const ending = within(screen.getByRole("region", { name: "Ending" })).getAllByRole("listitem")[0];
+    expect(ending.textContent).toContain("old@example.com");
+    expect(within(screen.getByRole("region", { name: "Upcoming" })).getByRole("listitem").textContent).toContain("me@example.com");
+  });
+
+  it("shows the account in Due soon rows too", () => {
+    render3(
+      [
+        withAccount({ name: "CodePilot Pro", ...monthly, lastRenewalDate: "2026-09-08" }, "me@example.com"), // cancel by 5 Oct
+        withAccount({ name: "CodePilot Pro", ...monthly, lastRenewalDate: "2026-09-25" }, "work@example.com"),
+      ],
+      { alertOffsets: [3, 1, 0] },
+    );
+    const due = screen.getByRole("region", { name: "Due soon" });
+    expect(due.textContent).toContain("me@example.com");
+  });
+});

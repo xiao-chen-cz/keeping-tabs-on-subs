@@ -100,6 +100,7 @@ export function SubscriptionDetail({
         <Item label="Status">{cap(s.status)}</Item>
         <Item label="Vendor">{s.vendor}</Item>
         <Item label="Plan">{s.plan}</Item>
+        <Item label="Account">{s.accountLabel}</Item>
         <Item label="Amount">{money(s.amountCents)}</Item>
         <Item label="Renewal amount">
           {!cancelled && c.renewalAmountCents !== null && c.renewalAmountCents !== s.amountCents
