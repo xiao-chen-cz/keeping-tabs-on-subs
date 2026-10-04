@@ -8,8 +8,8 @@ export default async function LoginPage() {
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-4 py-12">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Keeping Tabs</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">Private demo. Sign in to continue.</p>
+        <h1 className="font-heading text-2xl font-semibold text-primary-ink">Keeping Tabs</h1>
+        <p className="text-mid">Private demo. Sign in to continue.</p>
       </div>
       <LoginForm />
     </main>

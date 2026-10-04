@@ -21,8 +21,7 @@ export interface ReviewScreenProps {
   rejectAction: () => Promise<void>;
 }
 
-const inputClass =
-  "w-full min-h-12 rounded-md border border-zinc-300 bg-transparent px-3 py-2 text-base dark:border-zinc-700";
+const inputClass = "input";
 
 function QuestionBlock({
   field,
@@ -47,11 +46,7 @@ function QuestionBlock({
             type="button"
             aria-pressed={values[formField] === o.value}
             onClick={() => set(o.value)}
-            className={`min-h-12 rounded-full border px-4 text-base ${
-              values[formField] === o.value
-                ? "border-indigo-600 bg-indigo-600 text-white"
-                : "border-zinc-300 dark:border-zinc-700"
-            }`}
+            className={values[formField] === o.value ? "btn-primary" : "btn-secondary"}
           >
             {o.label}
           </button>
@@ -73,10 +68,10 @@ function QuestionBlock({
     );
   }
   return (
-    <div className="flex flex-col gap-2" data-question={field}>
-      <p className="text-sm font-medium">
+    <div className="flex flex-col gap-1.5" data-question={field}>
+      <p className="text-sm font-medium text-text">
         {q.prompt}
-        {answered && <span className="ml-2 text-xs text-green-700 dark:text-green-400">answered</span>}
+        {answered && <span className="pill ml-2 border-green bg-green-light text-green-ink">answered</span>}
       </p>
       {control}
     </div>
@@ -97,26 +92,26 @@ export function ReviewScreen({
   const allAnswered = questions.every((f) => isAnswered(vals, f));
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold tracking-tight">{vals.name.trim() || "Unnamed"}</h1>
+    <div className="flex flex-col gap-3">
+      <h1 className="font-heading text-2xl font-semibold text-primary-ink">{vals.name.trim() || "Unnamed"}</h1>
       {updatesName && (
-        <p className="rounded-md bg-indigo-50 p-3 text-sm text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200">
+        <p className="rounded-control border border-primary-ink/30 bg-primary-light p-3 text-sm text-primary-ink">
           This will update {updatesName}.
         </p>
       )}
 
-      <details className="rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800">
+      <details className="rounded-control border border-line p-3 text-sm">
         <summary className="min-h-8 cursor-pointer font-medium">What the app read</summary>
         {captureText ? (
           <p className="mt-2 whitespace-pre-wrap break-words">{captureText}</p>
         ) : (
-          <p className="mt-2 text-zinc-600 dark:text-zinc-400">No text for this capture.</p>
+          <p className="mt-2 text-mid">No text for this capture.</p>
         )}
       </details>
 
       {questions.length > 0 && (
-        <section aria-labelledby="questions-heading" className="flex flex-col gap-4">
-          <h2 id="questions-heading" className="text-lg font-semibold">
+        <section aria-labelledby="questions-heading" className="flex flex-col gap-3">
+          <h2 id="questions-heading" className="section-label">
             {questions.length === 1 ? "One question" : `${questions.length} questions`}
           </h2>
           {questions.map((f) => (
@@ -142,11 +137,11 @@ export function ReviewScreen({
       <form action={rejectAction} className="pb-8">
         <button
           type="submit"
-          className="min-h-12 rounded-full border border-zinc-300 px-6 font-medium dark:border-zinc-700"
+          className="btn-secondary"
         >
           Reject
         </button>
-        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Rejecting discards this proposal. Nothing is added to your list.</p>
+        <p className="mt-1 text-xs text-mid">Rejecting discards this proposal. Nothing is added to your list.</p>
       </form>
     </div>
   );

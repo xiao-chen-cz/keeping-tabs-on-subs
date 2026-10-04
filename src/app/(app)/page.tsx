@@ -27,14 +27,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   return (
     <main className="flex flex-1 flex-col">
       {pendingCount > 0 && (
-        <div className="mx-auto w-full max-w-md px-4 pt-2">
-          <Link
-            href="/review"
-            className="flex min-h-12 items-center justify-center rounded-full bg-indigo-600 px-6 font-medium text-white active:bg-indigo-700"
-          >
-            Review ({pendingCount})
-          </Link>
-        </div>
+        <Link href="/review" className="btn-primary mb-4 w-full">
+          Review ({pendingCount})
+        </Link>
       )}
       <RenewalsList
         groups={groups}
@@ -45,11 +40,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         alertOffsets={profile.reminderOffsets}
       />
       {groups.archived.length > 0 && (
-        <div className="mx-auto w-full max-w-md px-4 pb-28">
-          <Link
-            href={showArchived ? "/" : "/?show=cancelled"}
-            className="inline-flex min-h-12 items-center text-sm text-zinc-600 underline dark:text-zinc-400"
-          >
+        <div className="pb-24">
+          <Link href={showArchived ? "/" : "/?show=cancelled"} className="link inline-flex min-h-10 items-center text-sm">
             {showArchived ? "Hide cancelled" : "Show cancelled"}
           </Link>
         </div>

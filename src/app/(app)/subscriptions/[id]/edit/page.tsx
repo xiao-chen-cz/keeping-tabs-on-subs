@@ -16,8 +16,8 @@ export default async function EditSubscriptionPage({ params }: PageProps<"/subsc
   ]);
   if (!existing) notFound();
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Edit {existing.subscription.name}</h1>
+    <main className="flex flex-1 flex-col gap-3">
+      <h1 className="font-heading text-2xl font-semibold text-primary-ink">Edit {existing.subscription.name}</h1>
       <SubscriptionForm
         mode="edit"
         action={updateSubscriptionAction.bind(null, id)}

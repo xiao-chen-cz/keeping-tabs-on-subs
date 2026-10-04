@@ -10,19 +10,18 @@ import {
   type CancelFormValues,
 } from "@/lib/validation/cancel-form";
 
-const inputClass =
-  "w-full min-h-12 rounded-md border border-zinc-300 bg-transparent px-3 py-2 text-base dark:border-zinc-700";
+const inputClass = "input";
 
 function Field({ name, label, errors, hint, children }: { name: string; label: string; errors?: string[]; hint?: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={name} className="text-sm font-medium">
+      <label htmlFor={name} className="label">
         {label}
       </label>
       {children}
-      {hint && <p className="text-xs text-zinc-500 dark:text-zinc-400">{hint}</p>}
+      {hint && <p className="text-xs text-mid">{hint}</p>}
       {errors?.map((e) => (
-        <p key={e} id={`${name}-error`} role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p key={e} id={`${name}-error`} role="alert" className="text-sm text-danger">
           {e}
         </p>
       ))}
@@ -59,7 +58,7 @@ export function CancelForm({
   });
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <form action={formAction} className="flex flex-col gap-3">
       <Field name="occurredOn" label="Cancelled on" errors={errors.occurredOn}>
         <input {...bind("occurredOn")} type="date" className={inputClass} />
       </Field>
@@ -92,15 +91,15 @@ export function CancelForm({
       >
         <input {...bind("accessUntil")} type="date" className={inputClass} />
       </Field>
-      <div className="flex items-center gap-4 pb-8 pt-2">
+      <div className="flex items-center gap-4 pb-8 pt-1">
         <button
           type="submit"
           disabled={pending}
-          className="min-h-12 rounded-full bg-indigo-600 px-6 font-medium text-white active:bg-indigo-700 disabled:opacity-60"
+          className="btn-primary"
         >
           {pending ? "Saving..." : "Mark as cancelled"}
         </button>
-        <Link href={cancelHref} className="inline-flex min-h-12 items-center text-sm text-zinc-600 underline dark:text-zinc-400">
+        <Link href={cancelHref} className="link inline-flex min-h-11 items-center text-sm">
           Back
         </Link>
       </div>

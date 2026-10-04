@@ -5,17 +5,14 @@ export function TotalsCard({ totals }: { totals: CurrencyTotals }) {
   const entries = Object.entries(totals) as [Currency, { monthly: number; yearly: number }][];
   if (entries.length === 0) return null;
   return (
-    <section
-      aria-label="Totals"
-      className="rounded-2xl bg-indigo-50 p-4 text-indigo-950 dark:bg-indigo-950/60 dark:text-indigo-50"
-    >
-      <h2 className="mb-1 text-xs font-medium uppercase tracking-wide opacity-70">Total spend</h2>
-      <ul className="space-y-1">
+    <section aria-label="Totals" className="rounded-control border border-line px-3 py-2 text-sm text-mid">
+      <h2 className="section-label mb-0.5">Total spend</h2>
+      <ul className="space-y-0.5">
         {entries.map(([currency, t]) => (
-          <li key={currency} className="text-base font-semibold">
-            {formatMoney(Math.round(t.monthly), currency)} / month
-            <span className="font-normal opacity-60"> · </span>
-            {formatMoney(Math.round(t.yearly), currency)} / year
+          <li key={currency}>
+            <span className="font-semibold text-text">{formatMoney(Math.round(t.monthly), currency)} / month</span>
+            <span> · </span>
+            <span className="font-semibold text-text">{formatMoney(Math.round(t.yearly), currency)} / year</span>
           </li>
         ))}
       </ul>

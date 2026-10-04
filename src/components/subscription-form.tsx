@@ -53,8 +53,7 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-const inputClass =
-  "w-full min-h-12 rounded-md border border-zinc-300 bg-transparent px-3 py-2 text-base dark:border-zinc-700";
+const inputClass = "input";
 
 function Field({
   name,
@@ -74,17 +73,17 @@ function Field({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
-        <label htmlFor={name} className="text-sm font-medium">
+        <label htmlFor={name} className="label">
           {label}
         </label>
         {flag && (
           <span
             data-confidence={flag}
             title="How sure the capture reading was"
-            className={`rounded-full px-2 py-0.5 text-xs ${
+            className={`pill ${
               flag === "low"
-                ? "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200"
-                : "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
+                ? "border-danger text-danger"
+                : "border-warn-line bg-warn-bg text-warn-ink"
             }`}
           >
             {flag}
@@ -92,9 +91,9 @@ function Field({
         )}
       </div>
       {children}
-      {hint && <p className="text-xs text-zinc-500 dark:text-zinc-400">{hint}</p>}
+      {hint && <p className="text-xs text-mid">{hint}</p>}
       {errors?.map((e) => (
-        <p key={e} id={`${name}-error`} role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p key={e} id={`${name}-error`} role="alert" className="text-sm text-danger">
           {e}
         </p>
       ))}
@@ -152,9 +151,9 @@ export function SubscriptionForm({
       : [];
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <form action={formAction} className="flex flex-col gap-3">
       {mode === "edit" && missing.length > 0 && (
-        <p className="rounded-md bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        <p className="rounded-control border border-warn-line bg-warn-bg p-3 text-sm text-warn-ink">
           Still missing: {missing.map((f) => FIELD_LABELS[f] ?? f).join(", ")}. You can save without them, but this
           entry stays under Needs update.
         </p>
@@ -166,8 +165,8 @@ export function SubscriptionForm({
 
       {mode === "edit" && !hideStatus && (
         <p className="text-sm">
-          <span className="font-medium">Status:</span> {cap(vals.status || "confirmed")}
-          <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+          <span className="font-semibold">Status:</span> {cap(vals.status || "confirmed")}
+          <span className="block text-xs text-mid">
             To cancel or reopen, use the buttons on the subscription page.
           </span>
         </p>
@@ -202,7 +201,7 @@ export function SubscriptionForm({
 
       <Field name="last_renewal_date" flag={confidenceFlags?.last_renewal_date} label="Billing date (last or next charge)" errors={errors.last_renewal_date}>
         <input {...bind("last_renewal_date")} type="date" className={inputClass} />
-        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">The most recent charge, or the next one if you know it.</p>
+        <p className="mt-1 text-xs text-mid">The most recent charge, or the next one if you know it.</p>
       </Field>
 
       <Field name="trial_ends" flag={confidenceFlags?.trial_ends} label="Trial ends" errors={errors.trial_ends}>
@@ -293,15 +292,15 @@ export function SubscriptionForm({
         <textarea {...bind("notes")} rows={3} className={inputClass} />
       </Field>
 
-      <div className="flex items-center gap-4 pb-8 pt-2">
+      <div className="flex items-center gap-4 pb-8 pt-1">
         <button
           type="submit"
           disabled={pending || submitDisabled}
-          className="min-h-12 rounded-full bg-indigo-600 px-6 font-medium text-white active:bg-indigo-700 disabled:opacity-60"
+          className="btn-primary"
         >
           {pending ? "Saving..." : (submitLabel ?? (mode === "create" ? "Add subscription" : "Save changes"))}
         </button>
-        <Link href={cancelHref} className="inline-flex min-h-12 items-center text-sm text-zinc-600 underline dark:text-zinc-400">
+        <Link href={cancelHref} className="link inline-flex min-h-11 items-center text-sm">
           Cancel
         </Link>
       </div>

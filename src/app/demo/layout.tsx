@@ -4,18 +4,20 @@ import Link from "next/link";
 export default function DemoLayout({ children }: LayoutProps<"/demo">) {
   return (
     <>
-      <header className="border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-        <Link href="/demo" className="font-semibold tracking-tight">
-          Keeping Tabs · Demo
-        </Link>
+      <header className="border-b border-line">
+        <div className="mx-auto w-full max-w-xl px-4 py-3">
+          <Link href="/demo" className="font-heading text-lg font-semibold text-primary-ink">
+            Keeping Tabs · Demo
+          </Link>
+        </div>
       </header>
-      <p className="bg-amber-50 px-4 py-2 text-center text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+      <p className="bg-light px-4 py-1.5 text-center text-xs text-mid">
         Demo with sample data. Nothing here is real, nothing can be changed, and no alerts are sent.{" "}
-        <Link href="/login" className="underline">
+        <Link href="/login" className="link">
           Sign in for your own.
         </Link>
       </p>
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6">{children}</div>
+      <div className="mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-4">{children}</div>
     </>
   );
 }

@@ -1,5 +1,6 @@
 import type { ComputedSubscription, SubscriptionCore } from "@/lib/domain/types";
 import type { CurrencyTotals } from "@/lib/domain/totals";
+import { dueSoon } from "@/lib/domain/alerts";
 import { DueSoon } from "./due-soon";
 import { EndingRow } from "./ending-row";
 import { RenewalRow } from "./renewal-row";
@@ -19,7 +20,18 @@ export interface RenewalsListProps<T extends SubscriptionCore> {
   alertOffsets?: number[];
 }
 
-const h2 = "mb-2 text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400";
+function SectionHeading({ id, count, children }: { id: string; count: number; children: string }) {
+  return (
+    <div className="flex items-baseline gap-1.5 border-b border-line pb-1">
+      <h2 id={id} className="section-label">
+        {children}
+      </h2>
+      <span aria-hidden className="section-label">
+        · {count}
+      </span>
+    </div>
+  );
+}
 
 export function RenewalsList<T extends SubscriptionCore>({
   groups,
@@ -29,30 +41,34 @@ export function RenewalsList<T extends SubscriptionCore>({
   addHref,
   alertOffsets,
 }: RenewalsListProps<T>) {
-  const { upcoming, ending, archived } = groups;
-  const empty = upcoming.length === 0 && ending.length === 0 && !(showArchived && archived.length > 0);
+  const { ending, archived } = groups;
+  // Rows shown under Due soon are not repeated under Upcoming.
+  const dueRows = alertOffsets ? new Set(dueSoon(groups.upcoming, alertOffsets).map((d) => d.row)) : null;
+  const upcoming = dueRows ? groups.upcoming.filter((r) => !dueRows.has(r)) : groups.upcoming;
+  const hasDue = dueRows !== null && dueRows.size > 0;
+  const empty = upcoming.length === 0 && !hasDue && ending.length === 0 && !(showArchived && archived.length > 0);
   const key = (r: Row<T>, i: number) => `${r.input.name}-${i}`;
 
   return (
-    <div className={`mx-auto max-w-md space-y-6 px-4 pt-6 ${addHref ? "pb-28" : "pb-8"}`}>
+    <div className={`space-y-5 ${addHref ? "pb-20" : "pb-8"}`}>
       <TotalsCard totals={totals} />
 
       {empty ? (
         <section className="py-10 text-center">
-          <p className="text-lg font-medium">No subscriptions yet</p>
+          <p className="text-lg font-semibold">No subscriptions yet</p>
           {addHref && (
-            <a href={addHref} className="mt-3 inline-block min-h-12 px-4 py-3 font-medium text-indigo-700 dark:text-indigo-300">
+            <a href={addHref} className="link mt-3 inline-block min-h-11 px-4 py-2 font-medium">
               Add your first subscription
             </a>
           )}
         </section>
       ) : (
         <>
-          {alertOffsets && <DueSoon rows={upcoming} offsets={alertOffsets} hrefFor={hrefFor} />}
+          {alertOffsets && <DueSoon rows={groups.upcoming} offsets={alertOffsets} hrefFor={hrefFor} />}
           {upcoming.length > 0 && (
             <section aria-labelledby="h-upcoming">
-              <h2 id="h-upcoming" className={h2}>Upcoming</h2>
-              <ul className="space-y-2">
+              <SectionHeading id="h-upcoming" count={upcoming.length}>Upcoming</SectionHeading>
+              <ul>
                 {upcoming.map((r, i) => (
                   <li key={key(r, i)}>
                     <RenewalRow row={r} href={hrefFor?.(r)} />
@@ -63,8 +79,8 @@ export function RenewalsList<T extends SubscriptionCore>({
           )}
           {ending.length > 0 && (
             <section aria-labelledby="h-ending">
-              <h2 id="h-ending" className={h2}>Ending</h2>
-              <ul className="space-y-2">
+              <SectionHeading id="h-ending" count={ending.length}>Ending</SectionHeading>
+              <ul>
                 {ending.map((r, i) => (
                   <li key={key(r, i)}>
                     <EndingRow row={r} href={hrefFor?.(r)} />
@@ -75,8 +91,8 @@ export function RenewalsList<T extends SubscriptionCore>({
           )}
           {showArchived && archived.length > 0 && (
             <section aria-labelledby="h-archived">
-              <h2 id="h-archived" className={h2}>Cancelled</h2>
-              <ul className="space-y-2">
+              <SectionHeading id="h-archived" count={archived.length}>Cancelled</SectionHeading>
+              <ul>
                 {archived.map((r, i) => (
                   <li key={key(r, i)}>
                     <EndingRow row={r} href={hrefFor?.(r)} />
@@ -89,11 +105,8 @@ export function RenewalsList<T extends SubscriptionCore>({
       )}
 
       {addHref && (
-        <div className="fixed inset-x-0 bottom-0 bg-gradient-to-t from-white via-white to-transparent px-4 pb-4 pt-6 dark:from-neutral-950 dark:via-neutral-950">
-          <a
-            href={addHref}
-            className="mx-auto flex min-h-12 max-w-md items-center justify-center rounded-full bg-indigo-600 px-6 font-medium text-white shadow-lg active:bg-indigo-700"
-          >
+        <div className="fixed inset-x-0 bottom-0 border-t border-line bg-bg px-4 py-2">
+          <a href={addHref} className="btn-primary mx-auto flex w-full max-w-xl">
             Add subscription
           </a>
         </div>

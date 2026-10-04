@@ -92,6 +92,7 @@ This applies only to the *next* renewal, not to later ones.
 - Sort (D2): rows flagged **Needs update** first, then Cancel-by ascending; ties on Cancel-by are broken by Next renewal ascending, then by Name.
 - Tags (§2.8): a **Trial** tag on active trials and a **Needs update** tag are shown next to the name, so they stand out from other rows.
 - No time window: every active subscription is listed, including those whose cancel-by date has already passed.
+- **Due soon first, no duplicates (app, decided 2026-10-04):** rows with an alert due (§3.2) are shown in a Due soon section above Upcoming and are left out of the Upcoming list, so each row appears once. Totals still count every included row.
 - Highlight: Renewal amount and Price rises? cells are highlighted (#D9D2E9) when Price rises? = Yes. Columns A–H have their own conditional formats; their rules are not documented here.
 
 ### 3.2 Reminders (D10, decided 2026-10-02)

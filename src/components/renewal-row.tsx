@@ -1,12 +1,11 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import type { ComputedSubscription, SubscriptionCore } from "@/lib/domain/types";
 import { formatMoney } from "@/lib/domain/totals";
 import { formatDay, relativeDays } from "./format";
 import { Tag } from "./tag";
 
-export const rowClass =
-  "block min-h-14 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900";
-const linkClass = `${rowClass} active:bg-neutral-50 dark:active:bg-neutral-800`;
+export const rowClass = "block border-b border-line py-3";
+const linkClass = `${rowClass} active:bg-light`;
 
 /** Wraps row content in a link only when an href is given (read-only otherwise). */
 export function RowShell({ href, children }: { href?: string; children: ReactNode }) {
@@ -20,56 +19,66 @@ export function RowShell({ href, children }: { href?: string; children: ReactNod
   );
 }
 
+/** One muted line of segments joined with " · ". Lines break only between segments, never inside one. */
+export function MetaLine({ parts }: { parts: ReactNode[] }) {
+  const shown = parts.filter((p) => p !== null && p !== false && p !== undefined);
+  if (shown.length === 0) return null;
+  return (
+    <p className="mt-0.5 text-sm text-mid">
+      {shown.map((p, i) => (
+        <Fragment key={i}>
+          {i > 0 && " · "}
+          <span className="whitespace-nowrap">{p}</span>
+        </Fragment>
+      ))}
+    </p>
+  );
+}
+
 export function RenewalRow<T extends SubscriptionCore>({ row, href }: { row: ComputedSubscription<T>; href?: string }) {
   const { input, computed: c } = row;
   const { amountCents, currency } = input;
   const amount =
     c.renewalAmountCents !== null && currency !== null ? (
-      <p className="text-sm font-medium tabular-nums">
+      <span className="tabular-nums">
         {c.priceRises && amountCents !== null ? (
           <>
-            <span className="text-neutral-500 dark:text-neutral-400">{(amountCents / 100).toFixed(2)}</span>
+            <span>{(amountCents / 100).toFixed(2)}</span>
             <span aria-label="rises to"> → </span>
-            <span className="text-red-700 dark:text-red-400">{(c.renewalAmountCents / 100).toFixed(2)}</span>{" "}
-            {currency}
+            <span className="font-medium text-danger">{(c.renewalAmountCents / 100).toFixed(2)}</span> {currency}
           </>
         ) : (
           formatMoney(c.renewalAmountCents, currency)
         )}
-      </p>
+      </span>
     ) : null;
 
   const cancel =
     c.cancelBy !== null && c.daysUntilCancelBy !== null ? (
       c.daysUntilCancelBy < 0 ? (
-        <p className="text-sm font-medium text-red-700 dark:text-red-400">deadline passed</p>
+        <span className="font-medium text-danger">deadline passed</span>
       ) : (
-        <p className="text-sm">
+        <span>
           cancel by {formatDay(c.cancelBy)} ({relativeDays(c.daysUntilCancelBy)})
-        </p>
+        </span>
       )
+    ) : null;
+
+  const renews =
+    c.nextRenewal !== null && c.daysUntilRenewal !== null ? (
+      <span>
+        renews {formatDay(c.nextRenewal)} ({relativeDays(c.daysUntilRenewal)})
+      </span>
     ) : null;
 
   return (
     <RowShell href={href}>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="font-semibold">{input.name}</span>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="text-base font-semibold text-text">{input.name}</span>
         {c.tags.needsUpdate && <Tag kind="needsUpdate" />}
         {c.tags.trial && <Tag kind="trial" />}
       </div>
-      {amount}
-      {c.tags.needsUpdate ? (
-        <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">Missing renewal date or cycle</p>
-      ) : (
-        <div className="mt-1 space-y-0.5 text-sm text-neutral-600 dark:text-neutral-400">
-          {c.nextRenewal !== null && c.daysUntilRenewal !== null && (
-            <p>
-              renews {formatDay(c.nextRenewal)} ({relativeDays(c.daysUntilRenewal)})
-            </p>
-          )}
-          {cancel}
-        </div>
-      )}
+      <MetaLine parts={c.tags.needsUpdate ? [amount, <span key="m">Missing renewal date or cycle</span>] : [amount, renews, cancel]} />
     </RowShell>
   );
 }

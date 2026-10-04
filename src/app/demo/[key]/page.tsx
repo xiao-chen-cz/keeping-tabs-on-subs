@@ -13,11 +13,9 @@ export default async function DemoDetailPage({ params }: PageProps<"/demo/[key]"
 
   return (
     <main className="flex flex-1 flex-col">
-      <div className="mx-auto w-full max-w-md px-4 pt-2">
-        <Link href="/demo" className="inline-flex min-h-12 items-center text-sm text-zinc-600 underline dark:text-zinc-400">
-          Back to list
-        </Link>
-      </div>
+      <Link href="/demo" className="link inline-flex min-h-10 items-center text-sm">
+        Back to list
+      </Link>
       <SubscriptionDetail row={row} />
     </main>
   );

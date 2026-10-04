@@ -24,11 +24,9 @@ export default async function SubscriptionPage({ params }: PageProps<"/subscript
 
   return (
     <main className="flex flex-1 flex-col">
-      <div className="mx-auto w-full max-w-md px-4 pt-2">
-        <Link href="/" className="inline-flex min-h-12 items-center text-sm text-zinc-600 underline dark:text-zinc-400">
-          Back to list
-        </Link>
-      </div>
+      <Link href="/" className="link inline-flex min-h-10 items-center text-sm">
+        Back to list
+      </Link>
       <SubscriptionDetail
         row={row}
         editHref={`/subscriptions/${subscription.id}/edit`}

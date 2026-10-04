@@ -11,15 +11,15 @@ export default async function ReviewQueuePage() {
   const byId = new Map(subscriptions.map((s) => [s.id, s]));
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-2">
-      <Link href="/" className="inline-flex min-h-12 items-center text-sm text-zinc-600 underline dark:text-zinc-400">
+    <main className="flex flex-1 flex-col gap-3">
+      <Link href="/" className="link inline-flex min-h-10 items-center text-sm">
         Back to list
       </Link>
-      <h1 className="text-2xl font-semibold tracking-tight">Review</h1>
+      <h1 className="font-heading text-2xl font-semibold text-primary-ink">Review</h1>
       {pending.length === 0 ? (
-        <p className="text-zinc-600 dark:text-zinc-400">Nothing to review</p>
+        <p className="text-mid">Nothing to review</p>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col">
           {pending.map(({ proposal, updatesName }) => {
             const d = proposal.draft;
             const existing = d.updatesSubscriptionId ? byId.get(d.updatesSubscriptionId) : undefined;
@@ -33,15 +33,15 @@ export default async function ReviewQueuePage() {
               <li key={proposal.id}>
                 <Link
                   href={`/review/${proposal.id}`}
-                  className="flex min-h-12 flex-col gap-1 rounded-lg border border-zinc-200 p-4 active:bg-zinc-50 dark:border-zinc-800 dark:active:bg-zinc-900"
+                  className="flex flex-col gap-0.5 border-b border-line py-3 active:bg-light"
                 >
-                  <span className="font-medium">{d.name ?? "Unnamed"}</span>
+                  <span className="font-semibold">{d.name ?? "Unnamed"}</span>
                   {d.amountCents !== null && d.currency !== null && (
-                    <span className="text-sm">{formatMoney(d.amountCents, d.currency)}</span>
+                    <span className="text-sm text-mid">{formatMoney(d.amountCents, d.currency)}</span>
                   )}
-                  {updatesName && <span className="text-sm text-indigo-700 dark:text-indigo-300">Update to {updatesName}</span>}
+                  {updatesName && <span className="text-sm text-accent-dark">Update to {updatesName}</span>}
                   {questions > 0 && (
-                    <span className="text-sm text-amber-800 dark:text-amber-300">
+                    <span className="text-sm text-warn-ink">
                       {questions === 1 ? "1 question" : `${questions} questions`}
                     </span>
                   )}

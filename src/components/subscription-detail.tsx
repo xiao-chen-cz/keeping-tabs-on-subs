@@ -12,9 +12,9 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 function Item({ label, children }: { label: string; children: ReactNode }) {
   if (children === null || children === undefined || children === false) return null;
   return (
-    <div className="py-3">
-      <dt className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">{label}</dt>
-      <dd className="mt-0.5 break-words">{children}</dd>
+    <div className="grid grid-cols-[2fr_3fr] gap-3 border-b border-line py-2 text-[15px]">
+      <dt className="text-mid">{label}</dt>
+      <dd className="min-w-0 break-words text-text">{children}</dd>
     </div>
   );
 }
@@ -28,8 +28,7 @@ export function describeEvent(e: SubscriptionEvent): string {
   return line;
 }
 
-const buttonClass =
-  "my-2 inline-flex min-h-12 items-center rounded-full border border-zinc-300 px-6 font-medium dark:border-zinc-700";
+const buttonClass = "btn-secondary";
 
 export function SubscriptionDetail({
   row,
@@ -56,18 +55,18 @@ export function SubscriptionDetail({
   const cancelled = s.status === "cancelled";
 
   return (
-    <article className="mx-auto max-w-md px-4 py-6">
-      <header className="mb-2 flex flex-wrap items-center gap-2">
-        <h1 className="text-2xl font-semibold">{s.name}</h1>
+    <article>
+      <header className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <h1 className="font-heading text-2xl font-semibold text-primary-ink">{s.name}</h1>
         {c.tags.needsUpdate && <Tag kind="needsUpdate" />}
         {c.tags.trial && <Tag kind="trial" />}
         {c.tags.ending && <Tag kind="ending" />}
       </header>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         {editHref && (
           <a
             href={editHref}
-            className="my-2 inline-flex min-h-12 items-center rounded-full bg-indigo-600 px-6 font-medium text-white active:bg-indigo-700"
+            className="btn-primary"
           >
             Edit
           </a>
@@ -85,7 +84,7 @@ export function SubscriptionDetail({
           </form>
         )}
       </div>
-      <dl className="divide-y divide-neutral-200 dark:divide-neutral-800">
+      <dl className="border-t border-line">
         <Item label="Status">{cap(s.status)}</Item>
         <Item label="Vendor">{s.vendor}</Item>
         <Item label="Plan">{s.plan}</Item>
@@ -122,7 +121,7 @@ export function SubscriptionDetail({
               href={s.cancelUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-indigo-700 underline dark:text-indigo-300"
+              className="link"
             >
               {s.cancelUrl}
             </a>
@@ -136,22 +135,22 @@ export function SubscriptionDetail({
         <Item label="Notes">{s.notes}</Item>
       </dl>
       {events && events.length > 0 && (
-        <section className="mt-6" aria-labelledby="history-heading">
-          <h2 id="history-heading" className="text-lg font-semibold">
+        <section className="mt-5" aria-labelledby="history-heading">
+          <h2 id="history-heading" className="section-label">
             History
           </h2>
-          <ul className="mt-2 flex flex-col gap-2">
+          <ul className="mt-1 flex flex-col">
             {events.map((e) => (
-              <li key={e.id} className="text-sm">
+              <li key={e.id} className="border-b border-line py-2 text-sm">
                 {describeEvent(e)}
-                {e.note && <span className="block text-zinc-600 dark:text-zinc-400">{e.note}</span>}
+                {e.note && <span className="block text-mid">{e.note}</span>}
               </li>
             ))}
           </ul>
         </section>
       )}
       {captureText != null && (
-        <details className="mt-6 rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800">
+        <details className="mt-5 rounded-control border border-line p-3 text-sm">
           <summary className="min-h-8 cursor-pointer font-medium">Original capture</summary>
           <p className="mt-2 whitespace-pre-wrap break-words">{captureText}</p>
         </details>

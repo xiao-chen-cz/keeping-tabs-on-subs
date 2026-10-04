@@ -96,4 +96,26 @@ describe("RenewalsList", () => {
     expect(screen.getByText("Add subscription").getAttribute("href")).toBe("/subscriptions/new");
     expect(screen.getAllByRole("link").length).toBe(rows.length + 1);
   });
+
+  it("shows a due row once, under Due soon only; others stay under Upcoming", () => {
+    const f = fixture([
+      { name: "Soonish", ...monthly, lastRenewalDate: "2026-09-06" }, // cancel-by 3 Oct: due today
+      { name: "Faraway", ...monthly, lastRenewalDate: "2026-09-16" }, // cancel-by 13 Oct
+    ]);
+    render(<RenewalsList groups={f.groups} totals={f.totals} alertOffsets={[3, 1, 0]} />);
+    expect(screen.getAllByText("Soonish")).toHaveLength(1);
+    const due = within(screen.getByRole("region", { name: "Due soon" }));
+    expect(due.getByText("Soonish")).toBeTruthy();
+    const upcoming = within(screen.getByRole("region", { name: "Upcoming" }));
+    expect(upcoming.queryByText("Soonish")).toBeNull();
+    expect(upcoming.getByText("Faraway")).toBeTruthy();
+  });
+
+  it("hides Upcoming when every row is due", () => {
+    const f = fixture([{ name: "Soonish", ...monthly, lastRenewalDate: "2026-09-06" }]);
+    render(<RenewalsList groups={f.groups} totals={f.totals} alertOffsets={[3, 1, 0]} />);
+    expect(screen.getByRole("region", { name: "Due soon" })).toBeTruthy();
+    expect(screen.queryByRole("region", { name: "Upcoming" })).toBeNull();
+    expect(screen.queryByText("No subscriptions yet")).toBeNull();
+  });
 });

@@ -1,26 +1,109 @@
 @import "tailwindcss";
 
+/* App palette. Light values here, dark equivalents in the media query below. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --text: #3a4758;
+  --mid: #6b7889;
+  --line: #dde3e8;
+  --light: #f5f7f8;
+  --primary: #0b435e;
+  --primary-dark: #072e42;
+  --primary-light: #e8f1f5;
+  --primary-ink: #0b435e;
+  --on-primary: #ffffff;
+  --accent: #419f8b;
+  --accent-dark: #2e7a69;
+  --accent-light: #eaf4f2;
+  --green: #6dc85a;
+  --green-light: #edf8ea;
+  --green-ink: #2f6b22;
+  --danger: #c0392b;
+  --warn-bg: #fdf3e1;
+  --warn-line: #e8c27a;
+  --warn-ink: #8a5a00;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #0f1a22;
+    --surface: #0f1a22;
+    --text: #dbe3ea;
+    --mid: #9aa8b6;
+    --line: #24323d;
+    --light: #16242e;
+    --primary: #1c6285;
+    --primary-dark: #154e6b;
+    --primary-light: #12303f;
+    --primary-ink: #a9d3e8;
+    --on-primary: #ffffff;
+    --accent: #5fc0aa;
+    --accent-dark: #6fcdb8;
+    --accent-light: #133a33;
+    --green: #6dc85a;
+    --green-light: #14301a;
+    --green-ink: #9bdc8b;
+    --danger: #ef7a6c;
+    --warn-bg: #2d2412;
+    --warn-line: #6b5420;
+    --warn-ink: #f0c36a;
   }
 }
 
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-mid: var(--mid);
+  --color-line: var(--line);
+  --color-light: var(--light);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-primary-ink: var(--primary-ink);
+  --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-accent-light: var(--accent-light);
+  --color-green: var(--green);
+  --color-green-light: var(--green-light);
+  --color-green-ink: var(--green-ink);
+  --color-danger: var(--danger);
+  --color-warn-bg: var(--warn-bg);
+  --color-warn-line: var(--warn-line);
+  --color-warn-ink: var(--warn-ink);
+  --font-sans: var(--font-poppins), system-ui, sans-serif;
+  --font-heading: var(--font-lora), Georgia, serif;
+  --radius-control: 6px;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-poppins), system-ui, sans-serif;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-control border px-5 text-[15px] font-medium disabled:opacity-60 border-primary bg-primary text-on-primary active:bg-primary-dark;
+  }
+  .btn-secondary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-control border px-5 text-[15px] font-medium disabled:opacity-60 border-line bg-surface text-text active:bg-light;
+  }
+  .input {
+    @apply min-h-11 w-full rounded-control border border-line bg-surface px-3 py-2 text-base text-text;
+  }
+  .label {
+    @apply text-[13px] text-mid;
+  }
+  .link {
+    @apply text-accent-dark underline underline-offset-2;
+  }
+  .pill {
+    @apply inline-block rounded-full border px-2 py-px text-xs font-semibold leading-5;
+  }
+  .section-label {
+    @apply text-xs font-semibold uppercase tracking-wide text-mid;
+  }
 }

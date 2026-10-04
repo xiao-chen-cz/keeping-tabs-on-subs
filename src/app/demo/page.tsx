@@ -21,10 +21,10 @@ export default async function DemoPage({ searchParams }: PageProps<"/demo">) {
         alertOffsets={[...DEFAULT_ALERT_OFFSETS]}
       />
       {groups.archived.length > 0 && (
-        <div className="mx-auto w-full max-w-md px-4 pb-8">
+        <div className="pb-8">
           <Link
             href={showArchived ? "/demo" : "/demo?show=cancelled"}
-            className="inline-flex min-h-12 items-center text-sm text-zinc-600 underline dark:text-zinc-400"
+            className="link inline-flex min-h-10 items-center text-sm"
           >
             {showArchived ? "Hide cancelled" : "Show cancelled"}
           </Link>

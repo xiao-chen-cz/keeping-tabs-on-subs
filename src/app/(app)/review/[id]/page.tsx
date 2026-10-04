@@ -20,8 +20,8 @@ export default async function ReviewProposalPage({ params }: PageProps<"/review/
 
   const initialValues = proposalFormValues(found.proposal, found.existing);
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-2 px-4 py-2">
-      <Link href="/review" className="inline-flex min-h-12 items-center text-sm text-zinc-600 underline dark:text-zinc-400">
+    <main className="flex flex-1 flex-col gap-1">
+      <Link href="/review" className="link inline-flex min-h-10 items-center text-sm">
         Back to review
       </Link>
       <ReviewScreen

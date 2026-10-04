@@ -5,20 +5,22 @@ import { signOut } from "@/lib/dal/auth-actions";
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <>
-      <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-        <Link href="/" className="font-semibold tracking-tight">
-          Keeping Tabs
-        </Link>
-        <form action={signOut}>
-          <button type="submit" className="text-sm text-zinc-600 underline dark:text-zinc-400">
-            Sign out
-          </button>
-        </form>
+      <header className="border-b border-line">
+        <div className="mx-auto flex w-full max-w-xl items-center justify-between px-4 py-3">
+          <Link href="/" className="font-heading text-lg font-semibold text-primary-ink">
+            Keeping Tabs
+          </Link>
+          <form action={signOut}>
+            <button type="submit" className="link text-sm">
+              Sign out
+            </button>
+          </form>
+        </div>
       </header>
-      <p className="bg-amber-50 px-4 py-2 text-center text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+      <p className="bg-light px-4 py-1.5 text-center text-xs text-mid">
         Demo: alerts show in the app only, no emails are sent yet.
       </p>
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6">{children}</div>
+      <div className="mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-4">{children}</div>
     </>
   );
 }
