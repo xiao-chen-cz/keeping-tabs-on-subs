@@ -2,7 +2,7 @@
 // No model call: these stand in for extraction output.
 import { addDays } from "@/lib/dates/plain-date";
 import type { PlainDate, SubscriptionDraft } from "@/lib/domain/types";
-import type { SeedSet } from "./build-seed";
+import { buildSeed, type SeedSet } from "./build-seed";
 import { CODEPILOT_RECEIPT, GYMBOX_INVOICE, NOTEFORGE_BILLING, type SeedCapture } from "./captures";
 
 export interface SeedProposal {
@@ -32,6 +32,9 @@ const blank: SubscriptionDraft = {
  */
 export function buildSeedProposals(set: SeedSet, today: PlainDate): SeedProposal[] {
   const p1Date = addDays(today, 28);
+  // P2 is the receipt for CodePilot's most recent charge, so approving it keeps the schedule
+  // (it confirms the amount and links the receipt) instead of inventing a charge today.
+  const codePilotLastCharge = buildSeed("full", today).find((r) => r.key === 1)!.lastRenewalDate!;
   const p1: SeedProposal = {
     key: "P1",
     capture: NOTEFORGE_BILLING,
@@ -54,7 +57,7 @@ export function buildSeedProposals(set: SeedSet, today: PlainDate): SeedProposal
     {
       key: "P2",
       capture: CODEPILOT_RECEIPT,
-      captureDate: today,
+      captureDate: codePilotLastCharge,
       updatesSeedKey: 1,
       draft: {
         ...blank,
@@ -63,7 +66,7 @@ export function buildSeedProposals(set: SeedSet, today: PlainDate): SeedProposal
         amountCents: 2000,
         currency: "USD",
         billingCycle: "monthly",
-        lastRenewalDate: today,
+        lastRenewalDate: codePilotLastCharge,
         fieldConfidence: {
           name: "high", amountCents: "high", currency: "high", billingCycle: "high", lastRenewalDate: "high",
         },

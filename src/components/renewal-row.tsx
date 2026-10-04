@@ -71,6 +71,12 @@ export function RenewalRow<T extends SubscriptionCore>({ row, href }: { row: Com
       </span>
     ) : null;
 
+  // On the day of the charge the cancel window is over anyway: no red "deadline passed", show what comes next.
+  const chargedToday = [
+    <span key="t">{c.tags.trial ? "trial ends today" : "charged today"}</span>,
+    c.followingRenewal && <span key="n">next {formatDay(c.followingRenewal)}</span>,
+  ];
+
   return (
     <RowShell href={href}>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -78,7 +84,7 @@ export function RenewalRow<T extends SubscriptionCore>({ row, href }: { row: Com
         {c.tags.needsUpdate && <Tag kind="needsUpdate" />}
         {c.tags.trial && <Tag kind="trial" />}
       </div>
-      <MetaLine parts={c.tags.needsUpdate ? [amount, <span key="m">Missing renewal date or cycle</span>] : [amount, renews, cancel]} />
+      <MetaLine parts={c.tags.needsUpdate ? [amount, <span key="m">Missing renewal date or cycle</span>] : c.daysUntilRenewal === 0 ? [amount, ...chargedToday] : [amount, renews, cancel]} />
     </RowShell>
   );
 }

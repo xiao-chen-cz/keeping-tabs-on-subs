@@ -118,4 +118,13 @@ describe("RenewalsList", () => {
     expect(screen.queryByRole("region", { name: "Upcoming" })).toBeNull();
     expect(screen.queryByText("No subscriptions yet")).toBeNull();
   });
+
+  it("on the day of a charge shows 'charged today · next …' instead of a red deadline", () => {
+    const { groups, totals } = fixture([{ name: "Paid Today", ...monthly, lastRenewalDate: TODAY }]);
+    render(<RenewalsList groups={groups} totals={totals} />);
+    const upcoming = screen.getByRole("region", { name: "Upcoming" });
+    expect(within(upcoming).getByText("charged today")).toBeTruthy();
+    expect(within(upcoming).getByText("next 3 Nov")).toBeTruthy();
+    expect(within(upcoming).queryByText("deadline passed")).toBeNull();
+  });
 });

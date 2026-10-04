@@ -104,6 +104,8 @@ export interface Subscription extends SubscriptionCore {
 export interface ComputedFields {
   nextRenewal: PlainDate | null;
   daysUntilRenewal: number | null;
+  /** Only when the next renewal is today: the renewal after it (for "charged today · next …"). */
+  followingRenewal: PlainDate | null;
   /** Effective notice: the override, or the default by cycle. */
   noticeDays: number;
   noticeIsDefault: boolean;

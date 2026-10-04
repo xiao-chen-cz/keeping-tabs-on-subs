@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { computeSubscription } from "@/lib/domain/compute";
 import { describe, expect, it } from "vitest";
 import { addDays } from "@/lib/dates/plain-date";
 import { missingRequired, matchExisting } from "@/lib/domain/proposal";
@@ -26,13 +27,19 @@ describe("buildSeedProposals", () => {
     expect(p1.capture.rawText(p1.captureDate)).toContain(addDays(TODAY, 28));
   });
 
-  it("P2 matches CodePilot Pro (seed #1) and stands for a charge dated today", () => {
+  it("P2 matches CodePilot Pro (seed #1) and is the receipt for its last charge, so approval keeps the schedule", () => {
     const p2 = buildSeedProposals("full", TODAY)[1]!;
     const subs = buildSeed("full", TODAY);
     const hit = matchExisting(p2.draft, subs);
     expect(hit).toBe(subs.find((s) => s.key === p2.updatesSeedKey)!.id);
     expect(subs.find((s) => s.id === hit)!.name).toBe("CodePilot Pro");
-    expect(p2.draft.lastRenewalDate).toBe(TODAY);
+    const codePilot = subs.find((s) => s.key === 1)!;
+    expect(p2.draft.lastRenewalDate).toBe(codePilot.lastRenewalDate);
+    expect(p2.captureDate).toBe(codePilot.lastRenewalDate);
+    // Approving must not move the next renewal.
+    const before = computeSubscription(codePilot, TODAY).computed.nextRenewal;
+    const after = computeSubscription({ ...codePilot, lastRenewalDate: p2.draft.lastRenewalDate }, TODAY).computed.nextRenewal;
+    expect(after).toBe(before);
     expect(p2.draft.updatesSubscriptionId).toBeNull();
   });
 

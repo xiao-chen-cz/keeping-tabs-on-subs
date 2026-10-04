@@ -115,6 +115,12 @@ describe("logic-spec §5 edge cases", () => {
 
   // The type requires a name and the DB check rejects an empty one (length(trim(name)) > 0),
   // so there is no empty-name row to compute. Validation lives in src/lib/validation and the schema.
+  it("E9b followingRenewal: on the charge day it names the next one, otherwise null", () => {
+    const m = { status: "confirmed", amountCents: 1000, currency: "EUR", billingCycle: "monthly" } as const;
+    expect(calc({ ...m, lastRenewalDate: "2026-10-01" }, "2026-10-01").computed.followingRenewal).toBe("2026-11-01");
+    expect(calc({ ...m, lastRenewalDate: "2026-09-15" }, "2026-10-01").computed.followingRenewal).toBeNull();
+  });
+
   it("E25 empty name is rejected on entry (DB check enforces the same)", () => {
     expect(parseSubscriptionForm({ name: "  ", status: "confirmed" }, "edit").ok).toBe(false);
   });

@@ -1,5 +1,5 @@
 // Combines the rules into every computed field. Pure; today is injected.
-import { compare, diffDays } from "@/lib/dates/plain-date";
+import { addDays, compare, diffDays } from "@/lib/dates/plain-date";
 import { isArchived, isEnding, isTrial, needsUpdate } from "./flags";
 import { cancelBy, effectiveNotice } from "./notice";
 import { priceRises, renewalAmountCents } from "./pricing";
@@ -19,6 +19,7 @@ export function computeSubscription<T extends SubscriptionCore>(
     computed: {
       nextRenewal: next,
       daysUntilRenewal: next === null ? null : diffDays(next, today),
+      followingRenewal: next !== null && next === today ? nextRenewal(input, addDays(today, 1)) : null,
       noticeDays,
       noticeIsDefault: input.cancelNoticeDays === null,
       cancelBy: by,
