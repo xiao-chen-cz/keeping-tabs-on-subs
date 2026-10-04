@@ -5,6 +5,7 @@ import { core } from "@/lib/domain/fixtures";
 import { totalsByCurrency } from "@/lib/domain/totals";
 import { groupAndSort } from "@/lib/domain/upcoming";
 import type { SubscriptionCore } from "@/lib/domain/types";
+import { subscriptionHref } from "@/lib/domain/needs-update";
 import { RenewalsList } from "./renewals-list";
 
 afterEach(cleanup);
@@ -44,6 +45,21 @@ describe("RenewalsList", () => {
     expect(items[0].textContent).toContain("Needs update");
     expect(items[0].textContent).toContain("Missing renewal date or cycle");
     expect(screen.getByText("Trial")).toBeTruthy();
+  });
+
+  it("links Needs update rows to /complete and the others to the detail page", () => {
+    const withIds = rows.map((r, i) => ({ ...r, id: `id${i}` }));
+    const computed = withIds.map((r) => computeSubscription({ ...core(r), id: r.id }, TODAY));
+    render(
+      <RenewalsList
+        groups={groupAndSort(computed)}
+        totals={totalsByCurrency(computed)}
+        hrefFor={(r) => subscriptionHref(r.input.id, r.computed.tags.needsUpdate)}
+      />,
+    );
+    const href = (name: string) => screen.getByRole("link", { name: new RegExp(name) }).getAttribute("href");
+    expect(href("Missing")).toBe("/subscriptions/id1/complete");
+    expect(href("Alpha")).toBe("/subscriptions/id0");
   });
 
   it("shows the price rise, deadline passed and cancel-by", () => {

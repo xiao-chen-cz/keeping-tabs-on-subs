@@ -5,6 +5,7 @@ import type { ComputedSubscription, Subscription } from "@/lib/domain/types";
 import { BILLING_CYCLE_LABELS } from "@/lib/domain/types";
 import { formatMoney } from "@/lib/domain/totals";
 import { formatDayLong, relativeDays } from "./format";
+import { missingForSchedule } from "@/lib/domain/needs-update";
 import { Tag } from "./tag";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -33,6 +34,7 @@ const buttonClass = "btn-secondary";
 export function SubscriptionDetail({
   row,
   editHref,
+  completeHref,
   cancelHref,
   reopenAction,
   events,
@@ -40,6 +42,8 @@ export function SubscriptionDetail({
 }: {
   row: ComputedSubscription<Subscription>;
   editHref?: string;
+  /** Needs update rows link their banner here. */
+  completeHref?: string;
   /** Link to the cancel form; shown for confirmed rows. */
   cancelHref?: string;
   /** Server action that reopens a cancelled row; shown for cancelled rows. */
@@ -56,6 +60,14 @@ export function SubscriptionDetail({
 
   return (
     <article>
+      {c.tags.needsUpdate && completeHref && (
+        <a
+          href={completeHref}
+          className="mb-3 block rounded-control border border-warn-line bg-warn-bg p-3 text-sm font-medium text-warn-ink"
+        >
+          Needs update: {missingForSchedule(s).length === 1 ? "1 question" : `${missingForSchedule(s).length} questions`}
+        </a>
+      )}
       <header className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1">
         <h1 className="font-heading text-2xl font-semibold text-primary-ink">{s.name}</h1>
         {c.tags.needsUpdate && <Tag kind="needsUpdate" />}

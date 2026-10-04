@@ -7,6 +7,7 @@ import { getProfile } from "@/lib/dal/profile";
 import { listSubscriptions } from "@/lib/dal/subscriptions";
 import { todayIn } from "@/lib/dates/plain-date";
 import { computeSubscription } from "@/lib/domain/compute";
+import { subscriptionHref } from "@/lib/domain/needs-update";
 import { listHref, parseListFilters } from "@/lib/domain/filters";
 import { TABS_COOKIE, tabsEnabledFrom } from "@/lib/tabs-pref";
 import { totalsByCurrency } from "@/lib/domain/totals";
@@ -41,7 +42,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       <RenewalsList
         groups={groups}
         totals={totals}
-        hrefFor={(r) => `/subscriptions/${r.input.id}`}
+        hrefFor={(r) => subscriptionHref(r.input.id, r.computed.tags.needsUpdate)}
         addHref="/subscriptions/new"
         showArchived={showArchived}
         alertOffsets={profile.reminderOffsets}

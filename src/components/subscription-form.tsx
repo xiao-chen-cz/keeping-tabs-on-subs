@@ -40,6 +40,8 @@ export interface SubscriptionFormProps {
   /** Controlled mode: the parent owns the values (review answers fill the form). */
   values?: FormValues;
   onValuesChange?: (values: FormValues) => void;
+  /** Form fields still missing for the current values: amber marker and a hidden "Missing" hint. */
+  missingFields?: readonly FormField[];
   /** Small "low" / "medium" marker next to fields whose extraction confidence is not high. */
   confidenceFlags?: Partial<Record<FormField, Exclude<Confidence, "high">>>;
 }
@@ -61,6 +63,7 @@ function Field({
   errors,
   hint,
   flag,
+  missing,
   children,
 }: {
   name: string;
@@ -68,6 +71,7 @@ function Field({
   errors?: string[];
   hint?: string;
   flag?: "low" | "medium";
+  missing?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -76,6 +80,16 @@ function Field({
         <label htmlFor={name} className="label">
           {label}
         </label>
+        {missing && (
+          <span data-missing={name} className="pill border-warn-line bg-warn-bg text-warn-ink">
+            Missing
+          </span>
+        )}
+        {missing && (
+          <span id={`${name}-missing`} className="sr-only">
+            Missing: required to work out the next renewal
+          </span>
+        )}
         {flag && (
           <span
             data-confidence={flag}
@@ -112,6 +126,7 @@ export function SubscriptionForm({
   submitDisabled,
   values,
   onValuesChange,
+  missingFields,
   confidenceFlags,
 }: SubscriptionFormProps) {
   const [state, formAction, pending] = useActionState(action, INITIAL_FORM_STATE);
@@ -119,6 +134,12 @@ export function SubscriptionForm({
   const [inner, setInner] = useState<FormValues>(initialValues);
   const vals = values ?? inner;
   const errors = state.fieldErrors;
+
+  const miss = (name: FormField) => (missingFields?.includes(name) ?? false);
+  const ic = (name: FormField) => (miss(name) ? `${inputClass} border-warn-line bg-warn-bg` : inputClass);
+  const describedBy = (name: FormField) =>
+    [errors[name] ? `${name}-error` : null, miss(name) ? `${name}-missing` : null].filter(Boolean).join(" ") ||
+    undefined;
 
   const bind = (name: FormField) => ({
     id: name,
@@ -130,7 +151,7 @@ export function SubscriptionForm({
       onValuesChange?.(next);
     },
     "aria-invalid": errors[name] ? (true as const) : undefined,
-    "aria-describedby": errors[name] ? `${name}-error` : undefined,
+    "aria-describedby": describedBy(name),
   });
 
   const cycle = (BILLING_CYCLES as readonly string[]).includes(vals.billing_cycle)
@@ -152,15 +173,15 @@ export function SubscriptionForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
-      {mode === "edit" && missing.length > 0 && (
+      {mode === "edit" && !missingFields && missing.length > 0 && (
         <p className="rounded-control border border-warn-line bg-warn-bg p-3 text-sm text-warn-ink">
           Still missing: {missing.map((f) => FIELD_LABELS[f] ?? f).join(", ")}. You can save without them, but this
           entry stays under Needs update.
         </p>
       )}
 
-      <Field name="name" flag={confidenceFlags?.name} label="Name *" errors={errors.name}>
-        <input {...bind("name")} type="text" required autoComplete="off" className={inputClass} />
+      <Field name="name" missing={miss("name")} flag={confidenceFlags?.name} label="Name *" errors={errors.name}>
+        <input {...bind("name")} type="text" required autoComplete="off" className={ic("name")} />
       </Field>
 
       {mode === "edit" && !hideStatus && (
@@ -173,11 +194,11 @@ export function SubscriptionForm({
       )}
 
       <div className="grid grid-cols-[2fr_1fr] gap-3">
-        <Field name="amount" flag={confidenceFlags?.amount} label="Amount" errors={errors.amount}>
-          <input {...bind("amount")} type="text" inputMode="decimal" placeholder="9.99" className={inputClass} />
+        <Field name="amount" missing={miss("amount")} flag={confidenceFlags?.amount} label="Amount" errors={errors.amount}>
+          <input {...bind("amount")} type="text" inputMode="decimal" placeholder="9.99" className={ic("amount")} />
         </Field>
-        <Field name="currency" flag={confidenceFlags?.currency} label="Currency" errors={errors.currency}>
-          <select {...bind("currency")} className={inputClass}>
+        <Field name="currency" missing={miss("currency")} flag={confidenceFlags?.currency} label="Currency" errors={errors.currency}>
+          <select {...bind("currency")} className={ic("currency")}>
             <option value="">-</option>
             {CURRENCIES.map((c) => (
               <option key={c} value={c}>
@@ -188,8 +209,8 @@ export function SubscriptionForm({
         </Field>
       </div>
 
-      <Field name="billing_cycle" flag={confidenceFlags?.billing_cycle} label="Billing cycle" errors={errors.billing_cycle}>
-        <select {...bind("billing_cycle")} className={inputClass}>
+      <Field name="billing_cycle" missing={miss("billing_cycle")} flag={confidenceFlags?.billing_cycle} label="Billing cycle" errors={errors.billing_cycle}>
+        <select {...bind("billing_cycle")} className={ic("billing_cycle")}>
           <option value="">Choose...</option>
           {BILLING_CYCLES.map((c) => (
             <option key={c} value={c}>
@@ -199,13 +220,13 @@ export function SubscriptionForm({
         </select>
       </Field>
 
-      <Field name="last_renewal_date" flag={confidenceFlags?.last_renewal_date} label="Billing date (last or next charge)" errors={errors.last_renewal_date}>
-        <input {...bind("last_renewal_date")} type="date" className={inputClass} />
+      <Field name="last_renewal_date" missing={miss("last_renewal_date")} flag={confidenceFlags?.last_renewal_date} label="Billing date (last or next charge)" errors={errors.last_renewal_date}>
+        <input {...bind("last_renewal_date")} type="date" className={ic("last_renewal_date")} />
         <p className="mt-1 text-xs text-mid">The most recent charge, or the next one if you know it.</p>
       </Field>
 
-      <Field name="trial_ends" flag={confidenceFlags?.trial_ends} label="Trial ends" errors={errors.trial_ends}>
-        <input {...bind("trial_ends")} type="date" className={inputClass} />
+      <Field name="trial_ends" missing={miss("trial_ends")} flag={confidenceFlags?.trial_ends} label="Trial ends" errors={errors.trial_ends}>
+        <input {...bind("trial_ends")} type="date" className={ic("trial_ends")} />
       </Field>
 
       <Field
@@ -224,16 +245,16 @@ export function SubscriptionForm({
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
-        <Field name="regular_price" flag={confidenceFlags?.regular_price} label="Regular price" errors={errors.regular_price}>
-          <input {...bind("regular_price")} type="text" inputMode="decimal" className={inputClass} />
+        <Field name="regular_price" missing={miss("regular_price")} flag={confidenceFlags?.regular_price} label="Regular price" errors={errors.regular_price}>
+          <input {...bind("regular_price")} type="text" inputMode="decimal" className={ic("regular_price")} />
         </Field>
-        <Field name="promo_ends" flag={confidenceFlags?.promo_ends} label="Promo ends" errors={errors.promo_ends}>
-          <input {...bind("promo_ends")} type="date" className={inputClass} />
+        <Field name="promo_ends" missing={miss("promo_ends")} flag={confidenceFlags?.promo_ends} label="Promo ends" errors={errors.promo_ends}>
+          <input {...bind("promo_ends")} type="date" className={ic("promo_ends")} />
         </Field>
       </div>
 
-      <Field name="category_id" flag={confidenceFlags?.category_id} label="Category" errors={errors.category_id}>
-        <select {...bind("category_id")} className={inputClass}>
+      <Field name="category_id" missing={miss("category_id")} flag={confidenceFlags?.category_id} label="Category" errors={errors.category_id}>
+        <select {...bind("category_id")} className={ic("category_id")}>
           <option value="">-</option>
           {lookups.categories.map((o) => (
             <option key={o.id} value={o.id}>
@@ -243,8 +264,8 @@ export function SubscriptionForm({
         </select>
       </Field>
 
-      <Field name="payment_method_id" label="Payment method" errors={errors.payment_method_id}>
-        <select {...bind("payment_method_id")} className={inputClass}>
+      <Field name="payment_method_id" missing={miss("payment_method_id")} label="Payment method" errors={errors.payment_method_id}>
+        <select {...bind("payment_method_id")} className={ic("payment_method_id")}>
           <option value="">-</option>
           {lookups.paymentMethods.map((o) => (
             <option key={o.id} value={o.id}>
@@ -254,8 +275,8 @@ export function SubscriptionForm({
         </select>
       </Field>
 
-      <Field name="scope" flag={confidenceFlags?.scope} label="Scope" errors={errors.scope}>
-        <select {...bind("scope")} className={inputClass}>
+      <Field name="scope" missing={miss("scope")} flag={confidenceFlags?.scope} label="Scope" errors={errors.scope}>
+        <select {...bind("scope")} className={ic("scope")}>
           <option value="">-</option>
           {SCOPES.map((s) => (
             <option key={s} value={s}>
@@ -265,8 +286,8 @@ export function SubscriptionForm({
         </select>
       </Field>
 
-      <Field name="confidence" label="Confidence" errors={errors.confidence}>
-        <select {...bind("confidence")} className={inputClass}>
+      <Field name="confidence" missing={miss("confidence")} label="Confidence" errors={errors.confidence}>
+        <select {...bind("confidence")} className={ic("confidence")}>
           <option value="">-</option>
           {CONFIDENCES.map((c) => (
             <option key={c} value={c}>
@@ -276,20 +297,20 @@ export function SubscriptionForm({
         </select>
       </Field>
 
-      <Field name="vendor" label="Vendor" errors={errors.vendor}>
-        <input {...bind("vendor")} type="text" className={inputClass} />
+      <Field name="vendor" missing={miss("vendor")} label="Vendor" errors={errors.vendor}>
+        <input {...bind("vendor")} type="text" className={ic("vendor")} />
       </Field>
 
-      <Field name="plan" label="Plan" errors={errors.plan}>
-        <input {...bind("plan")} type="text" className={inputClass} />
+      <Field name="plan" missing={miss("plan")} label="Plan" errors={errors.plan}>
+        <input {...bind("plan")} type="text" className={ic("plan")} />
       </Field>
 
-      <Field name="cancel_url" label="Cancel link" errors={errors.cancel_url}>
-        <input {...bind("cancel_url")} type="url" inputMode="url" placeholder="https://" className={inputClass} />
+      <Field name="cancel_url" missing={miss("cancel_url")} label="Cancel link" errors={errors.cancel_url}>
+        <input {...bind("cancel_url")} type="url" inputMode="url" placeholder="https://" className={ic("cancel_url")} />
       </Field>
 
-      <Field name="notes" label="Notes" errors={errors.notes}>
-        <textarea {...bind("notes")} rows={3} className={inputClass} />
+      <Field name="notes" missing={miss("notes")} label="Notes" errors={errors.notes}>
+        <textarea {...bind("notes")} rows={3} className={ic("notes")} />
       </Field>
 
       <div className="flex items-center gap-4 pb-8 pt-1">

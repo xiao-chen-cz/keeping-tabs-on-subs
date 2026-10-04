@@ -1,8 +1,8 @@
 "use client";
-import { useState, type ReactNode } from "react";
-import { QUESTIONS } from "@/lib/domain/questions";
+import { useState } from "react";
 import type { RequiredField } from "@/lib/domain/proposal";
-import { applyAnswer, confidenceFlags as flagsFor, FIELD_FOR_QUESTION, isAnswered } from "./review-values";
+import { confidenceFlags as flagsFor, isAnswered } from "./review-values";
+import { openFormFields, QuestionsPanel } from "./questions-panel";
 import { SubscriptionForm, type LookupOption } from "./subscription-form";
 import type { FormValues, SubscriptionFormState } from "./subscription-form-values";
 import type { Proposal } from "@/lib/dal/map-proposal";
@@ -19,63 +19,6 @@ export interface ReviewScreenProps {
   lookups: { categories: LookupOption[]; paymentMethods: LookupOption[] };
   approveAction: (prev: SubscriptionFormState, formData: FormData) => Promise<SubscriptionFormState>;
   rejectAction: () => Promise<void>;
-}
-
-const inputClass = "input";
-
-function QuestionBlock({
-  field,
-  values,
-  onChange,
-}: {
-  field: RequiredField;
-  values: FormValues;
-  onChange: (next: FormValues) => void;
-}) {
-  const q = QUESTIONS[field];
-  const formField = FIELD_FOR_QUESTION[field];
-  const answered = isAnswered(values, field);
-  const set = (answer: string) => onChange(applyAnswer(values, field, answer));
-  let control: ReactNode;
-  if (q.input === "options") {
-    control = (
-      <div className="flex flex-wrap gap-2" role="group" aria-label={q.prompt}>
-        {q.options.map((o) => (
-          <button
-            key={o.value}
-            type="button"
-            aria-pressed={values[formField] === o.value}
-            onClick={() => set(o.value)}
-            className={values[formField] === o.value ? "btn-primary" : "btn-secondary"}
-          >
-            {o.label}
-          </button>
-        ))}
-      </div>
-    );
-  } else {
-    control = (
-      <input
-        aria-label={q.prompt}
-        value={values[formField]}
-        onChange={(e) => set(e.target.value)}
-        type={q.input === "date" ? "date" : "text"}
-        inputMode={q.input === "decimal" ? "decimal" : undefined}
-        placeholder={q.input === "decimal" ? "9.99" : undefined}
-        autoComplete="off"
-        className={inputClass}
-      />
-    );
-  }
-  return (
-    <div className="flex flex-col gap-1.5" data-question={field}>
-      <p className="text-sm font-medium text-text">
-        {q.prompt}
-        {answered && <span className="pill ml-2 border-green bg-green-light text-green-ink">answered</span>}
-      </p>
-      {control}
-    </div>
-  );
 }
 
 export function ReviewScreen({
@@ -109,16 +52,7 @@ export function ReviewScreen({
         )}
       </details>
 
-      {questions.length > 0 && (
-        <section aria-labelledby="questions-heading" className="flex flex-col gap-3">
-          <h2 id="questions-heading" className="section-label">
-            {questions.length === 1 ? "One question" : `${questions.length} questions`}
-          </h2>
-          {questions.map((f) => (
-            <QuestionBlock key={f} field={f} values={vals} onChange={setVals} />
-          ))}
-        </section>
-      )}
+      <QuestionsPanel questions={questions} values={vals} onChange={setVals} />
 
       <SubscriptionForm
         mode="create"
@@ -129,6 +63,7 @@ export function ReviewScreen({
         lookups={lookups}
         cancelHref="/review"
         hideStatus
+        missingFields={openFormFields(questions, vals)}
         submitLabel="Approve"
         submitDisabled={!allAnswered}
         confidenceFlags={flagsFor(proposal.draft.fieldConfidence)}

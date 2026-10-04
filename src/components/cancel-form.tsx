@@ -33,11 +33,14 @@ export function CancelForm({
   action,
   today,
   cancelHref,
+  initial,
 }: {
   action: (prev: CancelFormState, formData: FormData) => Promise<CancelFormState>;
   /** Default for "Cancelled on": today in the user's time zone. */
   today: string;
   cancelHref: string;
+  /** Optional prefill (e.g. the trial ended without converting). The user can change everything. */
+  initial?: Partial<CancelFormValues>;
 }) {
   const [state, formAction, pending] = useActionState(action, INITIAL_CANCEL_STATE);
   const [vals, setVals] = useState<CancelFormValues>({
@@ -46,6 +49,7 @@ export function CancelForm({
     reference: "",
     note: "",
     accessUntil: "",
+    ...initial,
   });
   const errors = state.fieldErrors;
   const bind = (name: CancelFormField) => ({

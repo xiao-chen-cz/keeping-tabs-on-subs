@@ -39,7 +39,7 @@ describe("ReviewScreen", () => {
 
   it("asks one fixed question per missing field and keeps Approve disabled until all are answered", () => {
     setup(proposal({ name: "Gymbox", amountCents: 3000 }));
-    expect(screen.getByRole("heading", { name: "3 questions" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "3 missing" })).toBeTruthy();
     expect(screen.getByText("Which currency?")).toBeTruthy();
     expect(screen.getByText("How often is it charged?")).toBeTruthy();
     expect(screen.getByText("When was the last charge, or when is the next one?")).toBeTruthy();
@@ -61,6 +61,22 @@ describe("ReviewScreen", () => {
     expect((screen.getByLabelText("Currency") as HTMLSelectElement).value).toBe("EUR");
     expect((screen.getByLabelText("Billing cycle") as HTMLSelectElement).value).toBe("monthly");
     expect(screen.getByRole("button", { name: "EUR" }).getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("marks missing fields in the form and the panel, and clears them as answers come in", () => {
+    setup(proposal({ name: "Gymbox", amountCents: 3000, currency: "EUR" }));
+    expect(document.querySelector('[data-missing="billing_cycle"]')?.textContent).toBe("Missing");
+    expect(document.querySelector('[data-missing="amount"]')).toBeNull();
+    expect(screen.getByLabelText("Billing cycle").getAttribute("aria-describedby")).toBe("billing_cycle-missing");
+    expect(screen.getByLabelText("Billing cycle").getAttribute("aria-invalid")).toBeNull();
+    expect(screen.getByRole("heading", { name: "2 missing" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Monthly" }));
+    expect(document.querySelector('[data-missing="billing_cycle"]')).toBeNull();
+    expect(screen.getByRole("heading", { name: "1 missing" })).toBeTruthy();
+    expect(screen.getByText("Answered: Monthly")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Billing date (last or next charge)"), { target: { value: "2026-10-31" } });
+    expect(screen.getByRole("heading", { name: "All answered" })).toBeTruthy();
+    expect(document.querySelector('[data-missing]')).toBeNull();
   });
 
   it("a typed amount that does not parse does not unlock Approve", () => {

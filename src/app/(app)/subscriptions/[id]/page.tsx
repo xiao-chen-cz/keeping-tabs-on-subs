@@ -29,6 +29,7 @@ export default async function SubscriptionPage({ params }: PageProps<"/subscript
       </Link>
       <SubscriptionDetail
         row={row}
+        completeHref={`/subscriptions/${subscription.id}/complete`}
         editHref={`/subscriptions/${subscription.id}/edit`}
         cancelHref={`/subscriptions/${subscription.id}/cancel`}
         reopenAction={reopenSubscriptionAction.bind(null, subscription.id)}

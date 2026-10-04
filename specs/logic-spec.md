@@ -79,7 +79,7 @@ This applies only to the *next* renewal, not to later ones.
 - `Yes` if Renewal amount > Amount, otherwise `No` (a price drop shows `No`).
 
 ### 2.8 Flags (computed, never stored)
-- **Needs update** (D2): Name set, Status ≠ Cancelled and Next renewal empty. Covers an ended trial with no Last renewal date and cycle, a missing anchor, or an unknown cycle. Shown in the front end as a tag and sorted to the top of Upcoming.
+- **Needs update** (D2): Name set, Status ≠ Cancelled and Next renewal empty. Covers an ended trial with no Last renewal date and cycle, a missing anchor, or an unknown cycle. Shown in the front end as a tag and sorted to the top of Upcoming. In the app, tapping the row opens the same fixed questions as the review queue for the fields that block a next renewal (amount, currency, cycle, billing date; an expired Trial ends does not count), with the open ones marked "Missing"; a trial that simply ended can be marked cancelled instead (prefilled channel Other, note "Trial ended without converting") (decided 2026-10-04).
 - **Trial** (D3): Trial ends is set and ≥ today. Shown as a tag so trials are distinguishable from paid subscriptions. The tag disappears the day after Trial ends; the row then shows normally, or as Needs update if no follow-up data exists.
 
 - **Ending** (D6): Status = Cancelled and Access until ≥ today. Shown in its own "Ending" group in the app with the access-until date and a tag; no renewal, no alerts, not in Upcoming. After Access until, the row is shown only in the archive/cancelled filter.
