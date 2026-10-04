@@ -27,7 +27,9 @@ export interface LookupOption {
 export interface SubscriptionFormProps {
   mode: "create" | "edit";
   /** A Server Action (id already bound for edit) or a stub in tests. */
-  action: (prev: SubscriptionFormState, formData: FormData) => Promise<SubscriptionFormState>;
+  action?: (prev: SubscriptionFormState, formData: FormData) => Promise<SubscriptionFormState>;
+  /** Public demo: no form action, nothing submits; the button is disabled and a note links to sign-in. */
+  readOnly?: boolean;
   initialValues: FormValues;
   lookups: { categories: LookupOption[]; paymentMethods: LookupOption[] };
   cancelHref: string;
@@ -54,6 +56,7 @@ const FIELD_LABELS: Record<string, string> = {
   last_renewal_date: "Billing date (or trial end date)",
 };
 
+const noopAction = async (prev: SubscriptionFormState) => prev;
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const inputClass = "input";
 
@@ -118,6 +121,7 @@ function Field({
 export function SubscriptionForm({
   mode,
   action,
+  readOnly,
   initialValues,
   lookups,
   cancelHref,
@@ -129,7 +133,7 @@ export function SubscriptionForm({
   missingFields,
   confidenceFlags,
 }: SubscriptionFormProps) {
-  const [state, formAction, pending] = useActionState(action, INITIAL_FORM_STATE);
+  const [state, formAction, pending] = useActionState(action ?? noopAction, INITIAL_FORM_STATE);
   // Controlled, so React's post-action form reset cannot wipe what the user typed.
   const [inner, setInner] = useState<FormValues>(initialValues);
   const vals = values ?? inner;
@@ -172,7 +176,10 @@ export function SubscriptionForm({
       : [];
 
   return (
-    <form action={formAction} className="flex flex-col gap-3">
+    <form
+      action={readOnly ? undefined : formAction}
+      onSubmit={readOnly ? (e) => e.preventDefault() : undefined}
+      className="flex flex-col gap-3">
       {mode === "edit" && !missingFields && missing.length > 0 && (
         <p className="rounded-control border border-warn-line bg-warn-bg p-3 text-sm text-warn-ink">
           Still missing: {missing.map((f) => FIELD_LABELS[f] ?? f).join(", ")}. You can save without them, but this
@@ -316,7 +323,7 @@ export function SubscriptionForm({
       <div className="flex items-center gap-4 pb-8 pt-1">
         <button
           type="submit"
-          disabled={pending || submitDisabled}
+          disabled={readOnly || pending || submitDisabled}
           className="btn-primary"
         >
           {pending ? "Saving..." : (submitLabel ?? (mode === "create" ? "Add subscription" : "Save changes"))}
@@ -325,6 +332,11 @@ export function SubscriptionForm({
           Cancel
         </Link>
       </div>
+      {readOnly && (
+        <p className="-mt-6 pb-8 text-xs text-mid">
+          Demo: <Link href="/login" className="link">sign in</Link> to approve or reject.
+        </p>
+      )}
     </form>
   );
 }

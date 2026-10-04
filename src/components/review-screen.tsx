@@ -17,8 +17,13 @@ export interface ReviewScreenProps {
   /** Required fields still empty in initialValues: fixed at load, so answered questions stay visible. */
   questions: RequiredField[];
   lookups: { categories: LookupOption[]; paymentMethods: LookupOption[] };
-  approveAction: (prev: SubscriptionFormState, formData: FormData) => Promise<SubscriptionFormState>;
-  rejectAction: () => Promise<void>;
+  /** Omitted in the public demo (readOnly). */
+  approveAction?: (prev: SubscriptionFormState, formData: FormData) => Promise<SubscriptionFormState>;
+  rejectAction?: () => Promise<void>;
+  /** Public demo: answers work in client state only; no actions, no Reject, Approve disabled. */
+  readOnly?: boolean;
+  /** Where Cancel / back goes; defaults to the signed-in queue. */
+  backHref?: string;
 }
 
 export function ReviewScreen({
@@ -30,6 +35,8 @@ export function ReviewScreen({
   lookups,
   approveAction,
   rejectAction,
+  readOnly,
+  backHref = "/review",
 }: ReviewScreenProps) {
   const [vals, setVals] = useState<FormValues>(initialValues);
   const allAnswered = questions.every((f) => isAnswered(vals, f));
@@ -57,11 +64,12 @@ export function ReviewScreen({
       <SubscriptionForm
         mode="create"
         action={approveAction}
+        readOnly={readOnly}
         initialValues={initialValues}
         values={vals}
         onValuesChange={setVals}
         lookups={lookups}
-        cancelHref="/review"
+        cancelHref={backHref}
         hideStatus
         missingFields={openFormFields(questions, vals)}
         submitLabel="Approve"
@@ -69,6 +77,7 @@ export function ReviewScreen({
         confidenceFlags={flagsFor(proposal.draft.fieldConfidence)}
       />
 
+      {!readOnly && (
       <form action={rejectAction} className="pb-8">
         <button
           type="submit"
@@ -78,6 +87,7 @@ export function ReviewScreen({
         </button>
         <p className="mt-1 text-xs text-mid">Rejecting discards this proposal. Nothing is added to your list.</p>
       </form>
+      )}
     </div>
   );
 }

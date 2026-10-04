@@ -5,7 +5,7 @@ import { todayIn } from "@/lib/dates/plain-date";
 import { DEFAULT_ALERT_OFFSETS } from "@/lib/domain/alerts";
 import { listHref, parseListFilters } from "@/lib/domain/filters";
 import { TABS_COOKIE, tabsEnabledFrom } from "@/lib/tabs-pref";
-import { demoView } from "./demo-data";
+import { demoProposals, demoView } from "./demo-data";
 
 // Reading searchParams makes this render per request, so "today" is never stale.
 export default async function DemoPage({ searchParams }: PageProps<"/demo">) {
@@ -17,9 +17,15 @@ export default async function DemoPage({ searchParams }: PageProps<"/demo">) {
   const showArchived = show === "cancelled";
   const today = todayIn("Europe/Berlin", new Date());
   const { groups, totals } = demoView(today);
+  const pendingCount = demoProposals(today).length;
 
   return (
     <main className="flex flex-1 flex-col">
+      {pendingCount > 0 && (
+        <Link href="/demo/review" className="btn-primary mb-4 w-full">
+          Review ({pendingCount})
+        </Link>
+      )}
       <RenewalsList
         groups={groups}
         totals={totals}

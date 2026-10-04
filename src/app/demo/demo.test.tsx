@@ -1,9 +1,14 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { RenewalsList } from "@/components/renewals-list";
 import { SubscriptionDetail } from "@/components/subscription-detail";
 import { DEFAULT_ALERT_OFFSETS } from "@/lib/domain/alerts";
-import { demoRow, demoView } from "./demo-data";
+import { ReviewScreen } from "@/components/review-screen";
+import { missingFromValues, proposalFormValues } from "@/components/review-values";
+import { DEMO_LOOKUPS, demoProposal, demoProposals, demoRow, demoView } from "./demo-data";
+import DemoReviewQueuePage from "./review/page";
+
+vi.mock("next/server", () => ({ connection: async () => {} }));
 
 afterEach(cleanup);
 const TODAY = "2026-10-02";
@@ -53,5 +58,47 @@ describe("demo detail", () => {
     render(<SubscriptionDetail row={demoRow("1", TODAY)!} />);
     expect(screen.queryByText(/Edit/)).toBeNull();
     expect(screen.queryAllByRole("link")).toHaveLength(0);
+  });
+});
+
+describe("demo review queue", () => {
+  const view = (key: string) => {
+    const f = demoProposal(key, TODAY)!;
+    const initialValues = proposalFormValues(f.proposal, f.existing);
+    return render(
+      <ReviewScreen readOnly backHref="/demo/review" proposal={f.proposal}
+        updatesName={f.existing?.subscription.name ?? null} captureText={f.captureText}
+        initialValues={initialValues} questions={missingFromValues(initialValues)} lookups={DEMO_LOOKUPS} />,
+    );
+  };
+
+  it("has three proposals P1-P3 and rejects unknown keys", () => {
+    expect(demoProposals(TODAY).map((p) => p.key)).toEqual(["P1", "P2", "P3"]);
+    expect(demoProposal("P9", TODAY)).toBeUndefined();
+  });
+
+  it("queue page lists 3 proposals linking under /demo/review", async () => {
+    render(await DemoReviewQueuePage());
+    const links = screen.getAllByRole("link").filter((a) => a.getAttribute("href")?.startsWith("/demo/review/"));
+    expect(links.map((a) => a.getAttribute("href"))).toEqual(["/demo/review/P1", "/demo/review/P2", "/demo/review/P3"]);
+  });
+
+  it("P1 asks the billing-cycle question, marked Missing", () => {
+    const { container } = view("P1");
+    expect(container.textContent).toMatch(/Billing cycle/);
+    expect(screen.getAllByText(/Missing/).length).toBeGreaterThan(0);
+  });
+
+  it("has no enabled Approve and no Reject", () => {
+    view("P1");
+    const approve = screen.getByRole("button", { name: "Approve" }) as HTMLButtonElement;
+    expect(approve.disabled).toBe(true);
+    expect(screen.queryByRole("button", { name: /reject/i })).toBeNull();
+    expect(screen.getByText(/sign in/i).getAttribute("href")).toBe("/login");
+  });
+
+  it("P2 shows the update notice", () => {
+    view("P2");
+    expect(screen.getByText(/This will update CodePilot Pro/)).toBeTruthy();
   });
 });
