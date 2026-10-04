@@ -3,7 +3,7 @@ import { compare, diffDays } from "@/lib/dates/plain-date";
 import { isArchived, isEnding, isTrial, needsUpdate } from "./flags";
 import { cancelBy, effectiveNotice } from "./notice";
 import { priceRises, renewalAmountCents } from "./pricing";
-import { isActiveTrial, nextRenewal } from "./schedule";
+import { nextRenewal } from "./schedule";
 import type { ComputedSubscription, PlainDate, SubscriptionCore } from "./types";
 
 export function computeSubscription<T extends SubscriptionCore>(
@@ -26,11 +26,8 @@ export function computeSubscription<T extends SubscriptionCore>(
       renewalAmountCents: renewal,
       priceRises: priceRises(input.amountCents, renewal),
       // D4: a future anchor is the first charge of a new plan
-      anchorInFuture:
-        input.status === "confirmed" &&
-        input.lastRenewalDate !== null &&
-        compare(input.lastRenewalDate, today) > 0 &&
-        !isActiveTrial(input, today),
+      // Label only ("Next charge" vs "Last charge"), so it holds for cancelled rows too.
+      anchorInFuture: input.lastRenewalDate !== null && compare(input.lastRenewalDate, today) > 0,
       tags: {
         trial: isTrial(input, today),
         needsUpdate: needsUpdate(input, next),

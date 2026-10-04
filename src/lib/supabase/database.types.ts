@@ -427,10 +427,7 @@ export type Database = {
         Args: { p_fields: Json; p_proposal_id: string }
         Returns: string
       }
-      reject_proposal: {
-        Args: { p_proposal_id: string }
-        Returns: undefined
-      }
+      reject_proposal: { Args: { p_proposal_id: string }; Returns: undefined }
       set_subscription_status: {
         Args: {
           p_access_until?: string

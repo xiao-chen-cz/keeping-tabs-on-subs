@@ -89,6 +89,8 @@ describe("logic-spec §5 edge cases", () => {
     const i = { billingCycle: "yearly", amountCents: 2999, lastRenewalDate: "2026-10-11" } as const;
     expect(calc(i, "2026-10-02").computed.anchorInFuture).toBe(true);
     expect(calc(i, "2026-10-12").computed.anchorInFuture).toBe(false);
+    // A cancelled row with a future billing date still labels it as the next charge.
+    expect(calc({ ...i, status: "cancelled" }, "2026-10-02").computed.anchorInFuture).toBe(true);
   });
 
   it("E11 notice default is flagged, an override is not", () => {
