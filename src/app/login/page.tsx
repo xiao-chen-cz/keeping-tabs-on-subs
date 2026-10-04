@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/dal/auth";
 import { LoginForm } from "./login-form";
@@ -12,6 +13,13 @@ export default async function LoginPage() {
         <p className="text-mid">Private demo. Sign in to continue.</p>
       </div>
       <LoginForm />
+      <p className="border-t border-line pt-4 text-sm text-mid">
+        No account?{" "}
+        <Link href="/demo" className="link">
+          Look around the demo with sample data
+        </Link>
+        , no sign-in needed.
+      </p>
     </main>
   );
 }
