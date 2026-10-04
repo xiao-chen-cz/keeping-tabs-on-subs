@@ -314,8 +314,8 @@ export type Database = {
       }
       subscriptions: {
         Row: {
-          account_label: string | null
           access_until: string | null
+          account_label: string | null
           amount: number | null
           billing_cycle: Database["public"]["Enums"]["billing_cycle"] | null
           cancel_notice_days: number | null
@@ -343,8 +343,8 @@ export type Database = {
           vendor: string | null
         }
         Insert: {
-          account_label?: string | null
           access_until?: string | null
+          account_label?: string | null
           amount?: number | null
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"] | null
           cancel_notice_days?: number | null
@@ -372,8 +372,8 @@ export type Database = {
           vendor?: string | null
         }
         Update: {
-          account_label?: string | null
           access_until?: string | null
+          account_label?: string | null
           amount?: number | null
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"] | null
           cancel_notice_days?: number | null
