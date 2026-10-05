@@ -11,7 +11,9 @@
     "test:watch": "vitest",
     "check-rls": "tsx --env-file=.env.local scripts/check-rls.ts",
     "create-account": "tsx --env-file=.env.local scripts/create-account.ts",
-    "reset-account": "tsx --env-file=.env.local scripts/reset-account.ts"
+    "reset-account": "tsx --env-file=.env.local scripts/reset-account.ts",
+    "bundle:alerts": "sh scripts/bundle-alerts.sh",
+    "check:alerts-fn": "deno check --config scripts/alerts-bundle.deno.json supabase/functions/send-alerts/index.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

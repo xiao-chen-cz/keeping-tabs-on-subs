@@ -50,6 +50,13 @@ Missing, in build order (each part depends on the one before):
 
 ## 6. Part C: daily email job
 
+**Built 2026-10-05 (as decided while building):**
+- Pure logic in `src/lib/alerts-job/digest.ts` (`buildDigest`, `renderDigestEmail`), tested with Vitest. The function imports it through `supabase/functions/send-alerts/shared.bundle.js`, made by `pnpm bundle:alerts` (`deno bundle` with an import map for `@/`); a test fails when the bundle is stale. `pnpm check:alerts-fn` type-checks the function.
+- The function claims rows in `alert_sends` before sending (the unique key stops a second run) and releases them when Brevo fails.
+- pg_cron (`…_alerts_cron.sql`) posts with an `x-cron-secret` header; the function deploys with `verify_jwt = false` (in `supabase/config.toml`) and checks that header. The project URL and the secret come from Vault, so no secret is in git.
+- Secrets: `BREVO_API_KEY`, `CRON_SECRET`, `APP_URL`, `ALERTS_FROM_EMAIL` as Edge Function secrets. Brevo IP blocking stays off (Edge Functions have no fixed IPs).
+- Email links go to `/alerts/[id]` (Part A); a footer links to `/settings`. HTML escapes all user text; only http(s) cancel links are included.
+
 1. `supabase/functions/send-alerts/`: for each user with `alert_channel = 'app_email'`: today in their time zone, load Confirmed rows, compute with the shared domain code, call `alertsToSend` with the offsets already in `alert_sends` for the row's current Cancel-by, collect the hits; if there are none, send nothing; otherwise send **one** email listing them (E46), then insert one `alert_sends` row per hit. A unique-violation on insert means another run got there first: skip.
 2. Shared code: the Edge Function imports the pure modules from `src/lib/domain/` (no Node or Next imports there). **Spike first** (30 min): confirm the Supabase bundler accepts imports outside `supabase/functions/`; fallback is a `scripts/sync-domain.ts` copy step checked by a test that the copy is identical.
 3. Email content per row: name, amount (or Amount → Renewal amount on a price rise), next renewal, cancel-by, days left, cancel URL if known, and Keep / Cancelled links (C5). Plain HTML plus a text part, app name in full ("Keeping Tabs on Subs"), a footer link to `/settings` to switch email off. Open and click tracking off in Brevo (no tracked links or pixels on testers), so Brevo's "branded subdomain" is not needed.

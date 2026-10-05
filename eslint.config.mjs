@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Deno code (Edge Functions), checked with `pnpm check:alerts-fn` instead.
+    "supabase/functions/**",
   ]),
 ]);
 

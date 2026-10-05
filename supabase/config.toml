@@ -411,3 +411,7 @@ enabled = true
 # declarative_schema_path = "./schemas"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# Daily alert email (D21-23 Part C). Called by pg_cron with x-cron-secret, not with a user JWT.
+[functions.send-alerts]
+verify_jwt = false
