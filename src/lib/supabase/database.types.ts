@@ -358,9 +358,9 @@ export type Database = {
       }
       subscriptions: {
         Row: {
-          alert_mode: Database["public"]["Enums"]["alert_mode"]
           access_until: string | null
           account_label: string | null
+          alert_mode: Database["public"]["Enums"]["alert_mode"]
           amount: number | null
           billing_cycle: Database["public"]["Enums"]["billing_cycle"] | null
           cancel_notice_days: number | null
@@ -389,9 +389,9 @@ export type Database = {
           vendor: string | null
         }
         Insert: {
-          alert_mode?: Database["public"]["Enums"]["alert_mode"]
           access_until?: string | null
           account_label?: string | null
+          alert_mode?: Database["public"]["Enums"]["alert_mode"]
           amount?: number | null
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"] | null
           cancel_notice_days?: number | null
@@ -420,9 +420,9 @@ export type Database = {
           vendor?: string | null
         }
         Update: {
-          alert_mode?: Database["public"]["Enums"]["alert_mode"]
           access_until?: string | null
           account_label?: string | null
+          alert_mode?: Database["public"]["Enums"]["alert_mode"]
           amount?: number | null
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"] | null
           cancel_notice_days?: number | null
@@ -501,6 +501,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      undo_keep: { Args: { p_subscription_id: string }; Returns: undefined }
     }
     Enums: {
       alert_channel: "app" | "app_email"
@@ -519,7 +520,11 @@ export type Database = {
       currency: "EUR" | "USD" | "GBP" | "CHF"
       entry_source: "manual" | "seed" | "capture"
       scope: "business" | "personal" | "family"
-      subscription_event_kind: "cancelled" | "reopened" | "kept"
+      subscription_event_kind:
+        | "cancelled"
+        | "reopened"
+        | "kept"
+        | "keep_undone"
       subscription_status: "confirmed" | "cancelled"
     }
     CompositeTypes: {
@@ -668,7 +673,7 @@ export const Constants = {
       currency: ["EUR", "USD", "GBP", "CHF"],
       entry_source: ["manual", "seed", "capture"],
       scope: ["business", "personal", "family"],
-      subscription_event_kind: ["cancelled", "reopened", "kept"],
+      subscription_event_kind: ["cancelled", "reopened", "kept", "keep_undone"],
       subscription_status: ["confirmed", "cancelled"],
     },
   },

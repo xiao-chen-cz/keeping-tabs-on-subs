@@ -56,7 +56,7 @@ export type CaptureInput = (typeof CAPTURE_INPUTS)[number];
 export const CANCEL_CHANNELS = ["website_app", "email", "phone", "letter", "in_person", "other"] as const;
 export type CancelChannel = (typeof CANCEL_CHANNELS)[number];
 
-export const SUBSCRIPTION_EVENT_KINDS = ["cancelled", "reopened", "kept"] as const;
+export const SUBSCRIPTION_EVENT_KINDS = ["cancelled", "reopened", "kept", "keep_undone"] as const;
 export type SubscriptionEventKind = (typeof SUBSCRIPTION_EVENT_KINDS)[number];
 
 /** Per subscription (D13): Remind, or Keep quietly. */

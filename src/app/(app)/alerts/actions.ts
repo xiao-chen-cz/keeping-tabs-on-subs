@@ -1,6 +1,6 @@
 "use server";
 import { notFound, redirect } from "next/navigation";
-import { keepRenewal, setAlertMode } from "@/lib/dal/alerts";
+import { keepRenewal, setAlertMode, undoKeep } from "@/lib/dal/alerts";
 import { requireUser } from "@/lib/dal/auth";
 import { getProfile } from "@/lib/dal/profile";
 import { getSubscription } from "@/lib/dal/subscriptions";
@@ -28,4 +28,18 @@ export async function answerQuietOfferAction(id: string, accept: boolean): Promi
   await requireUser();
   await setAlertMode(id, accept ? "quiet" : "remind", { offerAnswered: true });
   redirect(accept ? `/?quiet=${id}` : "/");
+}
+
+/** Bind id and where to return first. Undo a Keep (mistap, or reminders wanted after all). */
+export async function undoKeepAction(id: string, returnTo: "list" | "detail"): Promise<void> {
+  await requireUser();
+  await undoKeep(id);
+  redirect(returnTo === "detail" ? `/subscriptions/${id}` : "/");
+}
+
+/** Bind id first. Undo "Keep quietly" from the list notice; the offer stays answered. */
+export async function undoQuietAction(id: string): Promise<void> {
+  await requireUser();
+  await setAlertMode(id, "remind");
+  redirect("/");
 }

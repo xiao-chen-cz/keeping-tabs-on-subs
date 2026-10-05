@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { DueSoon } from "./due-soon";
-import { AlertActions, KeptNotice } from "./alert-actions";
+import { AlertActions, KeptForRenewal, KeptNotice, QuietNotice } from "./alert-actions";
 import { computeSubscription } from "@/lib/domain/compute";
 import { core } from "@/lib/domain/fixtures";
 
@@ -36,15 +36,28 @@ describe("Due soon actions", () => {
 
 describe("KeptNotice", () => {
   it("confirms the Keep without an offer", () => {
-    render(<KeptNotice name="Notely" cancelBy="2026-10-04" />);
+    render(<KeptNotice name="Notely" cancelBy="2026-10-04" undo={noop} />);
+    expect(screen.getByRole("button", { name: "Undo keep Notely" })).toBeTruthy();
     expect(screen.getByRole("status").textContent).toContain("Kept Notely");
     expect(screen.queryByText(/Stop reminding/)).toBeNull();
   });
 
   it("asks once whether to stop reminders (E44)", () => {
-    render(<KeptNotice name="Notely" cancelBy="2026-10-04" offer={{ accept: noop, decline: noop }} />);
+    render(<KeptNotice name="Notely" cancelBy="2026-10-04" undo={noop} offer={{ accept: noop, decline: noop }} />);
     expect(screen.getByText("Stop reminding you about Notely?")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Keep quietly" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Keep reminding me" })).toBeTruthy();
+  });
+});
+
+describe("Undo", () => {
+  it("QuietNotice offers Undo", () => {
+    render(<QuietNotice name="Notely" undo={noop} />);
+    expect(screen.getByRole("button", { name: "Undo keep quietly for Notely" })).toBeTruthy();
+  });
+  it("KeptForRenewal offers Remind me again", () => {
+    render(<KeptForRenewal cancelBy="2026-10-04" remindAgain={noop} />);
+    expect(screen.getByText(/no reminders before the cancel-by 4 Oct/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Remind me again" })).toBeTruthy();
   });
 });

@@ -22,8 +22,9 @@ function Item({ label, children }: { label: string; children: ReactNode }) {
 
 /** "Cancelled on 4 Oct 2026 via Website / app · ref ABC-123" / "Reopened on 5 Oct 2026" / "Kept on 1 Oct 2026 · cancel-by 4 Oct 2026". */
 export function describeEvent(e: SubscriptionEvent): string {
-  if (e.kind === "kept") {
-    return `Kept on ${formatDayLong(e.occurredOn)}${e.cancelBy ? ` · cancel-by ${formatDayLong(e.cancelBy)}` : ""}`;
+  if (e.kind === "kept" || e.kind === "keep_undone") {
+    const verb = e.kind === "kept" ? "Kept" : "Reminders back on";
+    return `${verb} on ${formatDayLong(e.occurredOn)}${e.cancelBy ? ` · cancel-by ${formatDayLong(e.cancelBy)}` : ""}`;
   }
   const verb = e.kind === "cancelled" ? "Cancelled" : "Reopened";
   let line = `${verb} on ${formatDayLong(e.occurredOn)}`;

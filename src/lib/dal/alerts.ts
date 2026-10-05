@@ -11,17 +11,25 @@ export async function keepRenewal(subscriptionId: string, cancelBy: PlainDate): 
   if (error) throw new Error(`Could not keep: ${error.message}`);
 }
 
-/** How many renewals of this row the user has kept (for the quiet offer, E44). */
+/** Undo a Keep: reminders resume for this renewal; the undo is logged as its own event (undo_keep). */
+export async function undoKeep(subscriptionId: string): Promise<void> {
+  await requireUser();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("undo_keep", { p_subscription_id: subscriptionId });
+  if (error) throw new Error(`Could not undo: ${error.message}`);
+}
+
+/** Keeps of this row that were not undone (for the quiet offer, E44). */
 export async function countKept(subscriptionId: string): Promise<number> {
   await requireUser();
   const supabase = await createClient();
-  const { count, error } = await supabase
+  const { data, error } = await supabase
     .from("subscription_events")
-    .select("id", { count: "exact", head: true })
+    .select("kind")
     .eq("subscription_id", subscriptionId)
-    .eq("kind", "kept");
+    .in("kind", ["kept", "keep_undone"]);
   if (error) throw new Error(`Could not count keeps: ${error.message}`);
-  return count ?? 0;
+  return data.reduce((n, e) => n + (e.kind === "kept" ? 1 : -1), 0);
 }
 
 /** Answer to the quiet offer, or a change on the detail page. Records that the offer was shown when asked. */

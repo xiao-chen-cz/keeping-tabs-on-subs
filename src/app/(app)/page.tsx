@@ -15,7 +15,7 @@ import { listHref, parseListFilters } from "@/lib/domain/filters";
 import { TABS_COOKIE, tabsEnabledFrom } from "@/lib/tabs-pref";
 import { totalsByCurrency } from "@/lib/domain/totals";
 import { groupAndSort } from "@/lib/domain/upcoming";
-import { answerQuietOfferAction, keepRenewalAction } from "./alerts/actions";
+import { answerQuietOfferAction, keepRenewalAction, undoKeepAction, undoQuietAction } from "./alerts/actions";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
   await requireUser();
@@ -51,6 +51,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         <KeptNotice
           name={keptRow.name}
           cancelBy={keptRow.keptForCancelBy}
+          undo={undoKeepAction.bind(null, keptRow.id, "list")}
           offer={
             offerQuiet
               ? {
@@ -61,7 +62,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           }
         />
       )}
-      {quietRow && <QuietNotice name={quietRow.name} />}
+      {quietRow && <QuietNotice name={quietRow.name} undo={undoQuietAction.bind(null, quietRow.id)} />}
       <RenewalsList
         groups={groups}
         totals={totals}

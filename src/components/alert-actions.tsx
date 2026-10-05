@@ -26,18 +26,23 @@ const noticeClass = "mb-4 rounded-control border border-green-ink/30 bg-green-li
 export function KeptNotice({
   name,
   cancelBy,
+  undo,
   offer,
 }: {
   name: string;
   cancelBy: string | null;
+  undo: () => Promise<void>;
   offer?: { accept: () => Promise<void>; decline: () => Promise<void> };
 }) {
   return (
     <div role="status" className={noticeClass}>
-      <p>
-        Kept {name}
-        {cancelBy ? ` (cancel-by ${formatDay(cancelBy)})` : ""}. No more reminders for this renewal.
-      </p>
+      <div className="flex items-start justify-between gap-3">
+        <p>
+          Kept {name}
+          {cancelBy ? ` (cancel-by ${formatDay(cancelBy)})` : ""}. No more reminders for this renewal.
+        </p>
+        <UndoButton action={undo} label={`Undo keep ${name}`} />
+      </div>
       {offer && (
         <div className="mt-2 border-t border-green-ink/20 pt-2">
           <p className="font-medium">Stop reminding you about {name}?</p>
@@ -61,10 +66,37 @@ export function KeptNotice({
 }
 
 /** Shown on the list after switching a row to Keep quietly. */
-export function QuietNotice({ name }: { name: string }) {
+export function QuietNotice({ name, undo }: { name: string; undo: () => Promise<void> }) {
   return (
-    <p role="status" className={noticeClass}>
-      {name} is now on Keep quietly. You&apos;ll still be alerted to captured price changes and promo endings.
-    </p>
+    <div role="status" className={`${noticeClass} flex items-start justify-between gap-3`}>
+      <p>
+        {name} is now on Keep quietly. You&apos;ll still be alerted to captured price changes and promo endings.
+      </p>
+      <UndoButton action={undo} label={`Undo keep quietly for ${name}`} />
+    </div>
+  );
+}
+
+function UndoButton({ action, label }: { action: () => Promise<void>; label: string }) {
+  return (
+    <form action={action} className="shrink-0">
+      <button type="submit" className="link -my-2 min-h-10 font-medium text-green-ink" aria-label={label}>
+        Undo
+      </button>
+    </form>
+  );
+}
+
+/** Detail page: the current renewal is kept. Reminders can be switched back on until the cancel-by. */
+export function KeptForRenewal({ cancelBy, remindAgain }: { cancelBy: string; remindAgain: () => Promise<void> }) {
+  return (
+    <div className="mb-3 flex items-center justify-between gap-3 rounded-control border border-line bg-surface p-3 text-sm">
+      <p className="text-mid">Kept for this renewal: no reminders before the cancel-by {formatDay(cancelBy)}.</p>
+      <form action={remindAgain} className="shrink-0">
+        <button type="submit" className="btn-secondary min-h-10 px-3 text-sm">
+          Remind me again
+        </button>
+      </form>
+    </div>
   );
 }

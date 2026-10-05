@@ -256,6 +256,9 @@ async function main() {
       const { data: before } = await admin.from("subscriptions").select("kept_for_cancel_by").eq("id", bSubId).single();
       const { error } = await client.rpc("keep_renewal", { p_subscription_id: bSubId, p_cancel_by: "2099-01-01" });
       const { data: after } = await admin.from("subscriptions").select("kept_for_cancel_by").eq("id", bSubId).single();
+      await client.rpc("undo_keep", { p_subscription_id: bSubId });
+      const { data: afterUndo } = await admin.from("subscriptions").select("kept_for_cancel_by").eq("id", bSubId).single();
+      report("A cannot undo a Keep on B's subscription", afterUndo?.kept_for_cancel_by === before?.kept_for_cancel_by, "kept date changed");
       report("A cannot keep B's subscription", !!error && after?.kept_for_cancel_by === before?.kept_for_cancel_by, error ? "kept date changed" : "rpc succeeded");
     }
     if (aSubId) {
@@ -320,6 +323,14 @@ async function main() {
           !keep1.error && !keep2.error && kept.data?.length === 1 && kept.data[0].cancel_by === "2026-10-29",
           `${keep1.error?.message ?? ""} ${keep2.error?.message ?? ""} kept=${JSON.stringify(kept.data)}`,
         );
+        const undo = await client.rpc("undo_keep", { p_subscription_id: id });
+        const afterUndo = await admin.from("subscriptions").select("kept_for_cancel_by").eq("id", id).single();
+        const undone = await admin.from("subscription_events").select("cancel_by").eq("subscription_id", id).eq("kind", "keep_undone");
+        report(
+          "Control: A can undo own Keep; the undo is logged with its cancel-by",
+          !undo.error && afterUndo.data?.kept_for_cancel_by === null && undone.data?.length === 1 && undone.data[0].cancel_by === "2026-10-29",
+          `${undo.error?.message ?? ""} kept=${afterUndo.data?.kept_for_cancel_by} undone=${JSON.stringify(undone.data)}`,
+        );
         const noCb = await client.from("subscription_events").insert({ subscription_id: id, kind: "kept", occurred_on: "2026-10-01" }).select("id");
         if (noCb.data?.length) eventIds.push(...noCb.data.map((r) => r.id));
         report("A kept event without cancel_by is refused", !!noCb.error, "insert succeeded");
@@ -334,6 +345,7 @@ async function main() {
         reject_proposal: await anon.rpc("reject_proposal", { p_proposal_id: fakeId }),
         set_subscription_status: await anon.rpc("set_subscription_status", { p_subscription_id: fakeId, p_status: "confirmed" }),
         keep_renewal: await anon.rpc("keep_renewal", { p_subscription_id: fakeId, p_cancel_by: "2026-01-01" }),
+        undo_keep: await anon.rpc("undo_keep", { p_subscription_id: fakeId }),
       };
       for (const [name, res] of Object.entries(calls)) {
         report(`anon cannot execute ${name}`, res.error?.code === "42501", res.error?.message ?? "rpc succeeded");

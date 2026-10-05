@@ -35,10 +35,11 @@ Missing, in build order (each part depends on the one before):
 ## 4. Part A: Keep and Cancelled
 
 1. Action `keepRenewal(subscriptionId, cancelBy)`: recompute the row for today, refuse with "out of date" when the computed Cancel-by differs (E47), else call `keep_renewal`. Returns whether the Keep offer should show (Remind row, earlier `kept` event exists, `quiet_offer_shown_at` null).
-2. Due soon rows get two buttons: **Keep** (immediate, row leaves Due soon with an undo toast) and **Cancelled** (opens the existing cancel sheet with today and, when a cancel URL is known, Website / app pre-selected).
-3. Keep offer sheet (E44): "Stop reminding you about <name>? You'll still be alerted to captured price changes and promo endings." Yes → `alert_mode = quiet`; either answer sets `quiet_offer_shown_at`.
-4. `/alerts/[id]` confirm page for email links: shows the row, its Cancel-by and the action from `do`, with one confirm button; stale `cb` shows "this reminder is out of date" and the row.
-5. `/demo` stays read-only: no buttons.
+2. Due soon rows get two buttons: **Keep** (immediate; the row leaves Due soon and a notice confirms it, with Undo) and **Cancelled** (opens the existing cancel sheet with today and, when a cancel URL is known, Website / app pre-selected).
+3. Undo (added 2026-10-05, migration `…_undo_keep.sql`): an Undo on the Kept notice and "Remind me again" on the detail page while the current renewal is kept; RPC `undo_keep` clears `kept_for_cancel_by` and logs `keep_undone`. Undo on the Keep quietly notice.
+4. Keep offer sheet (E44): "Stop reminding you about <name>? You'll still be alerted to captured price changes and promo endings." Yes → `alert_mode = quiet`; either answer sets `quiet_offer_shown_at`.
+5. `/alerts/[id]` confirm page for email links: shows the row, its Cancel-by and the action from `do`, with one confirm button; stale `cb` shows "this reminder is out of date" and the row.
+6. `/demo` stays read-only: no buttons.
 
 ## 5. Part B: quiet mode and alert channel
 
