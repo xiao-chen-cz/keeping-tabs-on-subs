@@ -36,6 +36,8 @@ One record per subscription. "Input" fields are entered by a person or by the Gm
 | V | Price rises? | Computed | enum Yes/No | §2.7 |
 | W | Access until | Input | date | Only when Status = Cancelled: the vendor keeps access until this date (D6). Not in the Sheet yet; added in the app |
 | — | Cancellation record | Input (app only) | event | When and how the user cancelled with the vendor: date, channel, optional confirmation reference and note, optional linked capture of the confirmation (D12). Append-only, kept even if the row is reopened |
+| — | Alert mode | Input (app only) | enum | `Remind` (default) or `Keep quietly` (D13). Per subscription |
+| — | Kept for | Input (app only) | date | The Cancel-by date the user tapped Keep for (§3.2). Set by the Keep action, never typed |
 
 "Today" = the current date in the Sheet's time zone (see D8). All tests must inject a fixed "today".
 
@@ -98,18 +100,28 @@ This applies only to the *next* renewal, not to later ones.
 - Highlight: Renewal amount and Price rises? cells are highlighted (#D9D2E9) when Price rises? = Yes. Columns A–H have their own conditional formats; their rules are not documented here.
 
 ### 3.2 Reminders (D10, decided 2026-10-02)
-Per-user list of alert offsets in days before Cancel-by, default **3, 1, 0**. Alerts are in-app (due-soon view) and sent by email (committed for D21–23): a daily job sends one email per row and offset, with Keep and Cancelled links.
+Per-user list of alert offsets in days before Cancel-by, default **3, 1, 0**. Alerts are always in-app (Due soon). Per user, they can also go by email (D14, default on): a daily job sends **at most one email per user per day**, listing every row that reached an offset that day; on a day with nothing due, no email is sent, each with Keep and Cancelled links.
 
 **When an alert fires.** For each active row (Status ≠ Cancelled, Next renewal set, not Kept): once Days until cancel-by L reaches an offset (L ≤ 3, L ≤ 1, L ≤ 0), that offset's alert is sent once per renewal. If several offsets are reached at once (row added late, job missed a day), only the smallest reached offset is sent. No alerts once L < 0 (deadline passed); the row stays in Upcoming.
 
 **Content.** Name, Amount + Currency, Next renewal, Cancel-by, Days left, cancel URL if known. If Price rises? = Yes, the same alert states Amount → Renewal amount. There is no separate price alert.
 
 **Actions on an alert (one tap, in the app or from the email link).**
-- **Keep:** "renewal is fine". Silences all remaining alerts for this renewal, including price-rise nudges. Stored as the Cancel-by date it applies to (`kept_for_cancel_by`). It expires by itself: after the renewal the next Cancel-by is a different date, so alerts resume for the following renewal.
-- **Cancelled:** sets Status = Cancelled. The row leaves Upcoming and alerts stop. The user cancels with the vendor themselves (cancel URL shown; no automatic cancellation).
+- **Keep:** "renewal is fine". Silences all remaining alerts for this renewal, including price-rise nudges. Stored as the Cancel-by date it applies to (`kept_for_cancel_by`) and logged as a `kept` event. It expires by itself: after the renewal the next Cancel-by is a different date, so alerts resume for the following renewal. Keep is optional: doing nothing also means the subscription renews.
+- **Cancelled:** opens the cancel sheet (D12) with Cancelled on = today and the channel pre-selected as Website / app when a cancel URL is known; the user confirms. Sets Status = Cancelled, the row leaves Upcoming and alerts stop. The user cancels with the vendor themselves (cancel URL shown; no automatic cancellation). D12's proof record wins over a literal one tap.
 - No reply: alerts continue at the remaining offsets.
+- **Email links** open the app (login first if needed) on a confirm screen for that row and Cancel-by; the link itself never changes data, because mail scanners open links. A link whose Cancel-by no longer matches the row says the reminder is out of date and shows the row (E47).
 
-**Rules.** Changing Cancel-by (new anchor, notice or plan change) invalidates Keep and resets which offsets were sent. Rows flagged Needs update get no cancel-by alerts (they have no date); they are flagged in the app. Active trials alert on the Trial ends date like any renewal. "Today" uses the time zone from D8.
+**Alert mode (D13).** Per subscription, `Remind` (default for every new row) or `Keep quietly`. A quiet row:
+- gets **no routine alerts** when its cycle is Monthly or Every 4 weeks;
+- gets **one alert per renewal**, at the user's largest offset only, when its cycle is Quarterly or Yearly (E40, E41, E48);
+- always alerts at every offset, like `Remind`, when Price rises? = Yes (a known promo end or a captured price change) or while a trial is active (E39, E42);
+- stays in Upcoming with a quiet mark, never in Due soon unless one of the rules above applies.
+The app only knows about price changes it has been given (promo dates, captures, edits); a vendor's price rise that was never captured is invisible until a receipt is captured. The setting's help text says so.
+
+**Keep offer.** When the user taps Keep on a `Remind` row that already has an earlier `kept` event, the app offers once: "Stop reminding you about <name>? You'll still be alerted to captured price changes and promo endings." Accept sets `Keep quietly`; either answer records that the offer was shown, and it is not offered again for that row (E44).
+
+**Rules.** Changing Cancel-by (new anchor, notice or plan change) invalidates Keep and resets which offsets were sent. Rows flagged Needs update get no cancel-by alerts (they have no date); they are flagged in the app, whatever the alert mode. Active trials alert on the Trial ends date like any renewal. "Today" uses the time zone from D8. The email job records each sent row, Cancel-by and offset, so a rerun on the same day sends nothing twice (E46); a row that reaches an offset while the user has email off is not sent later when email is switched on.
 
 ### 3.3 Totals (D7)
 Running cost shown per currency, never converted: one monthly and one yearly total for EUR and one for USD. Included: Status = Confirmed and no active trial. Excluded: Cancelled (including Ending), active trials and rows without a cycle (Needs update). Based on Amount (the current price), not Renewal amount. Monthly equivalent per row: Monthly × 1, Quarterly ÷ 3, Yearly ÷ 12, Every 4 weeks × 13 ÷ 12. Yearly total = monthly total × 12. Other currencies are listed as their own total.
@@ -179,6 +191,18 @@ Today = 2026-10-01 unless stated. "Current" is the Sheet's output; where a Decis
 | E35 | Access ended | B Cancelled, W 2026-12-31, today 2027-01-01 | Only in the cancelled/archive filter | — |
 | E36 | Totals | EUR: Monthly 10, Yearly 120, Every 4 weeks 2 | EUR monthly 10 + 10 + 2.17 = 22.17; yearly 266.00 | — |
 | E37 | Active trial in totals | Active trial with Amount 8.99 | Not counted until Trial ends passes | — |
+| E38 | Quiet, monthly | Monthly, Keep quietly, V No, L 3 | No alert, not in Due soon; row in Upcoming with quiet mark | D13 |
+| E39 | Quiet, price rise | Monthly, Keep quietly, V Yes, cancel-by 2026-10-04 | Alerts on 2026-10-01 (3), 2026-10-03 (1), 2026-10-04 (0), each showing Amount → Renewal amount | D13 |
+| E40 | Quiet, yearly | Yearly, Keep quietly, V No, cancel-by 2026-10-04, offsets 3,1,0 | One alert on 2026-10-01 (3); none at 1 or 0 | D13 |
+| E41 | Quiet, yearly, added late | Yearly, Keep quietly, V No, L 1 | One alert (offset 3 reached), not zero | D13 |
+| E42 | Quiet during a trial | Keep quietly, Trial ends 2026-10-07, notice 3 | Alerts at 3, 1, 0 before cancel-by 2026-10-04, like Remind; after the trial the quiet rule applies | D13 |
+| E43 | Quiet, Needs update | Keep quietly, no Next renewal | Flagged Needs update and sorted to the top, as for Remind | D13 |
+| E44 | Keep offer | Remind, Keep tapped at the 2026-09 renewal and again at the 2026-10 renewal | Offer shown once after the second Keep; never again for this row, accepted or not | D13 |
+| E45 | Email off | Alert channel App only, L 3 | In Due soon; no email; nothing recorded as sent | D14 |
+| E46 | Bundled email, rerun | Two rows reach an offset the same day; job runs twice | One email listing both rows; the second run sends nothing | D14 |
+| E46b | Nothing due | Email on; no row reaches an offset today | No email | D14 |
+| E47 | Stale email link | Email Keep link for cancel-by 2026-10-04; row's cancel-by is now 2026-10-11 | Keep not applied; "this reminder is out of date", row shown | — |
+| E48 | Quiet, custom offsets | Yearly, Keep quietly, offsets 7,3 | One alert at offset 7 only | D13 |
 
 ## 6. Decisions to settle in the Sheet before the build
 
@@ -191,7 +215,9 @@ Today = 2026-10-01 unless stated. "Current" is the Sheet's output; where a Decis
 - **D7 Currency: DECIDED 2026-10-02.** Totals per currency (EUR and USD separately), monthly and yearly, no conversion (§3.3). Open only if a combined total in one base currency is wanted later (needs a rate source).
 - **D8 Time zone: DECIDED 2026-10-02.** Not relevant at day granularity: "today" is the user's local date, default Europe/Berlin, same value for the app and the reminder job. Tests inject a fixed today.
 - **D9 After a promo: DECIDED 2026-10-02.** The price must be updated: when the first full-price receipt arrives, the review queue proposes a new Amount and clears Regular price / Promo ends; the user approves. Until then Price rises? stays Yes (E23) so alerts keep showing the higher price. Not chosen: deriving the current price automatically from Regular price after the promo date.
-- **D10 Reminders: DECIDED 2026-10-02.** Alerts at 3, 1 and 0 days before Cancel-by (per-user list, default 3,1,0), each once per renewal; Keep or Cancelled in one tap stops the rest; price rises are part of the same alert, not a separate one (§3.2, E28–E33).
+- **D10 Reminders: DECIDED 2026-10-02.** Alerts at 3, 1 and 0 days before Cancel-by (per-user list, default 3,1,0), each once per renewal; Keep or Cancelled in one tap stops the rest; price rises are part of the same alert, not a separate one (§3.2, E28–E33). Amended 2026-10-05: Cancelled from an alert opens the D12 cancel sheet pre-filled (proof record over a literal one tap); emails are bundled into at most one per user per day (none on a day with nothing due) instead of one per row.
+- **D13 Alert mode: DECIDED 2026-10-05.** Per subscription, `Remind` (default) or `Keep quietly`. Quiet = no routine reminders for Monthly / Every 4 weeks, one reminder at the largest offset for Quarterly / Yearly; price rises and active trials always alert at every offset; Needs update is unaffected. After a second Keep on the same row the app offers quiet mode once. Not chosen: snooze timers ("mute for 3 months") and a three-level setting. Known limit: the app only sees price changes it was given (§3.2, E38–E44, E48).
+- **D14 Alert channel: DECIDED 2026-10-05.** Per user, `App only` or `App and email` (default). In-app alerts cannot be switched off. Emails go to the account's login address (§3.2, E45–E46).
 - **D11 Status list: DECIDED 2026-10-02.** Status = Confirmed, Cancelled; Billing cycle per D3.
 - **D12 Cancellation record: DECIDED 2026-10-04.** Every change to Cancelled records, as proof, when the user cancelled with the vendor and how: `cancelled_on` (date, defaults to today, user can correct it), `channel` (Website / app, Email, Phone, Letter, In person, Other), optional `reference` (confirmation or ticket number, never card or account numbers) and `note`, optional link to a capture of the confirmation (email or screenshot), and `recorded_at` (timestamp, set by the system). Stored as an append-only event log (no edit, no delete), so reopening or editing the subscription never erases it; reopening (Cancelled → Confirmed) is recorded as its own event. The detail page shows the history. The Sheet does not track this.
 
