@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { AlertActions, KeptNotice, QuietNotice } from "@/components/alert-actions";
 import { RenewalsList } from "@/components/renewals-list";
+import { ReviewInbox } from "@/components/review-inbox";
 import { countKept } from "@/lib/dal/alerts";
 import { requireUser } from "@/lib/dal/auth";
 import { countPendingProposals } from "@/lib/dal/proposals";
@@ -42,11 +43,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
   return (
     <main className="flex flex-1 flex-col">
-      {pendingCount > 0 && (
-        <Link href="/review" className="btn-primary mb-4 w-full">
-          Review ({pendingCount})
-        </Link>
-      )}
       {keptRow && (
         <KeptNotice
           name={keptRow.name}
@@ -69,6 +65,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         hrefFor={(r) => subscriptionHref(r.input.id, r.computed.tags.needsUpdate)}
         addHref="/subscriptions/new"
         showArchived={showArchived}
+        inbox={<ReviewInbox count={pendingCount} href="/review" />}
         alertOffsets={profile.reminderOffsets}
         dueActionsFor={(r, cancelBy) => (
           <AlertActions

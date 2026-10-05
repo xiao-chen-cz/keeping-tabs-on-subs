@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { RenewalsList } from "@/components/renewals-list";
+import { ReviewInbox } from "@/components/review-inbox";
 import { SubscriptionDetail } from "@/components/subscription-detail";
 import { DEFAULT_ALERT_OFFSETS } from "@/lib/domain/alerts";
 import { ReviewScreen } from "@/components/review-screen";
@@ -124,5 +125,27 @@ describe("demo review queue", () => {
   it("P1 (new entry) has no separate-subscription block", () => {
     view("P1");
     expect(screen.queryByText("Not the same subscription?")).toBeNull();
+  });
+});
+
+describe("review inbox row", () => {
+  it("sits under Due soon and says what is inside", () => {
+    const { groups, totals } = demoView(TODAY);
+    const { container } = render(
+      <RenewalsList groups={groups} totals={totals} alertOffsets={[...DEFAULT_ALERT_OFFSETS]}
+        inbox={<ReviewInbox count={3} href="/demo/review" />} />,
+    );
+    const link = screen.getByRole("link", { name: /3 new entries to check/ });
+    expect(link.getAttribute("href")).toBe("/demo/review");
+    const due = screen.getByRole("region", { name: /due soon/i });
+    // Due soon comes first in the document, then the inbox row.
+    expect(due.compareDocumentPosition(link) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(container.textContent).toContain("Not in your list yet");
+  });
+  it("is hidden when nothing waits, and singular for one", () => {
+    const { container, rerender } = render(<ReviewInbox count={0} href="/review" />);
+    expect(container.textContent).toBe("");
+    rerender(<ReviewInbox count={1} href="/review" />);
+    expect(screen.getByText("1 new entry to check")).toBeTruthy();
   });
 });

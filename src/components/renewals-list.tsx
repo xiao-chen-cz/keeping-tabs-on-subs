@@ -37,6 +37,8 @@ export interface RenewalsListProps<T extends SubscriptionCore & Filterable & Acc
   alertOffsets?: number[];
   /** Keep / Cancelled controls under each Due soon row. Omit for a read-only view (public demo). */
   dueActionsFor?: (row: Row<T>, cancelBy: string) => ReactNode;
+  /** Shown right under Due soon (the review queue entry); also shown when the list is empty. */
+  inbox?: ReactNode;
   /** Omit to hide the tabs and filter bar. Totals then come from `totals`. */
   filters?: ListFilters;
   /** Category tabs on or off (the `kts_tabs` cookie). Off ignores `filters.category`. Default on. */
@@ -66,6 +68,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
   addHref,
   alertOffsets,
   dueActionsFor,
+  inbox,
   filters,
   tabsEnabled = true,
   basePath = "/",
@@ -112,6 +115,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
       {/* Without filters the totals lead the page; with filters they sit under the controls that change them. */}
       {!f && <TotalsCard totals={shownTotals} label={totalsLabel} />}
 
+      {unfilteredEmpty && inbox}
       {unfilteredEmpty ? (
         <section className="py-10 text-center">
           <p className="text-lg font-semibold">No subscriptions yet</p>
@@ -124,6 +128,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
       ) : (
         <>
           {alertOffsets && <DueSoon rows={groups.upcoming} offsets={alertOffsets} hrefFor={hrefFor} duplicates={duplicates} actionsFor={dueActionsFor} />}
+          {inbox}
           {f &&
             (tabsEnabled ? (
               <CategoryTabs tabs={categoryTabs(tabRows)} active={f.category} hrefFor={(cat) => hrefWith({ cat })} currentHref={currentHref} />

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { RenewalsList } from "@/components/renewals-list";
+import { ReviewInbox } from "@/components/review-inbox";
 import { todayIn } from "@/lib/dates/plain-date";
 import { DEFAULT_ALERT_OFFSETS } from "@/lib/domain/alerts";
 import { listHref, parseListFilters } from "@/lib/domain/filters";
@@ -21,16 +22,12 @@ export default async function DemoPage({ searchParams }: PageProps<"/demo">) {
 
   return (
     <main className="flex flex-1 flex-col">
-      {pendingCount > 0 && (
-        <Link href="/demo/review" className="btn-primary mb-4 w-full">
-          Review ({pendingCount})
-        </Link>
-      )}
       <RenewalsList
         groups={groups}
         totals={totals}
         hrefFor={(r) => `/demo/${r.input.key}`}
         showArchived={showArchived}
+        inbox={<ReviewInbox count={pendingCount} href="/demo/review" />}
         alertOffsets={[...DEFAULT_ALERT_OFFSETS]}
         filters={filters}
         tabsEnabled={tabsEnabled}

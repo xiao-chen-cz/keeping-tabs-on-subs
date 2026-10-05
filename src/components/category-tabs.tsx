@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { setTabsPreference } from "@/app/actions/tabs";
+import { TabsScroller } from "./tabs-scroller";
 
 export interface TabsBarProps {
   tabs: { key: string; label: string; count: number }[];
@@ -40,7 +41,7 @@ const tabClass = (active: boolean) =>
 export function CategoryTabs({ tabs, active, hrefFor, currentHref }: TabsBarProps) {
   return (
     <div className="flex items-center gap-2">
-      <nav aria-label="Categories" className="no-scrollbar flex min-w-0 flex-1 gap-2 overflow-x-auto py-1">
+      <TabsScroller label="Categories">
         <Link href={hrefFor(null)} aria-current={active === null ? "page" : undefined} className={tabClass(active === null)}>
           All
         </Link>
@@ -55,7 +56,7 @@ export function CategoryTabs({ tabs, active, hrefFor, currentHref }: TabsBarProp
             <span className="font-semibold opacity-80">{t.count}</span>
           </Link>
         ))}
-      </nav>
+      </TabsScroller>
       <TabsSwitch on currentHref={currentHref} />
     </div>
   );

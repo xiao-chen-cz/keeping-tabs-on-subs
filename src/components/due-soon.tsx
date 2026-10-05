@@ -60,6 +60,7 @@ export function DueSoon<T extends SubscriptionCore & { keptForCancelBy?: string 
           · {due.length}
         </span>
       </div>
+      <p className="pt-1 text-sm text-mid">Decide before the cancel-by date. If you do nothing, they renew.</p>
       <ul>
         {due.map(({ row, alert }, i) => (
           <li key={`${row.input.name}-${i}`}>
