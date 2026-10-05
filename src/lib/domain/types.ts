@@ -56,8 +56,16 @@ export type CaptureInput = (typeof CAPTURE_INPUTS)[number];
 export const CANCEL_CHANNELS = ["website_app", "email", "phone", "letter", "in_person", "other"] as const;
 export type CancelChannel = (typeof CANCEL_CHANNELS)[number];
 
-export const SUBSCRIPTION_EVENT_KINDS = ["cancelled", "reopened"] as const;
+export const SUBSCRIPTION_EVENT_KINDS = ["cancelled", "reopened", "kept"] as const;
 export type SubscriptionEventKind = (typeof SUBSCRIPTION_EVENT_KINDS)[number];
+
+/** Per subscription (D13): Remind, or Keep quietly. */
+export const ALERT_MODES = ["remind", "quiet"] as const;
+export type AlertMode = (typeof ALERT_MODES)[number];
+
+/** Per user (D14): in-app alerts only, or in-app plus email. */
+export const ALERT_CHANNELS = ["app", "app_email"] as const;
+export type AlertChannel = (typeof ALERT_CHANNELS)[number];
 
 /**
  * The inputs the date and price rules read. Every field the user may not know is nullable;
@@ -98,8 +106,12 @@ export interface Subscription extends SubscriptionCore {
   cancelUrl: string | null;
   notes: string | null;
   source: EntrySource;
-  /** Cancel-by date the user tapped Keep for (D10). Unused until the reminders milestone. */
+  /** Cancel-by date the user tapped Keep for (D10). */
   keptForCancelBy: PlainDate | null;
+  /** D13. */
+  alertMode: AlertMode;
+  /** When the "stop reminding you?" offer was shown; it is shown at most once (E44). */
+  quietOfferShownAt: string | null;
 }
 
 /** Everything derived from SubscriptionCore and today. Never stored, never typed by a person. */
@@ -140,7 +152,7 @@ export interface ComputedSubscription<T extends SubscriptionCore = Subscription>
  * the fields in REQUIRED_FOR_APPROVAL (logic-spec §4 rule 10).
  */
 export type SubscriptionDraft = {
-  [K in keyof Omit<Subscription, "id" | "source" | "keptForCancelBy" | "status">]:
+  [K in keyof Omit<Subscription, "id" | "source" | "keptForCancelBy" | "status" | "alertMode" | "quietOfferShownAt">]:
     | Subscription[K]
     | null;
 } & {

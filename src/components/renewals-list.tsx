@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { ComputedSubscription, SubscriptionCore } from "@/lib/domain/types";
 import type { CurrencyTotals } from "@/lib/domain/totals";
 import { dueSoon } from "@/lib/domain/alerts";
@@ -34,6 +35,8 @@ export interface RenewalsListProps<T extends SubscriptionCore & Filterable & Acc
   addHref?: string;
   /** Alert offsets (days before cancel-by) for the Due soon section; omit to hide it. */
   alertOffsets?: number[];
+  /** Keep / Cancelled controls under each Due soon row. Omit for a read-only view (public demo). */
+  dueActionsFor?: (row: Row<T>, cancelBy: string) => ReactNode;
   /** Omit to hide the tabs and filter bar. Totals then come from `totals`. */
   filters?: ListFilters;
   /** Category tabs on or off (the `kts_tabs` cookie). Off ignores `filters.category`. Default on. */
@@ -62,6 +65,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
   showArchived = false,
   addHref,
   alertOffsets,
+  dueActionsFor,
   filters,
   tabsEnabled = true,
   basePath = "/",
@@ -119,7 +123,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
         </section>
       ) : (
         <>
-          {alertOffsets && <DueSoon rows={groups.upcoming} offsets={alertOffsets} hrefFor={hrefFor} duplicates={duplicates} />}
+          {alertOffsets && <DueSoon rows={groups.upcoming} offsets={alertOffsets} hrefFor={hrefFor} duplicates={duplicates} actionsFor={dueActionsFor} />}
           {f &&
             (tabsEnabled ? (
               <CategoryTabs tabs={categoryTabs(tabRows)} active={f.category} hrefFor={(cat) => hrefWith({ cat })} currentHref={currentHref} />

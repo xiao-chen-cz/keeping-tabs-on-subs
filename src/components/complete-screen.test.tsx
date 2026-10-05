@@ -23,6 +23,8 @@ const sub: Subscription = {
   notes: null,
   source: "manual",
   keptForCancelBy: null,
+  alertMode: "remind",
+  quietOfferShownAt: null,
 };
 
 function setup() {

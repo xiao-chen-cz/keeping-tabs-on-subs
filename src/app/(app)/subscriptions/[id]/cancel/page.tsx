@@ -17,7 +17,13 @@ export default async function CancelSubscriptionPage({ params, searchParams }: P
   if (subscription.status !== "confirmed") redirect(`/subscriptions/${id}`);
 
   const today = todayIn(profile.timeZone, new Date());
-  const initial = reason === "trial-ended" ? trialEndedPrefill(subscription.trialEnds, today) : undefined;
+  // From an alert: pre-select Website / app when the vendor's cancel page is known (logic-spec §3.2).
+  const initial =
+    reason === "trial-ended"
+      ? trialEndedPrefill(subscription.trialEnds, today)
+      : reason === "alert" && subscription.cancelUrl
+        ? { channel: "website_app" }
+        : undefined;
 
   return (
     <main className="flex flex-1 flex-col gap-3">

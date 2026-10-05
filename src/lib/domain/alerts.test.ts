@@ -1,7 +1,7 @@
 // @vitest-environment node
 // logic-spec §3.2 and §5 E28-E33.
 import { describe, expect, it } from "vitest";
-import { alertsToSend, dueAlert, dueSoon } from "./alerts";
+import { alertsToSend, checkKeep, dueAlert, dueSoon, shouldOfferQuiet } from "./alerts";
 import { computeSubscription } from "./compute";
 import { core } from "./fixtures";
 import type { PlainDate, SubscriptionCore } from "./types";
@@ -104,4 +104,27 @@ describe("alerts", () => {
     ];
     expect(dueSoon(rows, OFFSETS).map((d) => d.row.input.name)).toEqual(["Soon", "Alpha", "Zed"]);
   });
+});
+
+describe("checkKeep", () => {
+  it("accepts the row's current cancel-by", () => {
+    expect(checkKeep(at("2026-10-01"), "2026-10-04")).toBe("ok");
+  });
+  it("E47: refuses a cancel-by that no longer matches", () => {
+    // Plan change moved the anchor: cancel-by is now 2026-10-11.
+    expect(checkKeep(at("2026-10-01", { lastRenewalDate: "2026-09-14" }), "2026-10-04")).toBe("stale");
+  });
+  it("refuses a cancelled row", () => {
+    expect(checkKeep(at("2026-10-01", { status: "cancelled" }), "2026-10-04")).toBe("not_active");
+  });
+});
+
+describe("shouldOfferQuiet (E44)", () => {
+  const remind = { alertMode: "remind" as const, quietOfferShownAt: null };
+  it("not after the first Keep", () => expect(shouldOfferQuiet(remind, 1)).toBe(false));
+  it("after the second Keep", () => expect(shouldOfferQuiet(remind, 2)).toBe(true));
+  it("never again once shown", () =>
+    expect(shouldOfferQuiet({ ...remind, quietOfferShownAt: "2026-10-01T07:00:00Z" }, 3)).toBe(false));
+  it("not for a row that is already quiet", () =>
+    expect(shouldOfferQuiet({ alertMode: "quiet", quietOfferShownAt: null }, 2)).toBe(false));
 });

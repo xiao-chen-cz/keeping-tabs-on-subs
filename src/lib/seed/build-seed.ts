@@ -94,6 +94,8 @@ function buildRow(spec: SeedSpec, today: PlainDate): SeedRow {
     notes: spec.notes,
     source: "seed",
     keptForCancelBy: null,
+    alertMode: "remind",
+    quietOfferShownAt: null,
   };
 }
 

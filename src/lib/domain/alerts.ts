@@ -1,5 +1,5 @@
 // logic-spec §3.2 Reminders (D10). Pure: "today" is already baked into the computed rows.
-import type { ComputedSubscription, PlainDate, SubscriptionCore } from "./types";
+import type { AlertMode, ComputedSubscription, PlainDate, SubscriptionCore } from "./types";
 
 export const DEFAULT_ALERT_OFFSETS = [3, 1, 0] as const;
 
@@ -70,4 +70,25 @@ export function dueSoon<T extends AlertSource>(
         a.alert.daysLeft - b.alert.daysLeft ||
         a.row.input.name.localeCompare(b.row.input.name, undefined, { sensitivity: "base" }),
     );
+}
+
+export type KeepCheck = "ok" | "stale" | "not_active";
+
+/**
+ * Whether a Keep for `cancelBy` still applies to the row (E47): a Keep from an old email, or after the
+ * Cancel-by moved (E32), is refused instead of silencing the wrong renewal.
+ */
+export function checkKeep<T extends SubscriptionCore>(row: ComputedSubscription<T>, cancelBy: PlainDate): KeepCheck {
+  if (row.input.status !== "confirmed") return "not_active";
+  return row.computed.cancelBy === cancelBy ? "ok" : "stale";
+}
+
+/**
+ * After a Keep: offer "Keep quietly" once (D13, E44). `keptCount` includes the Keep just made.
+ */
+export function shouldOfferQuiet(
+  sub: { alertMode: AlertMode; quietOfferShownAt: string | null },
+  keptCount: number,
+): boolean {
+  return sub.alertMode === "remind" && sub.quietOfferShownAt === null && keptCount >= 2;
 }

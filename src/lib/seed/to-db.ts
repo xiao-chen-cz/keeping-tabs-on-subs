@@ -45,6 +45,7 @@ export function seedRowToInsert(
     notes: row.notes,
     source: "seed",
     kept_for_cancel_by: row.keptForCancelBy,
+    alert_mode: row.alertMode,
   };
 }
 

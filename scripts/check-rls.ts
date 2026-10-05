@@ -18,6 +18,7 @@ const TABLES = [
   "captures",
   "proposals",
   "subscription_events",
+  "alert_sends",
 ] as const;
 
 let failures = 0;
@@ -252,6 +253,20 @@ async function main() {
       report("A cannot insert an event on B's subscription", !!error && !(data as unknown[] | null)?.length, "insert succeeded");
     }
     {
+      const { data: before } = await admin.from("subscriptions").select("kept_for_cancel_by").eq("id", bSubId).single();
+      const { error } = await client.rpc("keep_renewal", { p_subscription_id: bSubId, p_cancel_by: "2099-01-01" });
+      const { data: after } = await admin.from("subscriptions").select("kept_for_cancel_by").eq("id", bSubId).single();
+      report("A cannot keep B's subscription", !!error && after?.kept_for_cancel_by === before?.kept_for_cancel_by, error ? "kept date changed" : "rpc succeeded");
+    }
+    if (aSubId) {
+      const { data, error } = await client
+        .from("alert_sends")
+        .insert({ user_id: aId, subscription_id: aSubId, cancel_by: "2099-01-01", alert_offset: 3 })
+        .select("id");
+      if (data?.length) await admin.from("alert_sends").delete().in("id", data.map((r) => r.id));
+      report("A cannot write alert_sends (job only)", !!error && !(data as unknown[] | null)?.length, "insert succeeded");
+    }
+    {
       const { data, error } = await client
         .from("proposals")
         .insert({ capture_id: bFix.captureId, name: "rls-check" })
@@ -297,6 +312,17 @@ async function main() {
         );
         report("Cancelling an already cancelled subscription is refused", !!same.error, "unchanged status accepted");
         report("Cancelling without a channel is refused", !!noChannel.error, "accepted");
+        const keep1 = await client.rpc("keep_renewal", { p_subscription_id: id, p_cancel_by: "2026-10-29" });
+        const keep2 = await client.rpc("keep_renewal", { p_subscription_id: id, p_cancel_by: "2026-10-29" });
+        const kept = await admin.from("subscription_events").select("id, cancel_by").eq("subscription_id", id).eq("kind", "kept");
+        report(
+          "Control: A can keep own subscription; a repeat Keep adds no second event",
+          !keep1.error && !keep2.error && kept.data?.length === 1 && kept.data[0].cancel_by === "2026-10-29",
+          `${keep1.error?.message ?? ""} ${keep2.error?.message ?? ""} kept=${JSON.stringify(kept.data)}`,
+        );
+        const noCb = await client.from("subscription_events").insert({ subscription_id: id, kind: "kept", occurred_on: "2026-10-01" }).select("id");
+        if (noCb.data?.length) eventIds.push(...noCb.data.map((r) => r.id));
+        report("A kept event without cancel_by is refused", !!noCb.error, "insert succeeded");
       }
     }
 
@@ -307,6 +333,7 @@ async function main() {
         approve_proposal: await anon.rpc("approve_proposal", { p_proposal_id: fakeId, p_fields: {} }),
         reject_proposal: await anon.rpc("reject_proposal", { p_proposal_id: fakeId }),
         set_subscription_status: await anon.rpc("set_subscription_status", { p_subscription_id: fakeId, p_status: "confirmed" }),
+        keep_renewal: await anon.rpc("keep_renewal", { p_subscription_id: fakeId, p_cancel_by: "2026-01-01" }),
       };
       for (const [name, res] of Object.entries(calls)) {
         report(`anon cannot execute ${name}`, res.error?.code === "42501", res.error?.message ?? "rpc succeeded");

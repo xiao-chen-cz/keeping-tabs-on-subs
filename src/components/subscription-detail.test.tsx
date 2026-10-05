@@ -4,7 +4,7 @@ import type { SubscriptionEvent } from "@/lib/dal/map-proposal";
 import { computeSubscription } from "@/lib/domain/compute";
 import { core } from "@/lib/domain/fixtures";
 import type { Subscription } from "@/lib/domain/types";
-import { SubscriptionDetail } from "./subscription-detail";
+import { describeEvent, SubscriptionDetail } from "./subscription-detail";
 
 afterEach(cleanup);
 
@@ -22,6 +22,8 @@ const sub = (over: Partial<Subscription>): Subscription => ({
   notes: null,
   source: "seed",
   keptForCancelBy: null,
+  alertMode: "remind",
+  quietOfferShownAt: null,
   ...over,
 });
 
@@ -82,6 +84,7 @@ describe("SubscriptionDetail", () => {
       reference: "ABC-123",
       note: null,
       captureId: null,
+      cancelBy: null,
       recordedAt: "2026-10-04T10:00:00Z",
       ...over,
     });
@@ -107,5 +110,16 @@ describe("SubscriptionDetail", () => {
     render(<SubscriptionDetail row={computeSubscription(sub({}), "2026-10-03")} events={[]} />);
     expect(screen.queryByText("History")).toBeNull();
     expect(screen.queryByText("Original capture")).toBeNull();
+  });
+});
+
+describe("describeEvent: kept", () => {
+  it("names the cancel-by the Keep applies to", () => {
+    expect(
+      describeEvent({
+        id: "k1", subscriptionId: "s1", kind: "kept", occurredOn: "2026-10-01", channel: null, reference: null,
+        note: null, captureId: null, cancelBy: "2026-10-04", recordedAt: "2026-10-01T07:00:00Z",
+      }),
+    ).toBe("Kept on 1 Oct 2026 · cancel-by 4 Oct 2026");
   });
 });

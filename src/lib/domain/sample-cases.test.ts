@@ -13,7 +13,7 @@ const sub = (over: Partial<Subscription> & Pick<Subscription, "id" | "name">): S
   status: "confirmed", amountCents: null, currency: null, billingCycle: null, lastRenewalDate: null,
   trialEnds: null, cancelNoticeDays: null, regularPriceCents: null, promoEnds: null, accessUntil: null,
   vendor: null, plan: null, accountLabel: null, category: null, paymentMethod: null, scope: null, confidence: "high",
-  cancelUrl: null, notes: null, source: "seed", keptForCancelBy: null, ...over,
+  cancelUrl: null, notes: null, source: "seed", keptForCancelBy: null, alertMode: "remind", quietOfferShownAt: null, ...over,
 });
 
 const codePilot = sub({ id: "1", name: "CodePilot Pro", amountCents: 2000, currency: "USD", billingCycle: "monthly", lastRenewalDate: "2026-09-29" }); // next +27

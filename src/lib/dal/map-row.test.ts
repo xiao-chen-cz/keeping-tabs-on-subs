@@ -28,6 +28,8 @@ const row: SubscriptionRow = {
   notes: null,
   source: "seed",
   kept_for_cancel_by: null,
+  alert_mode: "remind",
+  quiet_offer_shown_at: null,
   created_at: "2026-10-01T00:00:00Z",
   updated_at: "2026-10-01T00:00:00Z",
 };

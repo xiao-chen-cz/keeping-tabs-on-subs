@@ -48,6 +48,8 @@ export interface SubscriptionEvent {
   reference: string | null;
   note: string | null;
   captureId: string | null;
+  /** Kept events only: the Cancel-by the Keep applies to. */
+  cancelBy: PlainDate | null;
   recordedAt: string;
 }
 
@@ -119,6 +121,7 @@ export function rowToEvent(row: EventRow): SubscriptionEvent {
     reference: row.reference,
     note: row.note,
     captureId: row.capture_id,
+    cancelBy: row.cancel_by,
     recordedAt: row.recorded_at,
   };
 }

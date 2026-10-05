@@ -39,6 +39,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      alert_sends: {
+        Row: {
+          alert_offset: number
+          cancel_by: string
+          email_id: string | null
+          id: string
+          sent_at: string
+          subscription_id: string
+          user_id: string
+        }
+        Insert: {
+          alert_offset: number
+          cancel_by: string
+          email_id?: string | null
+          id?: string
+          sent_at?: string
+          subscription_id: string
+          user_id: string
+        }
+        Update: {
+          alert_offset?: number
+          cancel_by?: string
+          email_id?: string | null
+          id?: string
+          sent_at?: string
+          subscription_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_sends_subscription_fk"
+            columns: ["subscription_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
       captures: {
         Row: {
           extraction: Json | null
@@ -113,18 +151,21 @@ export type Database = {
       }
       profiles: {
         Row: {
+          alert_channel: Database["public"]["Enums"]["alert_channel"]
           display_name: string | null
           reminder_offsets: number[]
           time_zone: string
           user_id: string
         }
         Insert: {
+          alert_channel?: Database["public"]["Enums"]["alert_channel"]
           display_name?: string | null
           reminder_offsets?: number[]
           time_zone?: string
           user_id: string
         }
         Update: {
+          alert_channel?: Database["public"]["Enums"]["alert_channel"]
           display_name?: string | null
           reminder_offsets?: number[]
           time_zone?: string
@@ -260,6 +301,7 @@ export type Database = {
       }
       subscription_events: {
         Row: {
+          cancel_by: string | null
           capture_id: string | null
           channel: Database["public"]["Enums"]["cancel_channel"] | null
           id: string
@@ -272,6 +314,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cancel_by?: string | null
           capture_id?: string | null
           channel?: Database["public"]["Enums"]["cancel_channel"] | null
           id?: string
@@ -284,6 +327,7 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          cancel_by?: string | null
           capture_id?: string | null
           channel?: Database["public"]["Enums"]["cancel_channel"] | null
           id?: string
@@ -314,6 +358,7 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          alert_mode: Database["public"]["Enums"]["alert_mode"]
           access_until: string | null
           account_label: string | null
           amount: number | null
@@ -333,6 +378,7 @@ export type Database = {
           payment_method_id: string | null
           plan: string | null
           promo_ends: string | null
+          quiet_offer_shown_at: string | null
           regular_price: number | null
           scope: Database["public"]["Enums"]["scope"] | null
           source: Database["public"]["Enums"]["entry_source"]
@@ -343,6 +389,7 @@ export type Database = {
           vendor: string | null
         }
         Insert: {
+          alert_mode?: Database["public"]["Enums"]["alert_mode"]
           access_until?: string | null
           account_label?: string | null
           amount?: number | null
@@ -362,6 +409,7 @@ export type Database = {
           payment_method_id?: string | null
           plan?: string | null
           promo_ends?: string | null
+          quiet_offer_shown_at?: string | null
           regular_price?: number | null
           scope?: Database["public"]["Enums"]["scope"] | null
           source?: Database["public"]["Enums"]["entry_source"]
@@ -372,6 +420,7 @@ export type Database = {
           vendor?: string | null
         }
         Update: {
+          alert_mode?: Database["public"]["Enums"]["alert_mode"]
           access_until?: string | null
           account_label?: string | null
           amount?: number | null
@@ -391,6 +440,7 @@ export type Database = {
           payment_method_id?: string | null
           plan?: string | null
           promo_ends?: string | null
+          quiet_offer_shown_at?: string | null
           regular_price?: number | null
           scope?: Database["public"]["Enums"]["scope"] | null
           source?: Database["public"]["Enums"]["entry_source"]
@@ -433,6 +483,10 @@ export type Database = {
         Args: { p_fields: Json; p_proposal_id: string }
         Returns: string
       }
+      keep_renewal: {
+        Args: { p_cancel_by: string; p_subscription_id: string }
+        Returns: undefined
+      }
       reject_proposal: { Args: { p_proposal_id: string }; Returns: undefined }
       set_subscription_status: {
         Args: {
@@ -449,6 +503,8 @@ export type Database = {
       }
     }
     Enums: {
+      alert_channel: "app" | "app_email"
+      alert_mode: "remind" | "quiet"
       billing_cycle: "monthly" | "quarterly" | "every_4_weeks" | "yearly"
       cancel_channel:
         | "website_app"
@@ -463,7 +519,7 @@ export type Database = {
       currency: "EUR" | "USD" | "GBP" | "CHF"
       entry_source: "manual" | "seed" | "capture"
       scope: "business" | "personal" | "family"
-      subscription_event_kind: "cancelled" | "reopened"
+      subscription_event_kind: "cancelled" | "reopened" | "kept"
       subscription_status: "confirmed" | "cancelled"
     }
     CompositeTypes: {
@@ -595,6 +651,8 @@ export const Constants = {
   },
   public: {
     Enums: {
+      alert_channel: ["app", "app_email"],
+      alert_mode: ["remind", "quiet"],
       billing_cycle: ["monthly", "quarterly", "every_4_weeks", "yearly"],
       cancel_channel: [
         "website_app",
@@ -610,7 +668,7 @@ export const Constants = {
       currency: ["EUR", "USD", "GBP", "CHF"],
       entry_source: ["manual", "seed", "capture"],
       scope: ["business", "personal", "family"],
-      subscription_event_kind: ["cancelled", "reopened"],
+      subscription_event_kind: ["cancelled", "reopened", "kept"],
       subscription_status: ["confirmed", "cancelled"],
     },
   },

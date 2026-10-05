@@ -41,11 +41,11 @@ describe("rowToEvent / rowToCapture", () => {
   it("maps snake_case to camelCase", () => {
     const e: EventRow = {
       id: "e1", user_id: "u", subscription_id: "s1", kind: "cancelled", occurred_on: "2026-10-04",
-      channel: "website_app", reference: "ABC-123", note: null, capture_id: null, recorded_at: "2026-10-04T10:00:00Z",
+      channel: "website_app", reference: "ABC-123", note: null, capture_id: null, cancel_by: null, recorded_at: "2026-10-04T10:00:00Z",
     };
     expect(rowToEvent(e)).toEqual({
       id: "e1", subscriptionId: "s1", kind: "cancelled", occurredOn: "2026-10-04", channel: "website_app",
-      reference: "ABC-123", note: null, captureId: null, recordedAt: "2026-10-04T10:00:00Z",
+      reference: "ABC-123", note: null, captureId: null, cancelBy: null, recordedAt: "2026-10-04T10:00:00Z",
     });
     expect(
       rowToCapture({

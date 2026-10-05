@@ -40,6 +40,8 @@ export function existingSub(over: Partial<Subscription> = {}): Subscription {
     notes: "Team seat",
     source: "seed",
     keptForCancelBy: null,
+    alertMode: "remind",
+    quietOfferShownAt: null,
     ...over,
   };
 }

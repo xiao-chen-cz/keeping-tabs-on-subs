@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { DueAlert } from "@/lib/domain/alerts";
 import { dueSoon } from "@/lib/domain/alerts";
 import type { ComputedSubscription, Currency, SubscriptionCore } from "@/lib/domain/types";
@@ -15,6 +16,8 @@ export interface DueSoonProps<T extends SubscriptionCore & { keptForCancelBy?: s
   hrefFor?: (row: Row<T>) => string;
   /** Names shared by several rows (duplicateNames): their account label is shown. */
   duplicates?: ReadonlySet<string>;
+  /** Keep / Cancelled controls under each row, outside the row link. Omit for read-only rows. */
+  actionsFor?: (row: Row<T>, cancelBy: string) => ReactNode;
 }
 
 const money = (cents: number) => (cents / 100).toFixed(2);
@@ -42,6 +45,7 @@ export function DueSoon<T extends SubscriptionCore & { keptForCancelBy?: string 
   offsets,
   hrefFor,
   duplicates,
+  actionsFor,
 }: DueSoonProps<T>) {
   const due = dueSoon(rows, offsets);
   if (due.length === 0) return null;
@@ -74,8 +78,8 @@ export function DueSoon<T extends SubscriptionCore & { keptForCancelBy?: string 
                   accountPart(duplicates, row.input),
                 ]}
               />
-              {/* TODO(D21): Keep / Cancelled one-tap buttons once the server action exists. */}
             </RowShell>
+            {actionsFor?.(row, alert.cancelBy)}
           </li>
         ))}
       </ul>

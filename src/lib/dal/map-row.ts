@@ -41,5 +41,7 @@ export function rowToSubscription(row: SubscriptionRow, lookups: NameLookups): S
     notes: row.notes,
     source: row.source,
     keptForCancelBy: row.kept_for_cancel_by,
+    alertMode: row.alert_mode,
+    quietOfferShownAt: row.quiet_offer_shown_at,
   };
 }
