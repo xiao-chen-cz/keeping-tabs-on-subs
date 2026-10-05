@@ -520,11 +520,7 @@ export type Database = {
       currency: "EUR" | "USD" | "GBP" | "CHF"
       entry_source: "manual" | "seed" | "capture"
       scope: "business" | "personal" | "family"
-      subscription_event_kind:
-        | "cancelled"
-        | "reopened"
-        | "kept"
-        | "keep_undone"
+      subscription_event_kind: "cancelled" | "reopened" | "kept" | "keep_undone"
       subscription_status: "confirmed" | "cancelled"
     }
     CompositeTypes: {
