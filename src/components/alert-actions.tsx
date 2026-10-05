@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { describeReminders } from "@/lib/domain/alerts";
+import type { AlertMode, BillingCycle } from "@/lib/domain/types";
 import { formatDay } from "./format";
 
 /**
@@ -98,5 +100,51 @@ export function KeptForRenewal({ cancelBy, remindAgain }: { cancelBy: string; re
         </button>
       </form>
     </div>
+  );
+}
+
+/**
+ * Reminder setting on the detail page (D13). A plain form with two radios, so it works without JS.
+ * The help text says what the app can and cannot see (logic-spec §3.2).
+ */
+export function RemindersForm({
+  mode,
+  cycle,
+  offsets,
+  action,
+}: {
+  mode: AlertMode;
+  cycle: BillingCycle | null;
+  offsets: number[];
+  action: (formData: FormData) => Promise<void>;
+}) {
+  const option = (value: AlertMode, label: string) => (
+    <label className="flex min-h-11 items-start gap-2 py-1">
+      <input type="radio" name="alertMode" value={value} defaultChecked={mode === value} className="mt-1 size-4" />
+      <span>
+        <span className="font-medium text-text">{label}</span>
+        <span className="block text-mid">{describeReminders(value, cycle, offsets)}</span>
+      </span>
+    </label>
+  );
+  return (
+    <section className="mt-5" aria-labelledby="reminders-heading">
+      <h2 id="reminders-heading" className="section-label">
+        Reminders
+      </h2>
+      <form action={action} className="mt-1 flex flex-col gap-1 text-sm">
+        {option("remind", "Remind me")}
+        {option("quiet", "Keep quietly")}
+        <p className="text-xs text-mid">
+          Keep quietly still alerts you to price changes and promo endings the app knows about, and to trials ending. The app
+          only sees prices you give it, so forward or paste price-change emails.
+        </p>
+        <div className="pt-1">
+          <button type="submit" className="btn-secondary min-h-10 px-4 text-sm">
+            Save reminders
+          </button>
+        </div>
+      </form>
+    </section>
   );
 }

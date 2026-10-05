@@ -23,10 +23,10 @@ The seed script takes a set name.
 | 3 | The Daily Ledger | 2.00 EUR | Every 4 weeks | Next +6; Regular price 12.00, Promo ends +300 | Content / Media, Personal, Private account | Promo later than next renewal: Price rises No. Alert at 3 days |
 | 4 | VoiceDraft Pro | 120.00 USD | Yearly | Next +10; Regular price 200.00, Promo ends = Next | Software / SaaS, Business, Business account | Price rises Yes in the alert (3 days before cancel-by) |
 | 5 | StreamBox Prime | 8.99 EUR | Monthly | Trial ends +19, Last renewal empty | Content / Media, Personal | Trial tag; next renewal = trial end; excluded from totals |
-| 6 | BudgetBuddy | 29.99 EUR | Yearly | Last renewal +9 (future: first charge of the new plan) | Finance / Banking, Personal, Private account; Notes: "Switched from monthly 2.99 EUR to annual, saves 20%" | Pending plan change (D4); cancel-by +2 |
+| 6 | BudgetBuddy | 29.99 EUR | Yearly | Last renewal +9 (future: first charge of the new plan) | Finance / Banking, Personal, Private account; Notes: "Switched from monthly 2.99 EUR to annual, saves 20%"; Reminders: Keep quietly | Pending plan change (D4); cancel-by +2; quiet yearly still gets its one alert (E41) |
 | 7 | FitClub Online | 14.90 EUR | Monthly | Status Cancelled, Access until +12 | Memberships / Communities, Personal | Ending group; no renewal, no alerts; excluded from totals |
 | 8 | PixelStock | 9.99 USD | (empty) | Trial ends −5, Last renewal empty | Software / SaaS, Business, Confidence Low | Needs update tag, sorted to the top; excluded from totals |
-| 9 | Cloudly Storage | 9.99 EUR | Monthly | Anchored on the 31st: Last renewal = the latest 31st on or before T | Infrastructure / Hosting, Business, Business account | Month-end clamping (next renewal on the last day of a short month) |
+| 9 | Cloudly Storage | 9.99 EUR | Monthly | Anchored on the 31st: Last renewal = the latest 31st on or before T | Infrastructure / Hosting, Business, Business account; Reminders: Keep quietly | Month-end clamping (next renewal on the last day of a short month); quiet monthly: quiet mark, never in Due soon (E38) |
 | 10 | SafeHome Insurance | 62.00 EUR | Quarterly | Next +50 | Insurance, Personal, Private account | Quarterly; notice 7 |
 | 11 | EuroServer Hosting | 11.47 EUR | Monthly | Next +20 (was +30 until 2026-10-03: about one month ahead, no past anchor reproduces it on some days) | Infrastructure / Hosting, Business, Business account; Notes: "Billed in arrears, amount varies. Was 10.34 until last quarter" | Varying amounts, price change in notes |
 | 12 | ChatPal Plus | 23.00 EUR | Monthly | Next +1 | AI, Business, Confidence Low; Notes: "Looks re-activated, confirm" | Cancel-by −2: renewal ahead, deadline passed, no alert |
@@ -39,7 +39,7 @@ The seed script takes a set name.
 - **Review queue:** P1 (NoteForge) waiting for approval.
 
 ## What the full set shows (demo account)
-- **Alerts due:** The Daily Ledger (cancel-by in 3 days), VoiceDraft Pro (3 days, with price rise 120 → 200 USD), BudgetBuddy (2 days; only the 3-day alert fires).
+- **Alerts due:** The Daily Ledger (cancel-by in 3 days), VoiceDraft Pro (3 days, with price rise 120 → 200 USD), BudgetBuddy (2 days; only the 3-day alert fires, and as a quiet yearly row it gets only that one). Cloudly Storage is quiet and never in Due soon, whatever its cancel-by.
 - **Upcoming order:** PixelStock (Needs update) first, then by cancel-by: ChatPal Plus (−2), BudgetBuddy (+2), The Daily Ledger (+3), VoiceDraft Pro (+3), CodePilot Pro #13 (+9), StreamBox Prime (+16), ... (rows 1–12 keep their relative order; #13 slots in after VoiceDraft Pro)
 - **Groups/tags:** Trial (StreamBox Prime), Needs update (PixelStock), Ending (FitClub Online).
 - **Totals (Confirmed, no trial, with cycle):**
@@ -58,4 +58,4 @@ The seed script takes a set name.
 Extra capture for live demos (not seeded as a proposal): `seed/captures/readloop-trial-email.txt`, a "your trial ends in 3 days" email, so a tester can see a fresh extraction create a Trial entry. All four captures are written for the demo; none come from a real inbox.
 
 ## Coverage against the logic spec
-E1 (#1), same name with different accounts (#1, #13), E5/E4 clamping (#9), E8 (#3), E10 (#6), E11 (#5), E13 (#8), E17 (#12), E18 (#4), E19 (#3), E26/E34 (#7), E36/E37 (totals), E28/E30/E33 (alerts #3, #4, #6), E29 (Keep on any alert), D6 Ending (#7), quarterly (#10), notice override (#2).
+E1 (#1), same name with different accounts (#1, #13), E5/E4 clamping (#9), E8 (#3), E10 (#6), E11 (#5), E13 (#8), E17 (#12), E18 (#4), E19 (#3), E26/E34 (#7), E36/E37 (totals), E28/E30/E33 (alerts #3, #4, #6), E29 (Keep on any alert), D6 Ending (#7), quarterly (#10), notice override (#2), Keep quietly E38 (#9) and E41 (#6).

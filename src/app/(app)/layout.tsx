@@ -10,11 +10,16 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
           <Link href="/" className="font-heading text-lg font-semibold text-primary-ink">
             Keeping Tabs on Subs
           </Link>
-          <form action={signOut}>
-            <button type="submit" className="link text-sm">
-              Sign out
-            </button>
-          </form>
+          <div className="flex items-center gap-4">
+            <Link href="/settings" className="link text-sm">
+              Settings
+            </Link>
+            <form action={signOut}>
+              <button type="submit" className="link text-sm">
+                Sign out
+              </button>
+            </form>
+          </div>
         </div>
       </header>
       <p className="bg-light px-4 py-1.5 text-center text-xs text-mid">

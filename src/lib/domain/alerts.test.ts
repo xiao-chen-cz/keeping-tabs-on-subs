@@ -1,10 +1,10 @@
 // @vitest-environment node
 // logic-spec §3.2 and §5 E28-E33.
 import { describe, expect, it } from "vitest";
-import { alertsToSend, checkKeep, dueAlert, dueSoon, shouldOfferQuiet } from "./alerts";
+import { alertsToSend, checkKeep, describeReminders, dueAlert, dueSoon, shouldOfferQuiet } from "./alerts";
 import { computeSubscription } from "./compute";
 import { core } from "./fixtures";
-import type { PlainDate, SubscriptionCore } from "./types";
+import type { AlertMode, PlainDate, SubscriptionCore } from "./types";
 
 const OFFSETS = [3, 1, 0];
 // Monthly, last 2026-09-07 -> next 2026-10-07, notice 3 -> cancel-by 2026-10-04.
@@ -14,10 +14,10 @@ const base: Partial<SubscriptionCore> = {
   billingCycle: "monthly",
   lastRenewalDate: "2026-09-07",
 };
-type Over = Partial<SubscriptionCore> & { keptForCancelBy?: PlainDate | null };
+type Over = Partial<SubscriptionCore> & { keptForCancelBy?: PlainDate | null; alertMode?: AlertMode };
 const at = (today: PlainDate, over: Over = {}) => {
-  const { keptForCancelBy, ...rest } = over;
-  return computeSubscription({ ...core({ ...base, ...rest }), keptForCancelBy }, today);
+  const { keptForCancelBy, alertMode, ...rest } = over;
+  return computeSubscription({ ...core({ ...base, ...rest }), keptForCancelBy, alertMode }, today);
 };
 const offsetOn = (today: PlainDate, over: Over = {}) => dueAlert(at(today, over), OFFSETS)?.offset ?? null;
 
@@ -127,4 +127,57 @@ describe("shouldOfferQuiet (E44)", () => {
     expect(shouldOfferQuiet({ ...remind, quietOfferShownAt: "2026-10-01T07:00:00Z" }, 3)).toBe(false));
   it("not for a row that is already quiet", () =>
     expect(shouldOfferQuiet({ alertMode: "quiet", quietOfferShownAt: null }, 2)).toBe(false));
+});
+
+describe("Keep quietly (D13)", () => {
+  const quiet = { alertMode: "quiet" as const };
+  // Yearly, last 2025-10-11 -> next 2026-10-11, notice 7 -> cancel-by 2026-10-04 (same as the monthly base).
+  const yearly = { ...quiet, billingCycle: "yearly" as const, lastRenewalDate: "2025-10-11" };
+
+  it("E38: quiet monthly without a price rise never alerts", () => {
+    for (const d of ["2026-10-01", "2026-10-03", "2026-10-04"]) expect(offsetOn(d, quiet)).toBeNull();
+  });
+  it("E39: quiet monthly with a price rise alerts at every offset, with the price", () => {
+    const rise = { ...quiet, amountCents: 1000, regularPriceCents: 1500, promoEnds: "2026-10-07" };
+    expect([offsetOn("2026-10-01", rise), offsetOn("2026-10-03", rise), offsetOn("2026-10-04", rise)]).toEqual([3, 1, 0]);
+    expect(dueAlert(at("2026-10-01", rise), OFFSETS)?.priceRise).toEqual({ fromCents: 1000, toCents: 1500 });
+  });
+  it("E40: quiet yearly alerts once, at the largest offset", () => {
+    expect(at("2026-10-01", yearly).computed.cancelBy).toBe("2026-10-04");
+    expect([offsetOn("2026-10-01", yearly), offsetOn("2026-10-03", yearly), offsetOn("2026-10-04", yearly)]).toEqual([3, 3, 3]);
+    const row = at("2026-10-03", yearly);
+    expect(alertsToSend(row, OFFSETS, [3])).toBeNull(); // already sent on 10-01: nothing more by email
+  });
+  it("E41: quiet yearly added late still gets its one alert", () => {
+    expect(alertsToSend(at("2026-10-03", yearly), OFFSETS, [])).toBe(3);
+  });
+  it("E48: quiet yearly with offsets 7, 3 alerts only at 7", () => {
+    expect(dueAlert(at("2026-09-27", yearly), [7, 3])?.offset).toBe(7);
+    expect(alertsToSend(at("2026-10-01", yearly), [7, 3], [7])).toBeNull();
+  });
+  it("quiet quarterly counts as a long cycle", () => {
+    expect(offsetOn("2026-10-01", { ...quiet, billingCycle: "quarterly", lastRenewalDate: "2026-07-11" })).toBe(3);
+  });
+  it("E42: quiet during an active trial alerts like Remind", () => {
+    const trial = { ...quiet, lastRenewalDate: null, trialEnds: "2026-10-07" };
+    expect([offsetOn("2026-10-01", trial), offsetOn("2026-10-03", trial), offsetOn("2026-10-04", trial)]).toEqual([3, 1, 0]);
+  });
+  it("E43: quiet does not hide Needs update", () => {
+    const row = at("2026-10-01", { ...quiet, lastRenewalDate: null, billingCycle: null });
+    expect(row.computed.tags.needsUpdate).toBe(true);
+  });
+  it("Remind (and a missing mode) keeps every offset", () => {
+    expect(offsetOn("2026-10-03", { alertMode: "remind" })).toBe(1);
+    expect(offsetOn("2026-10-03")).toBe(1);
+  });
+});
+
+describe("describeReminders", () => {
+  it("summarises each mode by cycle", () => {
+    expect(describeReminders("remind", "monthly", [3, 1, 0])).toBe("Reminders 3, 1 and 0 days before the cancel-by.");
+    expect(describeReminders("quiet", "yearly", [3, 1, 0])).toBe("One reminder, 3 days before the cancel-by.");
+    expect(describeReminders("quiet", "quarterly", [7, 3])).toBe("One reminder, 7 days before the cancel-by.");
+    expect(describeReminders("quiet", "every_4_weeks", [3, 1, 0])).toBe("No routine reminders.");
+    expect(describeReminders("remind", "monthly", [3])).toBe("Reminders 3 days before the cancel-by.");
+  });
 });

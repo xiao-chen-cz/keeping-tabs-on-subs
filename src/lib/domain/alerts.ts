@@ -3,8 +3,20 @@ import type { AlertMode, ComputedSubscription, PlainDate, SubscriptionCore } fro
 
 export const DEFAULT_ALERT_OFFSETS = [3, 1, 0] as const;
 
-/** A row may carry the cancel-by date the user tapped Keep for (E29, E32). */
-export type AlertSource = SubscriptionCore & { keptForCancelBy?: PlainDate | null };
+/** A row may carry the cancel-by date the user tapped Keep for (E29, E32) and its alert mode (D13, default Remind). */
+export type AlertSource = SubscriptionCore & { keptForCancelBy?: PlainDate | null; alertMode?: AlertMode };
+
+/**
+ * The offsets that apply to this row (D13). Remind: the user's offsets. Keep quietly: none for Monthly /
+ * Every 4 weeks, only the largest for Quarterly / Yearly; but every offset while a price rise is known or a
+ * trial is active (E38-E42, E48).
+ */
+export function effectiveOffsets<T extends AlertSource>(row: ComputedSubscription<T>, offsets: number[]): number[] {
+  const { input, computed: c } = row;
+  if (input.alertMode !== "quiet" || c.priceRises === true || c.tags.trial) return offsets;
+  if (offsets.length === 0) return [];
+  return input.billingCycle === "quarterly" || input.billingCycle === "yearly" ? [Math.max(...offsets)] : [];
+}
 
 export interface DueAlert {
   offset: number;
@@ -25,7 +37,7 @@ function reachedOffset<T extends AlertSource>(row: ComputedSubscription<T>, offs
   if (input.keptForCancelBy === c.cancelBy) return null; // Keep is valid only for this cancel-by
   const left = c.daysUntilCancelBy;
   if (left < 0) return null; // E31
-  const reached = offsets.filter((o) => left <= o);
+  const reached = effectiveOffsets(row, offsets).filter((o) => left <= o);
   if (reached.length === 0) return null;
   return { offset: Math.min(...reached), cancelBy: c.cancelBy, daysLeft: left };
 }
@@ -91,4 +103,17 @@ export function shouldOfferQuiet(
   keptCount: number,
 ): boolean {
   return sub.alertMode === "remind" && sub.quietOfferShownAt === null && keptCount >= 2;
+}
+
+function daysList(offsets: number[]): string {
+  const d = [...offsets].sort((a, b) => b - a).map(String);
+  return d.length <= 1 ? (d[0] ?? "") : `${d.slice(0, -1).join(", ")} and ${d[d.length - 1]}`;
+}
+
+/** Plain-language summary of a mode for a row's cycle (detail page, D13). Ignores price rises and trials. */
+export function describeReminders(mode: AlertMode, cycle: SubscriptionCore["billingCycle"], offsets: number[]): string {
+  if (offsets.length === 0) return "No reminders.";
+  if (mode === "remind") return `Reminders ${daysList(offsets)} days before the cancel-by.`;
+  if (cycle === "quarterly" || cycle === "yearly") return `One reminder, ${Math.max(...offsets)} days before the cancel-by.`;
+  return "No routine reminders.";
 }

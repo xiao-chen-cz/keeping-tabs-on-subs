@@ -23,7 +23,7 @@ function Item({ label, children }: { label: string; children: ReactNode }) {
 /** "Cancelled on 4 Oct 2026 via Website / app · ref ABC-123" / "Reopened on 5 Oct 2026" / "Kept on 1 Oct 2026 · cancel-by 4 Oct 2026". */
 export function describeEvent(e: SubscriptionEvent): string {
   if (e.kind === "kept" || e.kind === "keep_undone") {
-    const verb = e.kind === "kept" ? "Kept" : "Reminders back on";
+    const verb = e.kind === "kept" ? "Kept" : "Keep undone";
     return `${verb} on ${formatDayLong(e.occurredOn)}${e.cancelBy ? ` · cancel-by ${formatDayLong(e.cancelBy)}` : ""}`;
   }
   const verb = e.kind === "cancelled" ? "Cancelled" : "Reopened";
@@ -43,6 +43,7 @@ export function SubscriptionDetail({
   reopenAction,
   events,
   captureText,
+  reminders,
 }: {
   row: ComputedSubscription<Subscription>;
   editHref?: string;
@@ -56,6 +57,8 @@ export function SubscriptionDetail({
   events?: SubscriptionEvent[];
   /** Text of the original capture, when the entry came from one. Null/undefined: no section. */
   captureText?: string | null;
+  /** Reminder setting (D13), shown under the fields. Omit for read-only views. */
+  reminders?: ReactNode;
 }) {
   const { input: s, computed: c } = row;
   const money = (cents: number | null) =>
@@ -77,6 +80,7 @@ export function SubscriptionDetail({
         {c.tags.needsUpdate && <Tag kind="needsUpdate" />}
         {c.tags.trial && <Tag kind="trial" />}
         {c.tags.ending && <Tag kind="ending" />}
+        {!cancelled && s.alertMode === "quiet" && <Tag kind="quiet" />}
       </header>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {editHref && (
@@ -151,6 +155,7 @@ export function SubscriptionDetail({
         <Item label="Source">{cap(s.source)}</Item>
         <Item label="Notes">{s.notes}</Item>
       </dl>
+      {!cancelled && reminders}
       {events && events.length > 0 && (
         <section className="mt-5" aria-labelledby="history-heading">
           <h2 id="history-heading" className="section-label">

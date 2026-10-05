@@ -5,10 +5,11 @@ import type { ComputedSubscription, Currency, SubscriptionCore } from "@/lib/dom
 import { formatMoney } from "@/lib/domain/totals";
 import { formatDay, relativeDays } from "./format";
 import { accountPart, MetaLine, RowShell } from "./renewal-row";
+import { Tag } from "./tag";
 
 type Row<T extends SubscriptionCore> = ComputedSubscription<T>;
 
-export interface DueSoonProps<T extends SubscriptionCore & { keptForCancelBy?: string | null; accountLabel?: string | null }> {
+export interface DueSoonProps<T extends SubscriptionCore & { keptForCancelBy?: string | null; accountLabel?: string | null; alertMode?: "remind" | "quiet" }> {
   rows: Row<T>[];
   /** Alert offsets in days before cancel-by (user setting, default [3, 1, 0]). */
   offsets: number[];
@@ -40,7 +41,7 @@ function amountPart(row: Row<SubscriptionCore>, alert: DueAlert) {
 }
 
 /** "Due soon" section for the top of the list. Hidden when nothing is due. */
-export function DueSoon<T extends SubscriptionCore & { keptForCancelBy?: string | null; accountLabel?: string | null }>({
+export function DueSoon<T extends SubscriptionCore & { keptForCancelBy?: string | null; accountLabel?: string | null; alertMode?: "remind" | "quiet" }>({
   rows,
   offsets,
   hrefFor,
@@ -68,6 +69,7 @@ export function DueSoon<T extends SubscriptionCore & { keptForCancelBy?: string 
                 <span className="pill border-accent-dark/30 bg-accent-light text-accent-dark">
                   {relativeDays(alert.daysLeft)}
                 </span>
+                {row.input.alertMode === "quiet" && <Tag kind="quiet" />}
               </div>
               <MetaLine
                 parts={[

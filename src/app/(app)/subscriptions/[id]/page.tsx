@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { KeptForRenewal } from "@/components/alert-actions";
+import { KeptForRenewal, RemindersForm } from "@/components/alert-actions";
 import { SubscriptionDetail } from "@/components/subscription-detail";
 import { requireUser } from "@/lib/dal/auth";
 import { listEvents } from "@/lib/dal/events";
@@ -9,7 +9,7 @@ import { getProfile } from "@/lib/dal/profile";
 import { getSubscription } from "@/lib/dal/subscriptions";
 import { todayIn } from "@/lib/dates/plain-date";
 import { computeSubscription } from "@/lib/domain/compute";
-import { undoKeepAction } from "../../alerts/actions";
+import { setAlertModeAction, undoKeepAction } from "../../alerts/actions";
 import { reopenSubscriptionAction } from "../actions";
 
 export default async function SubscriptionPage({ params }: PageProps<"/subscriptions/[id]">) {
@@ -43,6 +43,14 @@ export default async function SubscriptionPage({ params }: PageProps<"/subscript
         reopenAction={reopenSubscriptionAction.bind(null, subscription.id)}
         events={events}
         captureText={capture ? (capture.rawText ?? "A file was uploaded for this entry.") : null}
+        reminders={
+          <RemindersForm
+            mode={subscription.alertMode}
+            cycle={subscription.billingCycle}
+            offsets={profile.reminderOffsets}
+            action={setAlertModeAction.bind(null, subscription.id)}
+          />
+        }
       />
     </main>
   );

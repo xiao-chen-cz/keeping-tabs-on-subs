@@ -44,9 +44,9 @@ Missing, in build order (each part depends on the one before):
 ## 5. Part B: quiet mode and alert channel
 
 1. Pure: extend `reachedOffset` in `alerts.ts` with the D13 rule. Effective offsets for a row = the user's offsets when Remind, trial active or Price rises? = Yes; `[max(offsets)]` for quiet Quarterly / Yearly; `[]` for quiet Monthly / Every 4 weeks. Everything else (Keep, E30 collapse, E31) is unchanged, so `dueAlert`, `alertsToSend` and `dueSoon` follow automatically.
-2. Detail page and edit form: "Reminders" with Remind / Keep quietly and the help text from §3.2 (including the known limit). The list shows a quiet mark on quiet rows.
-3. `/settings`: alert channel (App only / App and email, showing the login address), reminder offsets (checkboxes 7, 3, 1, 0; at least one). Linked from the header menu.
-4. Seed: in the full set, one quiet monthly row with a promo ending soon (so E39 is visible in the demo) and one quiet yearly row; update `specs/seed-data.md` and its expected Due soon list.
+2. Detail page (built 2026-10-05; not in the edit form, to keep that form about the subscription itself): "Reminders" with Remind / Keep quietly, a one-line summary per option for the row's cycle (`describeReminders`) and the help text from §3.2 (including the known limit). A "Quiet" tag on quiet rows in the list, Due soon and the detail header.
+3. `/settings`: alert channel (App only / App and email, showing the login address), reminder offsets (checkboxes 7, 3, 1, 0; at least one). Linked from the header. Built 2026-10-05.
+4. Seed (built 2026-10-05): in the full set only, Cloudly Storage (quiet monthly, E38) and BudgetBuddy (quiet yearly, still its one alert, E41). The starter set is unchanged, so testers see the default. E39 is covered by unit tests rather than a seed row.
 
 ## 6. Part C: daily email job
 

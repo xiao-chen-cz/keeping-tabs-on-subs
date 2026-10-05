@@ -30,6 +30,8 @@ export type SeedSpec = {
   paymentMethod: string | null;
   notes: string | null;
   accountLabel?: string | null;
+  /** D13; default Remind. */
+  alertMode?: "remind" | "quiet";
 };
 
 export const SEED_CATEGORIES = [
@@ -77,7 +79,7 @@ export const SEED_SPECS: readonly SeedSpec[] = [
     paymentMethod: null },
   { ...base, key: 6, name: "BudgetBuddy", amountCents: 2999, currency: "EUR", cycle: "yearly",
     dates: { kind: "lastRenewal", offset: 9 }, category: "Finance / Banking", scope: "personal",
-    paymentMethod: PRIVATE, notes: "Switched from monthly 2.99 EUR to annual, saves 20%" },
+    paymentMethod: PRIVATE, notes: "Switched from monthly 2.99 EUR to annual, saves 20%", alertMode: "quiet" },
   { ...base, key: 7, name: "FitClub Online", status: "cancelled", amountCents: 1490, currency: "EUR",
     cycle: "monthly", dates: { kind: "none" }, accessUntilOffset: 12,
     category: "Memberships / Communities", scope: "personal", paymentMethod: null },
@@ -86,7 +88,7 @@ export const SEED_SPECS: readonly SeedSpec[] = [
     confidence: "low", paymentMethod: null },
   { ...base, key: 9, name: "Cloudly Storage", amountCents: 999, currency: "EUR", cycle: "monthly",
     dates: { kind: "latest31st" }, category: "Infrastructure / Hosting", scope: "business",
-    paymentMethod: BUSINESS },
+    paymentMethod: BUSINESS, alertMode: "quiet" },
   { ...base, key: 10, name: "SafeHome Insurance", amountCents: 6200, currency: "EUR", cycle: "quarterly",
     dates: { kind: "next", offset: 50 }, category: "Insurance", scope: "personal", paymentMethod: PRIVATE },
   { ...base, key: 11, name: "EuroServer Hosting", amountCents: 1147, currency: "EUR", cycle: "monthly",

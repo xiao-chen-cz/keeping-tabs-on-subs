@@ -36,7 +36,7 @@ export function MetaLine({ parts }: { parts: ReactNode[] }) {
   );
 }
 
-type WithAccount = { accountLabel?: string | null };
+type WithAccount = { accountLabel?: string | null; alertMode?: "remind" | "quiet" };
 
 /** The account segment of the meta line (null unless the name is shared with another row). */
 export function accountPart(duplicates: ReadonlySet<string> | undefined, input: { name: string } & WithAccount): ReactNode {
@@ -101,6 +101,7 @@ export function RenewalRow<T extends SubscriptionCore & WithAccount>({
         <span className="text-base font-semibold text-text">{input.name}</span>
         {c.tags.needsUpdate && <Tag kind="needsUpdate" />}
         {c.tags.trial && <Tag kind="trial" />}
+        {input.alertMode === "quiet" && <Tag kind="quiet" />}
       </div>
       <MetaLine
         parts={[

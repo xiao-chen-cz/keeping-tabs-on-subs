@@ -147,3 +147,11 @@ describe("anchor derivation", () => {
     }
   });
 });
+
+describe("Keep quietly in the full set (D13)", () => {
+  it("BudgetBuddy and Cloudly Storage are quiet; the starter set has no quiet row", () => {
+    expect(buildSeed("full", "2026-10-02").filter((s) => s.alertMode === "quiet").map((s) => s.name).sort())
+      .toEqual(["BudgetBuddy", "Cloudly Storage"]);
+    expect(buildSeed("starter", "2026-10-02").some((s) => s.alertMode === "quiet")).toBe(false);
+  });
+});

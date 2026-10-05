@@ -43,3 +43,12 @@ export async function undoQuietAction(id: string): Promise<void> {
   await setAlertMode(id, "remind");
   redirect("/");
 }
+
+/** Bind id first. The Reminders setting on the detail page (D13). */
+export async function setAlertModeAction(id: string, formData: FormData): Promise<void> {
+  await requireUser();
+  const mode = formData.get("alertMode");
+  if (mode !== "remind" && mode !== "quiet") return;
+  await setAlertMode(id, mode);
+  redirect(`/subscriptions/${id}`);
+}
