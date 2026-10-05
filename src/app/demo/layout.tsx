@@ -5,7 +5,7 @@ export default function DemoLayout({ children }: LayoutProps<"/demo">) {
   return (
     <>
       <header className="border-b border-line">
-        <div className="mx-auto w-full max-w-xl px-4 py-3">
+        <div className="mx-auto w-full max-w-3xl px-4 py-3">
           <Link href="/demo" className="font-heading text-lg font-semibold text-primary-ink">
             Keeping Tabs on Subs · Demo
           </Link>
@@ -17,7 +17,7 @@ export default function DemoLayout({ children }: LayoutProps<"/demo">) {
           Sign in for your own.
         </Link>
       </p>
-      <div className="mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-4">{children}</div>
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-4">{children}</div>
     </>
   );
 }

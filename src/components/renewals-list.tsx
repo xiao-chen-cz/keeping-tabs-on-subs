@@ -199,7 +199,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
 
       {addHref && (
         <div className="fixed inset-x-0 bottom-0 border-t border-line bg-bg px-4 py-2">
-          <a href={addHref} className="btn-primary mx-auto flex w-full max-w-xl">
+          <a href={addHref} className="btn-primary mx-auto flex w-full max-w-3xl">
             Add subscription
           </a>
         </div>
