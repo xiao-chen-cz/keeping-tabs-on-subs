@@ -23,7 +23,7 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
         </div>
       </header>
       <p className="bg-light px-4 py-1.5 text-center text-xs text-mid">
-        Demo: alerts show in the app only, no emails are sent yet.
+        Demo: reminders show under Due soon and, unless you switch it off in Settings, by email at most once a day.
       </p>
       <div className="mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-4">{children}</div>
     </>

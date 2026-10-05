@@ -22,10 +22,11 @@ If you only want a look around first, the link plus `/demo` shows a read-only sa
 
 **4. Review a proposed entry.** The list shows a "Review (1)" button. Open it, read what the app picked up, answer the question it asks (the billing page it read did not say how often you pay), check the pre-filled form below and pick a category and approve the entry. It should now appear in your list. (Rejecting it instead leaves the list unchanged.)
 
+**5. Decide on a reminder.** Under "Due soon", tap "Keep" on one entry: it leaves the box until its next renewal (the green note has an Undo). Open another entry and, under "Reminders", try "Keep quietly". Reminders also arrive by email in the early morning (Berlin time), at most one a day and only when something is due; you can switch email off in Settings (top right). The email's buttons open the app first and change nothing until you confirm.
+
 ## What it does not do yet
 
 - No capture: you cannot type a description, upload a screenshot or paste an email yet. You add entries by hand for now.
-- No emails: reminders show in the app only.
 - No delete: you can cancel an entry, not remove it.
 - No password change.
 
