@@ -12,7 +12,7 @@ Xiao will send you an email address and password privately. Open the link Xiao g
 
 If you only want a look around first, the link plus `/demo` shows a read-only sample with no sign-in.
 
-## Four things to try
+## Five things to try
 
 **1. Find your next decision.** Look at the list and the "Due soon" section. Which subscription do you have to decide on first, and by what date? Say it out loud before you tap anything.
 

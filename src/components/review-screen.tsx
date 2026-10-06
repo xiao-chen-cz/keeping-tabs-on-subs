@@ -63,6 +63,11 @@ export function ReviewScreen({
   return (
     <div className="flex flex-col gap-3">
       <h1 className="font-heading text-2xl font-semibold text-primary-ink">{vals.name.trim() || "Unnamed"}</h1>
+      {!readOnly && (
+        <p className="text-sm text-mid">
+          {updatesName ? "Check the change, then approve it." : "Not in your list yet. Check the fields, then approve or reject."}
+        </p>
+      )}
       {extractionError && (
         <p role="status" className="rounded-control border border-line bg-light p-3 text-sm">
           The app could not read this capture ({extractionError.replace(/\.$/, "")}). Fill in the fields yourself, or
