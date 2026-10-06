@@ -48,4 +48,4 @@ Represented in `src/lib/domain/sample-cases.test.ts` with no invented values:
 2. **Notely Teams:** 240.00 EUR yearly with a 30-day notice override.
 3. **The Daily Ledger:** 2.00 EUR every 4 weeks, regular price 12.00 from a promo end after the next renewal (no rise yet).
 4. **VoiceDraft Pro:** 120.00 USD yearly, promo ends on the next renewal (rises to 200.00).
-5. **P1 NoteForge (proposal):** 12.00 USD monthly with a stated next renewal and cancel URL. Notice, category, scope and payment method stay null, and its per-field confidence is kept.
+5. **P1 NoteForge (proposal):** 12.00 USD with a stated next renewal and cancel URL. The billing page does not state the cycle, so it stays null and the review asks one question (the tester answers Monthly). Notice, category, scope and payment method stay null, and its per-field confidence is kept.

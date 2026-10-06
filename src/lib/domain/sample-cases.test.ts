@@ -3,6 +3,8 @@
 // "What a tester sees". Today 2026-10-02; anchors chosen so Next renewal lands on the seed offsets.
 import { describe, expect, it } from "vitest";
 import { computeSubscription } from "./compute";
+import { missingRequired } from "./proposal";
+import { parseAnswer, questionsFor } from "./questions";
 import { formatMoney, totalsByCurrency } from "./totals";
 import type { Subscription, SubscriptionCore, SubscriptionDraft } from "./types";
 import { groupAndSort } from "./upcoming";
@@ -60,18 +62,26 @@ describe("starter set at 2026-10-02", () => {
 describe("P1 NoteForge proposal", () => {
   const draft: SubscriptionDraft = {
     name: "NoteForge", vendor: null, plan: null, accountLabel: null, category: null, paymentMethod: null, scope: null, confidence: null,
-    amountCents: 1200, currency: "USD", billingCycle: "monthly",
+    amountCents: 1200, currency: "USD", billingCycle: null, // the billing page does not state the cycle
     lastRenewalDate: "2026-10-30", // stated next renewal, stored as a future anchor (D4)
     trialEnds: null, cancelNoticeDays: null, regularPriceCents: null, promoEnds: null, accessUntil: null,
     cancelUrl: "https://noteforge.example/billing", notes: null,
-    fieldConfidence: { amountCents: "high", billingCycle: "medium", category: "low" },
+    fieldConfidence: { amountCents: "high", category: "low" },
     updatesSubscriptionId: null,
   };
 
-  it("keeps unknowns null and computes the next renewal from the stated date", () => {
-    expect([draft.cancelNoticeDays, draft.category, draft.scope, draft.paymentMethod]).toEqual([null, null, null, null]);
-    expect(draft.fieldConfidence).toEqual({ amountCents: "high", billingCycle: "medium", category: "low" });
-    const core: SubscriptionCore = { ...draft, name: draft.name ?? "", status: "confirmed" };
+  it("keeps unknowns null and asks exactly one question: the billing cycle", () => {
+    expect([draft.billingCycle, draft.cancelNoticeDays, draft.category, draft.scope, draft.paymentMethod]).toEqual([null, null, null, null, null]);
+    expect(draft.fieldConfidence).toEqual({ amountCents: "high", category: "low" });
+    const missing = missingRequired(draft);
+    expect(missing).toEqual(["billingCycle"]);
+    expect(questionsFor(missing).map((q) => q.field)).toEqual(["billingCycle"]);
+  });
+
+  it("computes the next renewal from the stated date once the tester answers Monthly", () => {
+    const billingCycle = parseAnswer("billingCycle", "Monthly");
+    expect(billingCycle).toBe("monthly");
+    const core: SubscriptionCore = { ...draft, name: draft.name ?? "", billingCycle: "monthly", status: "confirmed" };
     const { computed } = computeSubscription(core, T);
     expect(computed).toMatchObject({ nextRenewal: "2026-10-30", daysUntilRenewal: 28, noticeDays: 3, cancelBy: "2026-10-27", anchorInFuture: true });
     expect(computed.tags.needsUpdate).toBe(false);
