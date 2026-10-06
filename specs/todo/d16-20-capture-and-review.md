@@ -19,10 +19,10 @@ The minimum demo in the brief ("typed description or upload/paste plus review qu
 | A2 | Approve as one transaction (insert or update subscription, then mark the proposal approved) | A Postgres function `approve_proposal(proposal_id, fields jsonb)` with `security invoker`, so RLS still applies. Two separate calls could leave a subscription without an approved proposal. |
 | A4 | Cancellation record (D12, added 2026-10-04) | In the Part A migration: append-only `subscription_events`. The cancel flow asks for date, channel and an optional reference. See §3 and step 7. |
 | A3 | A stated next renewal date in a capture | Store it as `lastRenewalDate` (a future anchor, D4 rule 3). Decided overnight, see `specs/subscription-rules.md`. The brief allows "next renewal" as the one required date. |
-| B1 | Model for extraction | Latest Claude Sonnet with vision (check the `claude-api` skill for the current id and price before coding). Only the capture is sent. |
-| B2 | Anthropic API key | A server-only Vercel env var (`ANTHROPIC_API_KEY`). This is not the Supabase secret key, which stays off Vercel. |
-| B3 | File storage | Private Supabase Storage bucket `captures` (EU), path `<user_id>/<capture_id>.<ext>`, storage RLS on the first path segment. Max size 10 MB; png, jpg, webp, pdf. |
-| B4 | Cost and abuse guard | A per-user daily cap on extraction calls (e.g. 30), counted in `captures`. |
+| B1 | Model for extraction | **Decided 2026-10-06:** `claude-opus-5-5` (vision + PDF, structured output), low effort, via the Anthropic API directly (about $0.05 per capture). Only the capture is sent. The API offers no EU inference geography (`us`/`global` only); EU-only would mean Bedrock Frankfurt, which was not chosen. The capture leaves the EU for the model call only, and the privacy notice says so. |
+| B2 | Anthropic API key | **Decided 2026-10-06:** the owner creates a key in a dedicated Console workspace with a monthly spend limit and sets it as a server-only Vercel env var (`ANTHROPIC_API_KEY`) and in `.env.local`. Never in chat or git. This is not the Supabase secret key, which stays off Vercel. |
+| B3 | File storage | **Decided 2026-10-06 as recommended:** private Supabase Storage bucket `captures` (EU), path `<user_id>/<capture_id>.<ext>`, storage RLS on the first path segment. Max size 10 MB; png, jpg, webp, pdf. |
+| B4 | Cost and abuse guard | **Decided 2026-10-06 as recommended:** 30 extraction calls per user per day (Berlin date), counted in `captures`. |
 
 ## 3. Schema (one migration per part)
 
