@@ -7,6 +7,7 @@ import { formatMoney } from "@/lib/domain/totals";
 import { formatDayLong, relativeDays } from "./format";
 import { missingForSchedule } from "@/lib/domain/needs-update";
 import { Tag } from "./tag";
+import { CaptureView, type CaptureFile } from "./capture-view";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -43,6 +44,7 @@ export function SubscriptionDetail({
   reopenAction,
   events,
   captureText,
+  captureFile = null,
   reminders,
 }: {
   row: ComputedSubscription<Subscription>;
@@ -57,6 +59,8 @@ export function SubscriptionDetail({
   events?: SubscriptionEvent[];
   /** Text of the original capture, when the entry came from one. Null/undefined: no section. */
   captureText?: string | null;
+  /** The uploaded picture or PDF of the original capture (signed link). */
+  captureFile?: CaptureFile | null;
   /** Reminder setting (D13), shown under the fields. Omit for read-only views. */
   reminders?: ReactNode;
 }) {
@@ -171,10 +175,10 @@ export function SubscriptionDetail({
           </ul>
         </section>
       )}
-      {captureText != null && (
+      {(captureText != null || captureFile !== null) && (
         <details className="mt-5 rounded-control border border-line p-3 text-sm">
           <summary className="min-h-8 cursor-pointer font-medium">Original capture</summary>
-          <p className="mt-2 whitespace-pre-wrap break-words">{captureText}</p>
+          <CaptureView text={captureText ?? null} file={captureFile} />
         </details>
       )}
     </article>

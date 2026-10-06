@@ -1,0 +1,34 @@
+{
+  "today": "2026-10-02",
+  "model": "claude-opus-5-5",
+  "output": {
+    "is_subscription": true,
+    "name": "CodePilot",
+    "vendor": null,
+    "plan": "Pro",
+    "account_label": "me@example.com",
+    "amount": "25.00",
+    "currency": "USD",
+    "billing_cycle": "monthly",
+    "last_charge_date": "2026-09-29",
+    "next_charge_date": null,
+    "trial_ends": null,
+    "regular_price": null,
+    "promo_ends": null,
+    "cancel_notice_days": null,
+    "cancel_url": null,
+    "payment_method_label": "Business account",
+    "category": "AI",
+    "category_confidence": "medium",
+    "scope": "business",
+    "scope_confidence": "low",
+    "field_confidence": {
+      "name": "high",
+      "amount": "high",
+      "currency": "high",
+      "billing_cycle": "high",
+      "date": "high"
+    },
+    "notes": null
+  }
+}

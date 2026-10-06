@@ -4,6 +4,7 @@ import type { PlainDate } from "@/lib/domain/types";
 import type { SeedRow } from "./build-seed";
 import type { SeedCapture } from "./captures";
 import type { SeedProposal } from "./proposals";
+import { draftToProposalInsert } from "@/lib/dal/map-proposal";
 
 export type SubscriptionInsert = Database["public"]["Tables"]["subscriptions"]["Insert"];
 
@@ -81,27 +82,10 @@ export function seedProposalToInsert(
     return id;
   };
   return {
+    ...draftToProposalInsert({ ...d, updatesSubscriptionId }, captureId, {
+      categoryId: lookup(categoryIds, d.category, "category"),
+      paymentMethodId: lookup(paymentMethodIds, d.paymentMethod, "payment method"),
+    }),
     user_id: userId,
-    capture_id: captureId,
-    name: d.name,
-    amount: toNumeric(d.amountCents),
-    currency: d.currency,
-    billing_cycle: d.billingCycle,
-    last_renewal_date: d.lastRenewalDate,
-    trial_ends: d.trialEnds,
-    cancel_notice_days: d.cancelNoticeDays,
-    regular_price: toNumeric(d.regularPriceCents),
-    promo_ends: d.promoEnds,
-    category_id: lookup(categoryIds, d.category, "category"),
-    payment_method_id: lookup(paymentMethodIds, d.paymentMethod, "payment method"),
-    scope: d.scope,
-    confidence: d.confidence,
-    vendor: d.vendor,
-    plan: d.plan,
-    account_label: d.accountLabel,
-    cancel_url: d.cancelUrl,
-    notes: d.notes,
-    field_confidence: d.fieldConfidence,
-    updates_subscription_id: updatesSubscriptionId,
   };
 }

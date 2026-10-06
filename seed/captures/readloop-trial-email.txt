@@ -1,0 +1,5 @@
+From: hello@readloop.example
+Subject: Your ReadLoop trial ends in 3 days
+
+Your free trial ends on 2026-10-05. After that ReadLoop Plus costs 6.99 EUR per month.
+Cancel anytime in Settings > Subscription.

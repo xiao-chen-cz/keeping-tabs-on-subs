@@ -13,9 +13,11 @@
     "create-account": "tsx --env-file=.env.local scripts/create-account.ts",
     "reset-account": "tsx --env-file=.env.local scripts/reset-account.ts",
     "bundle:alerts": "sh scripts/bundle-alerts.sh",
-    "check:alerts-fn": "deno check --config scripts/alerts-bundle.deno.json supabase/functions/send-alerts/index.ts"
+    "check:alerts-fn": "deno check --config scripts/alerts-bundle.deno.json supabase/functions/send-alerts/index.ts",
+    "extract:live": "tsx --conditions=react-server --env-file=.env.local scripts/extract-live.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.2",
     "next": "16.3.8",

@@ -15,6 +15,9 @@ import type { Database } from "@/lib/supabase/database.types";
 export type CaptureRow = Database["public"]["Tables"]["captures"]["Row"];
 export type ProposalRow = Database["public"]["Tables"]["proposals"]["Row"];
 export type EventRow = Database["public"]["Tables"]["subscription_events"]["Row"];
+export type ProposalInsert = Database["public"]["Tables"]["proposals"]["Insert"];
+
+const toNumeric = (cents: number | null): number | null => (cents === null ? null : Number((cents / 100).toFixed(2)));
 
 export interface Capture {
   id: string;
@@ -123,5 +126,39 @@ export function rowToEvent(row: EventRow): SubscriptionEvent {
     captureId: row.capture_id,
     cancelBy: row.cancel_by,
     recordedAt: row.recorded_at,
+  };
+}
+
+/**
+ * Draft -> proposals insert (without user_id: the column default is auth.uid(); the seed sets it).
+ * Category and payment method arrive as ids, resolved by the caller from the draft's names.
+ */
+export function draftToProposalInsert(
+  d: SubscriptionDraft,
+  captureId: string,
+  ids: { categoryId: string | null; paymentMethodId: string | null },
+): ProposalInsert {
+  return {
+    capture_id: captureId,
+    name: d.name,
+    amount: toNumeric(d.amountCents),
+    currency: d.currency,
+    billing_cycle: d.billingCycle,
+    last_renewal_date: d.lastRenewalDate,
+    trial_ends: d.trialEnds,
+    cancel_notice_days: d.cancelNoticeDays,
+    regular_price: toNumeric(d.regularPriceCents),
+    promo_ends: d.promoEnds,
+    category_id: ids.categoryId,
+    payment_method_id: ids.paymentMethodId,
+    scope: d.scope,
+    confidence: d.confidence,
+    vendor: d.vendor,
+    plan: d.plan,
+    account_label: d.accountLabel,
+    cancel_url: d.cancelUrl,
+    notes: d.notes,
+    field_confidence: d.fieldConfidence,
+    updates_subscription_id: d.updatesSubscriptionId,
   };
 }

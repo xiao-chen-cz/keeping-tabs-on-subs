@@ -1,5 +1,6 @@
 // Sample captures for the demo, all fictional. Seeded captures have input "seed" and raw text only;
 // a live demo pastes or uploads them again. Dates are built from the injected today.
+import { addDays } from "@/lib/dates/plain-date";
 import type { PlainDate } from "@/lib/domain/types";
 
 export interface SeedCapture {
@@ -60,3 +61,20 @@ export const READLOOP_TRIAL_EMAIL: SeedCapture = {
       "Cancel anytime in Settings > Subscription.",
     ].join("\n"),
 };
+
+export const SAMPLE_CAPTURES = [NOTEFORGE_BILLING, CODEPILOT_RECEIPT, GYMBOX_INVOICE, READLOOP_TRIAL_EMAIL] as const;
+
+/** Each sample's date, as an offset from today: the seed's (seed-data.md P1, P2) or the demo's. */
+const SAMPLE_DATE_OFFSET: Record<string, number> = {
+  "noteforge-billing": 28,
+  "codepilot-receipt": -3,
+  "gymbox-invoice": 0,
+  "readloop-trial-email": 3,
+};
+
+/** A sample capture's text with its date filled in from today (for live checks and the demo). */
+export function sampleCaptureText(key: string, today: PlainDate): string {
+  const sample = SAMPLE_CAPTURES.find((c) => c.key === key);
+  if (!sample) throw new Error(`Unknown sample capture "${key}"`);
+  return sample.rawText(addDays(today, SAMPLE_DATE_OFFSET[key]));
+}

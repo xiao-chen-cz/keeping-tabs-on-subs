@@ -44,7 +44,7 @@ export function questionsFor(missing: readonly RequiredField[]): Question[] {
 }
 
 /** "9,99" or "9.99" -> 999. Null when not a non-negative amount with at most 2 decimals. */
-function parseAmountCents(raw: string): number | null {
+export function parseAmountCents(raw: string): number | null {
   const s = raw.trim().replace(",", ".");
   if (!/^\d+(\.\d{1,2})?$/.test(s)) return null;
   const cents = Math.round(Number(s) * 100);

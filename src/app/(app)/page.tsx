@@ -63,7 +63,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         groups={groups}
         totals={totals}
         hrefFor={(r) => subscriptionHref(r.input.id, r.computed.tags.needsUpdate)}
-        addHref="/subscriptions/new"
+        addHref="/capture"
         showArchived={showArchived}
         inbox={<ReviewInbox count={pendingCount} href="/review" />}
         alertOffsets={profile.reminderOffsets}

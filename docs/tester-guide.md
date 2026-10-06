@@ -16,7 +16,7 @@ If you only want a look around first, the link plus `/demo` shows a read-only sa
 
 **1. Find your next decision.** Look at the list and the "Due soon" section. Which subscription do you have to decide on first, and by what date? Say it out loud before you tap anything.
 
-**2. Add one you made up.** Tap the add button and enter a subscription. Invent everything, for example "PhotoVault, 4.99 EUR, monthly". Please never type in your real subscriptions or any real account details.
+**2. Add one you made up.** Tap the add button and describe a subscription in your own words, for example "PhotoVault, 4.99 euros a month, next charge on the 20th". The app reads it (about 10 seconds) and shows you a proposal to check and approve. You can also try "Screenshot or PDF" with a made-up billing page, or "Paste email". Invent everything: please never use your real subscriptions, receipts, screenshots or account details, because what you add is sent to Anthropic's Claude model to be read. "Enter it yourself" opens a plain form instead.
 
 **3. Change the notice period, then cancel it.** Open the subscription you just added and edit it. Give it a different notice period (days before renewal you need to cancel by) and watch the cancel-by date move. Then open it again and tap "Mark as cancelled": enter the date, how you cancelled (a made-up confirmation number is fine) and, if you like, an "access until" date. It should move to an "Ending" group, and the subscription page now shows a History entry with what you entered. "Reopen" brings it back.
 
@@ -26,7 +26,6 @@ If you only want a look around first, the link plus `/demo` shows a read-only sa
 
 ## What it does not do yet
 
-- No capture: you cannot type a description, upload a screenshot or paste an email yet. You add entries by hand for now.
 - No delete: you can cancel an entry, not remove it.
 - No password change.
 

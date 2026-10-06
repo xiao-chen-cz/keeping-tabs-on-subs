@@ -1,0 +1,34 @@
+{
+  "today": "2026-10-02",
+  "model": "claude-opus-5-5",
+  "output": {
+    "is_subscription": true,
+    "name": "Gymbox",
+    "vendor": null,
+    "plan": null,
+    "account_label": null,
+    "amount": "39.00",
+    "currency": null,
+    "billing_cycle": null,
+    "last_charge_date": null,
+    "next_charge_date": null,
+    "trial_ends": null,
+    "regular_price": null,
+    "promo_ends": null,
+    "cancel_notice_days": null,
+    "cancel_url": null,
+    "payment_method_label": null,
+    "category": "Memberships / Communities",
+    "category_confidence": "medium",
+    "scope": "personal",
+    "scope_confidence": "low",
+    "field_confidence": {
+      "name": "high",
+      "amount": "high",
+      "currency": null,
+      "billing_cycle": null,
+      "date": null
+    },
+    "notes": "Invoice shows no currency, billing cycle or date; a Health / Fitness category might fit better."
+  }
+}

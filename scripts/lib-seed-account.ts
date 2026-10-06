@@ -44,8 +44,15 @@ export async function findUserId(db: Db, email: string): Promise<string | null> 
 
 export type SeedCounts = { subscriptions: number; proposals: number };
 
-/** Deletes a user's rows in dependency order (events, proposals, captures, subscriptions, lookups). */
+/** Deletes a user's capture files, then rows in dependency order (events, proposals, captures, subscriptions, lookups). */
 export async function clearUserData(db: Db, userId: string): Promise<void> {
+  for (;;) {
+    const files = await db.storage.from("captures").list(userId, { limit: 100 });
+    if (files.error) throw files.error;
+    if (files.data.length === 0) break;
+    const removed = await db.storage.from("captures").remove(files.data.map((f) => `${userId}/${f.name}`));
+    if (removed.error) throw removed.error;
+  }
   for (const table of [
     "subscription_events",
     "proposals",

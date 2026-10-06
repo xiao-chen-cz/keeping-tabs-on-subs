@@ -1,0 +1,9 @@
+From: billing@codepilot.example
+Subject: Your CodePilot Pro receipt
+
+Thanks for your payment.
+Date: 2026-09-29
+Plan: CodePilot Pro, monthly
+Account: me@example.com
+Amount: $25.00 USD
+Paid with: Business account

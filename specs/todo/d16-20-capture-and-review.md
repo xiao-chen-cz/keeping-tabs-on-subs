@@ -22,7 +22,7 @@ The minimum demo in the brief ("typed description or upload/paste plus review qu
 | B1 | Model for extraction | **Decided 2026-10-06:** `claude-opus-5-5` (vision + PDF, structured output), low effort, via the Anthropic API directly (about $0.05 per capture). Only the capture is sent. The API offers no EU inference geography (`us`/`global` only); EU-only would mean Bedrock Frankfurt, which was not chosen. The capture leaves the EU for the model call only, and the privacy notice says so. |
 | B2 | Anthropic API key | **Decided 2026-10-06:** the owner creates a key in a dedicated Console workspace with a monthly spend limit and sets it as a server-only Vercel env var (`ANTHROPIC_API_KEY`) and in `.env.local`. Never in chat or git. This is not the Supabase secret key, which stays off Vercel. |
 | B3 | File storage | **Decided 2026-10-06 as recommended:** private Supabase Storage bucket `captures` (EU), path `<user_id>/<capture_id>.<ext>`, storage RLS on the first path segment. Max size 10 MB; png, jpg, webp, pdf. |
-| B4 | Cost and abuse guard | **Decided 2026-10-06 as recommended:** 30 extraction calls per user per day (Berlin date), counted in `captures`. |
+| B4 | Cost and abuse guard | **Decided 2026-10-06 as recommended:** 30 extraction calls per user, counted in `captures`. Built as a rolling 24 hours (no time-zone boundary to compute; same effect for abuse). |
 
 ## 3. Schema (one migration per part)
 
@@ -48,13 +48,38 @@ The minimum demo in the brief ("typed description or upload/paste plus review qu
 
 **Done when:** cancelling a subscription in the edit form records date and channel, and the detail page shows it; the starter account shows 1 proposal (NoteForge); answering the category question and approving adds it to the list; rejecting P3 leaves the list unchanged; approving P2 updates CodePilot Pro's last renewal instead of creating a duplicate.
 
-## 5. Part B build steps (outline, detailed after Part A)
+## 5. Part B build steps (detailed 2026-10-06)
 
-1. `/capture` with three tabs: Describe (textarea), Upload (file input with camera on phones), Paste (textarea).
-2. Server action: create the capture row (and the storage upload), then call extraction, then create the proposal, then redirect to `/review/[id]`.
-3. `src/lib/extraction/`: the prompt with logic-spec §4 rules, a JSON schema via tool use or structured output, and zod-validated output. Null for anything not found; never guess dates or prices; card numbers are never kept.
-4. Tests: the prompt and schema against the 4 sample captures, using recorded fixtures (no live calls in CI), plus one manual live run.
-5. Sample captures: write `seed/captures/*` (NoteForge screenshot, CodePilot receipt text, Gymbox sparse PDF, ReadLoop trial email). All fictional.
+Decisions made while detailing (decide-and-log, owner can overturn):
+
+| # | Decision | Why |
+|---|---|---|
+| B5 | The browser uploads the file straight to Storage (user session, storage RLS); the server action gets only the path. | Server actions accept 1 MB by default and Vercel functions 4.5 MB; a 10 MB PDF would not fit through the action. |
+| B6 | Images are downscaled in the browser to at most 1568 px on the long edge (JPEG) before upload. PDFs go as they are (max 10 MB). | Claude scales larger images down anyway, the API limit per image is 5 MB, and phone photos are often bigger. Cheaper and faster. |
+| B7 | The capture row is inserted once, after the model call, with `extraction` / `extraction_error` filled in. The client picks the capture id (UUID) so the storage path `<user_id>/<capture_id>.<ext>` exists before the row. | `captures` has no update grant, and this keeps it that way. |
+| B8 | The model gets the capture, today's date (user time zone) and the category names. Never payment method nicknames, other subscriptions or the account email. Payment method and scope evidence that needs user data is resolved by code after the call. | CLAUDE.md: the LLM call sends only the capture being extracted. |
+| B9 | Payment method: the model returns the label it sees; code keeps it only when it equals one of the user's payment method nicknames (case-insensitive). Anything else (card brands, last digits, IBANs) is dropped. | §4 rules 7 and 8. |
+| B10 | Code, not the model, enforces: enums, ISO dates, amounts with at most 2 decimals, regular price and promo end both or neither, http(s) cancel URLs, overall confidence = lower of category and scope (§4 rule 6). A stated next charge becomes `lastRenewalDate` (A3); a stated last charge wins over it. | Never trust model output for rules we can check. |
+| B11 | A failed or refused call still creates the capture (with `extraction_error`) and an empty proposal, so the user can fill it in or reject it. Failed calls count toward the daily cap. | Manual entry is the fallback; nothing is lost. |
+| B12 | Free-text answers to the missing-field questions stay parsed by code (`parseAnswer`); a model parse is deferred until testers show it is needed. | Tappable options and date / amount inputs already cover the fixed questions. |
+
+Steps:
+
+1. **Migration** `…_capture_storage.sql`: private bucket `captures` (10 MB, png / jpeg / webp / pdf), storage policies select / insert / delete for `authenticated` where the first folder of the object name equals `auth.uid()`. No update policy. `check-rls` extended: another user cannot read, write or list a file.
+2. **Pure extraction module** `src/lib/extraction/`:
+   - `schema.ts`: zod schema of the model output (every field nullable, plus per-field confidence).
+   - `prompt.ts`: the system prompt from logic-spec §4 and the user content blocks (text, image or PDF document) with today's date and the category list.
+   - `to-draft.ts`: model output → `SubscriptionDraft` (rules B9, B10), then `matchExisting` sets `updatesSubscriptionId`.
+   - `limits.ts`: daily cap (30, Berlin day), accepted MIME types and size.
+   - Tests on recorded model outputs for the four sample captures plus bad output (card number, one-sided promo, unknown currency, javascript: URL, impossible date). No live calls in CI.
+3. **Server side** `src/lib/extraction/claude.ts` (server-only): `@anthropic-ai/sdk`, `claude-opus-5-5`, `effort: "low"`, `messages.parse` with `zodOutputFormat`, `max_tokens` 4000, typed error handling, a refusal or parse failure becomes `extraction_error`. `maxDuration` 60 s on the route.
+4. **DAL + action** `createCaptureAction` (in `src/app/(app)/capture/actions.ts`): require user → check the cap → for uploads check that the path is in the user's folder and download the file → call extraction → insert capture and proposal → redirect to `/review/[id]`. A shared `draftToProposalInsert` (generalised from the seed's `seedProposalToInsert`).
+5. **UI** `/capture`: three tabs (Describe, Upload or photo, Paste email), one submit, a pending state "Reading your capture…" (about 10–20 s). The list's Add button goes to `/capture`; "Enter it yourself" links to `/subscriptions/new`. The review and detail pages show an uploaded image or PDF through a short-lived signed URL; text captures as before.
+6. **Sample captures** `seed/captures/`: NoteForge billing page (PNG), CodePilot receipt (text), Gymbox invoice (sparse PDF), ReadLoop trial email (text). All fictional, generated by a script so they can be redrawn.
+7. **Live check** `pnpm extract:live <file>`: one real call per sample capture, run by hand (about $0.05 each), output compared with the recorded fixture.
+8. **Resets:** `reset-account` also deletes the user's files in `captures`.
+
+**Done when:** on the phone, a typed "ReadLoop 6.99 EUR a month, trial ends …" lands in the review queue as a Trial proposal; uploading the NoteForge PNG asks only the billing-cycle question; pasting the CodePilot receipt proposes an update with a price change; the Gymbox PDF yields name and amount only; a 31st call within 24 hours is refused with a clear message; nobody can open another user's file.
 
 ## 6. Cut order
 

@@ -8,6 +8,7 @@ import { SubscriptionForm, type LookupOption } from "./subscription-form";
 import type { FormValues, SubscriptionFormState } from "./subscription-form-values";
 import type { Proposal } from "@/lib/dal/map-proposal";
 import type { Subscription } from "@/lib/domain/types";
+import { CaptureView, type CaptureFile } from "./capture-view";
 
 export interface ReviewScreenProps {
   proposal: Proposal;
@@ -17,6 +18,10 @@ export interface ReviewScreenProps {
   existing?: Subscription | null;
   /** Capture text, or null for a file capture or a missing capture. */
   captureText: string | null;
+  /** An uploaded picture or PDF (signed link), when the capture was a file. */
+  captureFile?: CaptureFile | null;
+  /** Why the model could not read the capture: the fields are then empty for the user to fill in. */
+  extractionError?: string | null;
   initialValues: FormValues;
   /** Required fields still empty in initialValues: fixed at load, so answered questions stay visible. */
   questions: RequiredField[];
@@ -39,6 +44,8 @@ export function ReviewScreen({
   updatesName,
   existing = null,
   captureText,
+  captureFile = null,
+  extractionError = null,
   initialValues,
   questions,
   lookups,
@@ -56,6 +63,12 @@ export function ReviewScreen({
   return (
     <div className="flex flex-col gap-3">
       <h1 className="font-heading text-2xl font-semibold text-primary-ink">{vals.name.trim() || "Unnamed"}</h1>
+      {extractionError && (
+        <p role="status" className="rounded-control border border-line bg-light p-3 text-sm">
+          The app could not read this capture ({extractionError.replace(/\.$/, "")}). Fill in the fields yourself, or
+          reject it.
+        </p>
+      )}
       {updatesName && (
         <div className="rounded-control border border-primary-ink/30 bg-primary-light p-3 text-sm text-primary-ink">
           <p>This will update {updatesName}.</p>
@@ -73,11 +86,7 @@ export function ReviewScreen({
 
       <details className="rounded-control border border-line p-3 text-sm">
         <summary className="min-h-8 cursor-pointer font-medium">What the app read</summary>
-        {captureText ? (
-          <p className="mt-2 whitespace-pre-wrap break-words">{captureText}</p>
-        ) : (
-          <p className="mt-2 text-mid">No text for this capture.</p>
-        )}
+        <CaptureView text={captureText} file={captureFile} />
       </details>
 
       <QuestionsPanel questions={questions} values={vals} onChange={setVals} />

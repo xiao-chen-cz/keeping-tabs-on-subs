@@ -85,6 +85,7 @@ async function main() {
   const createdIds: string[] = [];
   const captureIds: string[] = []; // deleting a capture cascades to its proposals
   const eventIds: string[] = [];
+  const storagePaths: string[] = [];
 
   try {
     const client = publicClient();
@@ -337,6 +338,42 @@ async function main() {
       }
     }
 
+    // Capture files (plan d16-20 B3): one folder per user in the private captures bucket.
+    {
+      const pdf = new Blob(["%PDF-1.4\n% check-rls\n"], { type: "application/pdf" });
+      const ownPath = `${aId}/00000000-0000-4000-8000-00000000a001.pdf`;
+      const bPath = `${bId}/00000000-0000-4000-8000-00000000b001.pdf`;
+      storagePaths.push(ownPath, bPath);
+      const own = await client.storage.from("captures").upload(ownPath, pdf, { contentType: "application/pdf" });
+      report("Control: A can upload into own captures folder", !own.error, own.error?.message ?? "");
+      const over = await client.storage.from("captures").upload(ownPath, pdf, { contentType: "application/pdf", upsert: true });
+      report("A cannot overwrite a capture file", !!over.error, "overwrite succeeded");
+      const intoB = await client.storage.from("captures").upload(`${bId}/00000000-0000-4000-8000-00000000a002.pdf`, pdf, {
+        contentType: "application/pdf",
+      });
+      if (!intoB.error) storagePaths.push(`${bId}/00000000-0000-4000-8000-00000000a002.pdf`);
+      report("A cannot upload into B's captures folder", !!intoB.error, "upload succeeded");
+      const wrongType = await client.storage
+        .from("captures")
+        .upload(`${aId}/00000000-0000-4000-8000-00000000a003.txt`, new Blob(["x"], { type: "text/plain" }), { contentType: "text/plain" });
+      if (!wrongType.error) storagePaths.push(`${aId}/00000000-0000-4000-8000-00000000a003.txt`);
+      report("The captures bucket refuses other file types", !!wrongType.error, "text upload succeeded");
+
+      const seeded = await admin.storage.from("captures").upload(bPath, pdf, { contentType: "application/pdf", upsert: true });
+      if (seeded.error) throw new Error(`Could not place B's test file: ${seeded.error.message}`);
+      const read = await client.storage.from("captures").download(bPath);
+      report("A cannot download B's capture file", !!read.error, "download succeeded");
+      const listed = await client.storage.from("captures").list(bId);
+      report("A cannot list B's captures folder", !!listed.error || (listed.data?.length ?? 0) === 0, `${listed.data?.length} files`);
+      const signed = await client.storage.from("captures").createSignedUrl(bPath, 60);
+      report("A cannot sign a link to B's capture file", !!signed.error, "signed URL created");
+      const removed = await client.storage.from("captures").remove([bPath]);
+      const stillThere = await admin.storage.from("captures").download(bPath);
+      report("A cannot delete B's capture file", !stillThere.error, removed.error?.message ?? "file gone");
+      const anonRead = await publicClient().storage.from("captures").download(ownPath);
+      report("anon cannot download a capture file", !!anonRead.error, "download succeeded");
+    }
+
     const anon = publicClient();
     {
       const fakeId = "00000000-0000-4000-8000-000000000000";
@@ -356,6 +393,7 @@ async function main() {
       report(`anon gets no rows from ${t}`, !!error || (data?.length ?? 0) === 0, `${data?.length} rows`);
     }
   } finally {
+    if (storagePaths.length) await admin.storage.from("captures").remove(storagePaths);
     if (eventIds.length) await admin.from("subscription_events").delete().in("id", eventIds);
     if (captureIds.length) await admin.from("captures").delete().in("id", captureIds);
     if (createdIds.length) await admin.from("subscriptions").delete().in("id", createdIds);
