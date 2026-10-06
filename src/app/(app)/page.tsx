@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { AlertActions, KeptNotice, QuietNotice } from "@/components/alert-actions";
+import { AddedNotice, AlertActions, KeptNotice, QuietNotice, RemindNotice } from "@/components/alert-actions";
 import { RenewalsList } from "@/components/renewals-list";
 import { ReviewInbox } from "@/components/review-inbox";
 import { countKept } from "@/lib/dal/alerts";
@@ -21,7 +21,7 @@ import { answerQuietOfferAction, keepRenewalAction, undoKeepAction, undoQuietAct
 export default async function Home({ searchParams }: PageProps<"/">) {
   await requireUser();
   const sp = await searchParams;
-  const { show, kept, quiet } = sp;
+  const { show, kept, quiet, added, reminders } = sp;
   const filters = parseListFilters(sp);
   const tabsEnabled = tabsEnabledFrom((await cookies()).get(TABS_COOKIE)?.value);
   const linkFilters = { cat: tabsEnabled ? filters.category : null, q: filters.q, scope: filters.scope };
@@ -39,6 +39,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   // After Keep (?kept=<id>) or the quiet offer (?quiet=<id>): a one-off notice for that row.
   const keptRow = typeof kept === "string" ? subscriptions.find((s) => s.id === kept) : undefined;
   const quietRow = typeof quiet === "string" ? subscriptions.find((s) => s.id === quiet) : undefined;
+  // After approving a proposal (?added=<id>) or saving Remind me (?reminders=<id>).
+  const addedRow = typeof added === "string" ? rows.find((r) => r.input.id === added) : undefined;
+  const remindRow = typeof reminders === "string" ? subscriptions.find((s) => s.id === reminders) : undefined;
   const offerQuiet = keptRow ? shouldOfferQuiet(keptRow, await countKept(keptRow.id)) : false;
 
   return (
@@ -58,6 +61,15 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           }
         />
       )}
+      {addedRow && (
+        <AddedNotice
+          name={addedRow.input.name}
+          nextRenewal={addedRow.computed.nextRenewal}
+          cancelBy={addedRow.computed.cancelBy}
+          href={subscriptionHref(addedRow.input.id, addedRow.computed.tags.needsUpdate)}
+        />
+      )}
+      {remindRow && <RemindNotice name={remindRow.name} />}
       {quietRow && <QuietNotice name={quietRow.name} undo={undoQuietAction.bind(null, quietRow.id)} />}
       <RenewalsList
         groups={groups}

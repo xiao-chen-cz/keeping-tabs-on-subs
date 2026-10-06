@@ -24,7 +24,7 @@ export async function approveProposalAction(
   const parsed = parseSubscriptionForm(values, "create");
   if (!parsed.ok) return { fieldErrors: parsed.fieldErrors, values };
   const subscriptionId = await approveProposal(id, parsed.data);
-  redirect(`/subscriptions/${subscriptionId}`);
+  redirect(`/?added=${subscriptionId}`);
 }
 
 export async function rejectProposalAction(id: string): Promise<void> {

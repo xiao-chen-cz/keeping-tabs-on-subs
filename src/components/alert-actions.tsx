@@ -79,6 +79,41 @@ export function QuietNotice({ name, undo }: { name: string; undo: () => Promise<
   );
 }
 
+/** Shown on the list after switching a row back to Remind me (D13). */
+export function RemindNotice({ name }: { name: string }) {
+  return (
+    <p role="status" className={noticeClass}>
+      Saved. {name} will remind you before each cancel-by.
+    </p>
+  );
+}
+
+/** Shown on the list after approving a proposal: the entry is in the list now. */
+export function AddedNotice({
+  name,
+  nextRenewal,
+  cancelBy,
+  href,
+}: {
+  name: string;
+  nextRenewal: string | null;
+  cancelBy: string | null;
+  href: string;
+}) {
+  return (
+    <div role="status" className={`${noticeClass} flex items-start justify-between gap-3`}>
+      <p>
+        {name} is now in your list.
+        {nextRenewal ? ` Renews ${formatDay(nextRenewal)}` : ""}
+        {nextRenewal && cancelBy ? `, cancel by ${formatDay(cancelBy)}.` : nextRenewal ? "." : ""}
+      </p>
+      <Link href={href} className="link -my-2 inline-flex min-h-10 shrink-0 items-center font-medium text-green-ink">
+        Open
+      </Link>
+    </div>
+  );
+}
+
 function UndoButton({ action, label }: { action: () => Promise<void>; label: string }) {
   return (
     <form action={action} className="shrink-0">

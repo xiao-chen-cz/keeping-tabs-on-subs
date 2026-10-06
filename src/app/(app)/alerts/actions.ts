@@ -50,5 +50,6 @@ export async function setAlertModeAction(id: string, formData: FormData): Promis
   const mode = formData.get("alertMode");
   if (mode !== "remind" && mode !== "quiet") return;
   await setAlertMode(id, mode);
-  redirect(`/subscriptions/${id}`);
+  // Back to the list with a confirmation; Keep quietly reuses its notice (with Undo).
+  redirect(mode === "quiet" ? `/?quiet=${id}` : `/?reminders=${id}`);
 }
