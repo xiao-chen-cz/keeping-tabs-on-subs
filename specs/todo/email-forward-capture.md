@@ -1,6 +1,6 @@
 # Plan: forward an email to capture a subscription
 
-Created 2026-10-06 · **DRAFT, needs owner OK on Phase 0 before any build** · Builds on D16–20 Part B (`specs/todo/d16-20-capture-and-review.md`) · Not a brief milestone: extra scope, after the first tester round has started.
+Created 2026-10-06 · **PARKED (2026-10-07): build only if testers ask for it; not offered in the tester guide or the app.** F1 and F3 approved; F2 open (see Phase 0 notes); F4 open · Builds on D16–20 Part B (`specs/todo/d16-20-capture-and-review.md`) · Not a brief milestone: extra scope, after the first tester round has started.
 
 ## 1. Problem and goal
 
@@ -35,6 +35,9 @@ Decided while planning (decide-and-log, owner can overturn):
 ## 3. Phases
 
 ### Phase 0: confirm and decide (owner, ~30 min)
+
+Notes 2026-10-07 (F2 check from public docs): setup (2 MX records, one webhook API call) and payload fields (`From`, `To`, `Recipients`, `Subject`, `MessageId`, `RawTextBody`, `RawHtmlBody`, `SpamScore`, `Attachments[].DownloadToken`) match this plan. Not documented: which plans include inbound parsing, how long Brevo keeps inbound content and attachments (the events API defaults to the last 30 days), webhook signing. Open for the owner: check that the Inbound webhook type is selectable on the free plan; ask Brevo support about inbound content retention.
+
 1. Owner answers F1–F4.
 2. Confirm in the Brevo account: inbound parsing on the free plan, inbound retention and whether it can be shortened, and the exact payload field names (sender, recipients, subject, text and HTML bodies, attachments and how to download them). Record the answers here.
 3. Update CLAUDE.md (move the line out of *Out of scope*, close the two open questions) and the brief's scope note.

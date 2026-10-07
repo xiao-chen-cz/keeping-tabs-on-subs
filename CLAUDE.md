@@ -45,7 +45,7 @@ Next.js (TypeScript strict, Tailwind, mobile-first), Supabase (Postgres, auth, s
 - The owner's real subscriptions and receipts never enter the demo instance or any public copy, screenshot or video. Tester data is deleted after the test round.
 
 ## Out of scope (do not build)
-Inbox OAuth (Gmail/O365) for other users, forward-to-address email capture, bank/card scanning, automatic cancellation (show cancel URL and cancel-by only), tax receipt archive, migrating real Sheet data, push/SMS, billing/teams/onboarding/account deletion. Reminders are in-app plus email alerts.
+Inbox OAuth (Gmail/O365) for other users, bank/card scanning, automatic cancellation (show cancel URL and cancel-by only), tax receipt archive, migrating real Sheet data, push/SMS, billing/teams/onboarding/account deletion. Reminders are in-app plus email alerts. Forward-to-address email capture is planned but parked (`specs/todo/email-forward-capture.md`): build only if testers ask, and do not offer it to testers.
 
 ## Milestones and cut order
 D9–15 (Oct 3–9) schema, seed, list, detail, add/edit, preview live · D16–20 typed description + upload/paste, extraction, review queue, missing-field questions · D21–23 due-soon view, email alerts · D24–27 tests with 2–3 users · D28–30 fix, record demo on sample data. If behind, the question UI falls back to highlighted form fields; email alerts stay. Minimum demo: typed description or upload/paste plus review queue with questions.
@@ -53,4 +53,4 @@ D9–15 (Oct 3–9) schema, seed, list, detail, add/edit, preview live · D16–
 ## Working notes
 - Never write to H, I, K, L, U, V below row 2 in the Sheet (#REF!). The Sheets tools can't set protection or validation.
 - Project folder is being turned into a git repo; app code lives at the root next to `specs/`.
-- Open: inbound-email provider (EU residency, free tier), capture domain (subdomain of the owner's business domain, or separate).
+- Inbound email (parked feature): receiving domain is a new subdomain `in.` of the owner's domain (decided 2026-10-07); provider Brevo pending a free-plan and retention check (F2).
