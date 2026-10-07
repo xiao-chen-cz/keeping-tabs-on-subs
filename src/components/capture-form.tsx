@@ -1,5 +1,5 @@
 "use client";
-import { startTransition, useActionState, useState, type FormEvent } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import {
   MAX_IMAGE_EDGE,
   MAX_UPLOAD_BYTES,
@@ -40,6 +40,15 @@ async function prepareImage(file: File): Promise<{ blob: Blob; mimeType: UploadM
   return { blob, mimeType: "image/jpeg" };
 }
 
+/** First picture or PDF in a paste, or null when the clipboard holds text (so pasting email text still works). */
+function pastedFile(data: DataTransfer | null): File | null {
+  if (!data || data.types.includes("text/plain")) return null;
+  const file = Array.from(data.files).find((f) => f.type.startsWith("image/") || f.type === "application/pdf");
+  if (!file) return null;
+  // Clipboard screenshots are all called "image.png"; give them a clearer name for the file field.
+  return file.name === "image.png" ? new File([file], "pasted-screenshot.png", { type: file.type }) : file;
+}
+
 /** Typed description, upload, or pasted email (D16–20). Every path ends in one extraction and the review screen. */
 export function CaptureForm({
   action,
@@ -52,8 +61,42 @@ export function CaptureForm({
   const [kind, setKind] = useState<Kind>("text");
   const [uploading, setUploading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
   const busy = pending || uploading;
   const error = localError ?? state.error;
+
+  const [pendingPaste, setPendingPaste] = useState<File | null>(null);
+
+  function showPreview(file: File | null) {
+    setPreview(file?.type.startsWith("image/") ? URL.createObjectURL(file) : null);
+  }
+  useEffect(() => () => void (preview && URL.revokeObjectURL(preview)), [preview]);
+
+  // A screenshot pasted anywhere on the page (⌘V / Ctrl+V) goes into the file field, on any tab.
+  useEffect(() => {
+    if (busy) return;
+    function onPaste(e: ClipboardEvent) {
+      const file = pastedFile(e.clipboardData);
+      if (!file) return;
+      e.preventDefault();
+      setKind("upload");
+      setLocalError(null);
+      setPendingPaste(file);
+    }
+    document.addEventListener("paste", onPaste);
+    return () => document.removeEventListener("paste", onPaste);
+  }, [busy]);
+
+  // The file field only exists on the upload tab, so a paste from another tab is applied once it renders.
+  useEffect(() => {
+    if (!pendingPaste || !fileInput.current) return;
+    const dt = new DataTransfer();
+    dt.items.add(pendingPaste);
+    fileInput.current.files = dt.files;
+    showPreview(pendingPaste);
+    setPendingPaste(null);
+  }, [pendingPaste, kind]);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -117,6 +160,7 @@ export function CaptureForm({
             onClick={() => {
               setKind(t.kind);
               setLocalError(null);
+              showPreview(null); // the file field is emptied when it leaves the page
             }}
             className={kind === t.kind ? "btn-primary" : "btn-secondary"}
             disabled={busy}
@@ -149,13 +193,25 @@ export function CaptureForm({
           <label className="flex flex-col gap-1">
             <span className="label">A screenshot of a billing page, a photo of an invoice, or a PDF (max 10 MB)</span>
             <input
+              ref={fileInput}
               type="file"
               name="file"
               accept="image/png,image/jpeg,image/webp,application/pdf"
               className="input py-2"
               disabled={busy}
+              onChange={(e) => showPreview(e.currentTarget.files?.[0] ?? null)}
             />
           </label>
+          <div
+            tabIndex={0}
+            className="rounded-lg border border-dashed border-line px-4 py-3 text-mid focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            Or copy a screenshot and paste it here (⌘V / Ctrl+V).
+          </div>
+          {preview && (
+            // eslint-disable-next-line @next/next/no-img-element -- local object URL, not an optimisable asset
+            <img src={preview} alt="The screenshot that will be read" className="mt-2 max-h-48 w-fit rounded border border-line" />
+          )}
           <span className="text-xs text-mid">Pictures are made smaller (up to {MAX_IMAGE_EDGE} px) before they are sent.</span>
         </div>
       )}
