@@ -94,10 +94,10 @@ describe("RenewalsList", () => {
     expect(screen.queryByRole("link")).toBeNull();
     unmount();
     render(<RenewalsList groups={f.groups} totals={f.totals} addHref="/subscriptions/new" />);
-    expect(screen.getAllByRole("link").length).toBe(2);
+    expect(screen.getByRole("link").getAttribute("href")).toBe("/subscriptions/new");
   });
 
-  it("has no links in read-only mode, and links when hrefFor/addHref are given", () => {
+  it("has no links in read-only mode, and row links when hrefFor is given (no add bar: + Add lives in the header)", () => {
     const { unmount } = render(<RenewalsList groups={groups} totals={totals} />);
     expect(screen.queryAllByRole("link")).toHaveLength(0);
     unmount();
@@ -109,8 +109,8 @@ describe("RenewalsList", () => {
         addHref="/subscriptions/new"
       />,
     );
-    expect(screen.getByText("Add subscription").getAttribute("href")).toBe("/subscriptions/new");
-    expect(screen.getAllByRole("link").length).toBe(rows.length + 1);
+    expect(screen.queryByText("Add subscription")).toBeNull();
+    expect(screen.getAllByRole("link").length).toBe(rows.length);
   });
 
   it("shows a due row once, under Due soon only; others stay under Upcoming", () => {

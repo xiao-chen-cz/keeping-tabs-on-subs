@@ -31,7 +31,7 @@ export interface RenewalsListProps<T extends SubscriptionCore & Filterable & Acc
   /** Omit for a read-only view (public demo): rows are then not links. */
   hrefFor?: (row: Row<T>) => string;
   showArchived?: boolean;
-  /** Omit to hide every add control. */
+  /** Link for the empty state; omit to hide it. The main add control is the "+ Add" in the app header. */
   addHref?: string;
   /** Alert offsets (days before cancel-by) for the Due soon section; omit to hide it. */
   alertOffsets?: number[];
@@ -111,7 +111,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
   const key = (r: Row<T>, i: number) => `${r.input.name}-${i}`;
 
   return (
-    <div className={`space-y-5 ${addHref ? "pb-20" : "pb-8"}`}>
+    <div className="space-y-5 pb-8">
       {/* Without filters the totals lead the page; with filters they sit under the controls that change them. */}
       {!f && <TotalsCard totals={shownTotals} label={totalsLabel} />}
 
@@ -197,13 +197,6 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
         </>
       )}
 
-      {addHref && (
-        <div className="fixed inset-x-0 bottom-0 border-t border-line bg-bg px-4 py-2">
-          <a href={addHref} className="btn-primary mx-auto flex w-full max-w-3xl">
-            Add subscription
-          </a>
-        </div>
-      )}
     </div>
   );
 }

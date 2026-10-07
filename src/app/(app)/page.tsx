@@ -91,7 +91,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         basePath="/"
       />
       {groups.archived.length > 0 && (
-        <div className="pb-24">
+        <div className="pb-8">
           <Link href={listHref("/", { ...linkFilters, showCancelled: !showArchived })} className="link inline-flex min-h-10 items-center text-sm">
             {showArchived ? "Hide cancelled" : "Show cancelled"}
           </Link>

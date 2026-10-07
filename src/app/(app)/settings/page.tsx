@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SettingsForm } from "@/components/settings-form";
 import { requireUser } from "@/lib/dal/auth";
+import { signOut } from "@/lib/dal/auth-actions";
 import { getProfile } from "@/lib/dal/profile";
 import { saveSettingsAction } from "./actions";
 
@@ -20,6 +21,11 @@ export default async function SettingsPage({ searchParams }: PageProps<"/setting
         email={user.email}
         saved={saved === "1"}
       />
+      <form action={signOut} className="mt-6 border-t border-line pt-4">
+        <button type="submit" className="btn-secondary">
+          Sign out
+        </button>
+      </form>
     </main>
   );
 }

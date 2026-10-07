@@ -172,7 +172,7 @@ export function RemindersForm({
         {option("quiet", "Keep quietly")}
         <p className="text-xs text-mid">
           Keep quietly still alerts you to price changes and promo endings the app knows about, and to trials ending. The app
-          only sees prices you give it, so paste price-change emails under Add subscription.
+          only sees prices you give it, so paste price-change emails under + Add.
         </p>
         <div className="pt-1">
           <button type="submit" className="btn-secondary min-h-10 px-4 text-sm">

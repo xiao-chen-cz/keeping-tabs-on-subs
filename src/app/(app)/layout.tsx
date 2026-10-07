@@ -1,24 +1,21 @@
 import Link from "next/link";
-import { signOut } from "@/lib/dal/auth-actions";
 
 // No auth check here: layouts do not re-render on navigation. Pages and actions call the DAL.
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <>
       <header className="border-b border-line">
-        <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-3">
+        <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-4 py-3">
           <Link href="/" className="font-heading text-lg font-semibold text-primary-ink">
             Keeping Tabs on Subs
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+            <Link href="/capture" className="btn-primary min-h-9 whitespace-nowrap px-3 text-sm" aria-label="Add subscription">
+              + Add
+            </Link>
             <Link href="/settings" className="link text-sm">
               Settings
             </Link>
-            <form action={signOut}>
-              <button type="submit" className="link text-sm">
-                Sign out
-              </button>
-            </form>
           </div>
         </div>
       </header>
