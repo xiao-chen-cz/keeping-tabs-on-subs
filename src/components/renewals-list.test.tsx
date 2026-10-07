@@ -97,7 +97,7 @@ describe("RenewalsList", () => {
     expect(screen.getByRole("link").getAttribute("href")).toBe("/subscriptions/new");
   });
 
-  it("has no links in read-only mode, and row links when hrefFor is given (no add bar: + Add lives in the header)", () => {
+  it("has no links in read-only mode, and row links when hrefFor is given (no add bar: + New lives in the header)", () => {
     const { unmount } = render(<RenewalsList groups={groups} totals={totals} />);
     expect(screen.queryAllByRole("link")).toHaveLength(0);
     unmount();

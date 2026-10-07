@@ -31,7 +31,7 @@ export interface RenewalsListProps<T extends SubscriptionCore & Filterable & Acc
   /** Omit for a read-only view (public demo): rows are then not links. */
   hrefFor?: (row: Row<T>) => string;
   showArchived?: boolean;
-  /** Link for the empty state; omit to hide it. The main add control is the "+ Add" in the app header. */
+  /** Link for the empty state; omit to hide it. The main add control is "+ New" in the app header. */
   addHref?: string;
   /** Alert offsets (days before cancel-by) for the Due soon section; omit to hide it. */
   alertOffsets?: number[];
