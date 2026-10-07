@@ -38,6 +38,8 @@ Decided while planning (decide-and-log, owner can overturn):
 
 Notes 2026-10-07 (F2 check from public docs): setup (2 MX records, one webhook API call) and payload fields (`From`, `To`, `Recipients`, `Subject`, `MessageId`, `RawTextBody`, `RawHtmlBody`, `SpamScore`, `Attachments[].DownloadToken`) match this plan. Not documented: which plans include inbound parsing, how long Brevo keeps inbound content and attachments (the events API defaults to the last 30 days), webhook signing. Open for the owner: check that the Inbound webhook type is selectable on the free plan; ask Brevo support about inbound content retention.
 
+Notes 2026-10-07 (owner, dashboard): Plugins & Integrations → Webhooks → "Inbound webhook" says "only available on enterprise plan". That screen is Brevo's feature for external tools sending events into Brevo (leads, form submissions), not inbound email parsing (API webhook `type: "inbound"`, event `inboundEmailProcessed`), so it is not conclusive, but it is a warning sign. Next: ask Brevo support whether inbound email parsing works on the free plan. If it is enterprise-only, research another EU inbound provider when (if) testers ask for forwarding.
+
 1. Owner answers F1–F4.
 2. Confirm in the Brevo account: inbound parsing on the free plan, inbound retention and whether it can be shortened, and the exact payload field names (sender, recipients, subject, text and HTML bodies, attachments and how to download them). Record the answers here.
 3. Update CLAUDE.md (move the line out of *Out of scope*, close the two open questions) and the brief's scope note.
