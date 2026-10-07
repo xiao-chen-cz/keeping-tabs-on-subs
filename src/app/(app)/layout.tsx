@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeaderMenu } from "@/components/header-menu";
 
 // No auth check here: layouts do not re-render on navigation. Pages and actions call the DAL.
 export default function AppLayout({ children }: LayoutProps<"/">) {
@@ -9,13 +10,11 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
           <Link href="/" className="font-heading text-lg font-semibold text-primary-ink">
             Keeping Tabs on Subs
           </Link>
-          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+          <div className="flex shrink-0 items-center gap-2">
             <Link href="/capture" className="btn-primary min-h-9 whitespace-nowrap px-3 text-sm" aria-label="New subscription">
               + New
             </Link>
-            <Link href="/settings" className="link text-sm">
-              Settings
-            </Link>
+            <HeaderMenu />
           </div>
         </div>
       </header>
