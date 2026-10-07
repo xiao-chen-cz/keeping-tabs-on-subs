@@ -8,7 +8,7 @@ afterEach(cleanup);
 
 describe("CancelForm", () => {
   it("defaults Cancelled on to today and lists the channels", () => {
-    render(<CancelForm action={vi.fn()} today="2026-10-04" cancelHref="/subscriptions/1" />);
+    render(<CancelForm action={vi.fn()} userId="u1" today="2026-10-04" cancelHref="/subscriptions/1" />);
     expect((screen.getByLabelText("Cancelled on") as HTMLInputElement).value).toBe("2026-10-04");
     expect(screen.getByRole("option", { name: "Website / app" })).toBeTruthy();
     expect(screen.getByLabelText("Confirmation number (optional)")).toBeTruthy();
@@ -20,6 +20,7 @@ describe("CancelForm", () => {
     render(
       <CancelForm
         action={vi.fn()}
+        userId="u1"
         today="2026-10-04"
         cancelHref="/"
         initial={trialEndedPrefill("2026-09-29", "2026-10-04")}
@@ -44,7 +45,7 @@ describe("CancelForm", () => {
       fieldErrors: { channel: ["Choose how you cancelled"], occurredOn: ["The date cannot be in the future"] },
       values: null,
     }));
-    render(<CancelForm action={action} today="2026-10-04" cancelHref="/" />);
+    render(<CancelForm action={action} userId="u1" today="2026-10-04" cancelHref="/" />);
     fireEvent.change(screen.getByLabelText("Confirmation number (optional)"), { target: { value: "ABC-123" } });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "Mark as cancelled" }));

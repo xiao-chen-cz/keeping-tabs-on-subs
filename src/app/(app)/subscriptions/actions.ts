@@ -1,10 +1,12 @@
 "use server";
 import { notFound, redirect } from "next/navigation";
 import { requireUser } from "@/lib/dal/auth";
+import { saveProofCapture } from "@/lib/dal/captures";
 import { setStatus } from "@/lib/dal/events";
 import { getProfile } from "@/lib/dal/profile";
 import { createSubscription, updateSubscription } from "@/lib/dal/subscriptions";
 import { todayIn } from "@/lib/dates/plain-date";
+import { isUploadMimeType, isValidCaptureId } from "@/lib/extraction/limits";
 import { parseCancelForm, type CancelFormState } from "@/lib/validation/cancel-form";
 import { parseSubscriptionForm, type FormMode } from "@/lib/validation/subscription-form";
 import type { SubscriptionFormState } from "@/components/subscription-form-values";
@@ -54,12 +56,31 @@ export async function cancelSubscriptionAction(
   _prev: CancelFormState,
   formData: FormData,
 ): Promise<CancelFormState> {
-  await requireUser();
+  const user = await requireUser();
   const values = readValues(formData);
   const profile = await getProfile();
   const parsed = parseCancelForm(values, todayIn(profile.timeZone, new Date()));
   if (!parsed.ok) return { fieldErrors: parsed.fieldErrors, values };
-  await setStatus({ subscriptionId: id, status: "cancelled", record: parsed.record, accessUntil: parsed.accessUntil });
+
+  // Optional confirmation screenshot, already in Storage (the browser put it there).
+  let captureId: string | null = null;
+  if (values.captureId) {
+    const mimeType = values.mimeType ?? "";
+    if (!isValidCaptureId(values.captureId) || !isUploadMimeType(mimeType)) {
+      return { fieldErrors: { captureId: ["The screenshot could not be attached. Try again."] }, values };
+    }
+    const proof = await saveProofCapture(user.id, values.captureId, mimeType);
+    if (!proof.ok) return { fieldErrors: { captureId: [proof.error] }, values };
+    captureId = proof.captureId;
+  }
+
+  await setStatus({
+    subscriptionId: id,
+    status: "cancelled",
+    record: parsed.record,
+    accessUntil: parsed.accessUntil,
+    captureId,
+  });
   redirect(`/subscriptions/${id}`);
 }
 

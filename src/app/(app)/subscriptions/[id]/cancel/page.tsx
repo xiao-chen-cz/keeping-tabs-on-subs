@@ -9,7 +9,7 @@ import { trialEndedPrefill } from "@/lib/domain/needs-update";
 import { cancelSubscriptionAction } from "../../actions";
 
 export default async function CancelSubscriptionPage({ params, searchParams }: PageProps<"/subscriptions/[id]/cancel">) {
-  await requireUser();
+  const user = await requireUser();
   const { id } = await params;
   const { reason } = await searchParams;
   const [profile, subscription] = await Promise.all([getProfile(), getSubscription(id)]);
@@ -31,6 +31,7 @@ export default async function CancelSubscriptionPage({ params, searchParams }: P
       <CancelIntro cancelUrl={subscription.cancelUrl} accountLabel={subscription.accountLabel} />
       <CancelForm
         action={cancelSubscriptionAction.bind(null, id)}
+        userId={user.id}
         today={today}
         initial={initial}
         cancelHref={`/subscriptions/${id}`}

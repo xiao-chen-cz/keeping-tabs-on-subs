@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { KeptForRenewal, RemindersForm } from "@/components/alert-actions";
 import { SubscriptionDetail } from "@/components/subscription-detail";
 import { requireUser } from "@/lib/dal/auth";
-import { captureFileUrl } from "@/lib/dal/captures";
+import { captureFileLinks, captureFileUrl } from "@/lib/dal/captures";
 import { listEvents } from "@/lib/dal/events";
 import { getCaptureForSubscription } from "@/lib/dal/proposals";
 import { getProfile } from "@/lib/dal/profile";
@@ -23,7 +23,10 @@ export default async function SubscriptionPage({ params }: PageProps<"/subscript
     getCaptureForSubscription(id),
   ]);
   if (!subscription) notFound();
-  const fileUrl = capture?.storagePath ? await captureFileUrl(capture.storagePath) : null;
+  const [fileUrl, proofFiles] = await Promise.all([
+    capture?.storagePath ? captureFileUrl(capture.storagePath) : null,
+    captureFileLinks([...new Set(events.flatMap((e) => (e.captureId ? [e.captureId] : [])))]),
+  ]);
   const row = computeSubscription(subscription, todayIn(profile.timeZone, new Date()));
   // Only a Keep for the current renewal can be undone; an old one has already expired by itself.
   const keptNow =
@@ -44,6 +47,7 @@ export default async function SubscriptionPage({ params }: PageProps<"/subscript
         cancelHref={`/subscriptions/${subscription.id}/cancel`}
         reopenAction={reopenSubscriptionAction.bind(null, subscription.id)}
         events={events}
+        proofFiles={proofFiles}
         captureText={capture ? (capture.rawText ?? (fileUrl ? null : "A file was uploaded for this entry.")) : null}
         captureFile={fileUrl && capture?.mimeType ? { url: fileUrl, mimeType: capture.mimeType } : null}
         reminders={

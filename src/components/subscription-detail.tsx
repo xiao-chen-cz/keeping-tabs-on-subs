@@ -43,6 +43,7 @@ export function SubscriptionDetail({
   cancelHref,
   reopenAction,
   events,
+  proofFiles = {},
   captureText,
   captureFile = null,
   reminders,
@@ -57,6 +58,8 @@ export function SubscriptionDetail({
   reopenAction?: () => Promise<void>;
   /** Event history, newest first. */
   events?: SubscriptionEvent[];
+  /** Signed links to confirmation screenshots attached to events, by capture id. */
+  proofFiles?: Record<string, CaptureFile>;
   /** Text of the original capture, when the entry came from one. Null/undefined: no section. */
   captureText?: string | null;
   /** The uploaded picture or PDF of the original capture (signed link). */
@@ -170,6 +173,11 @@ export function SubscriptionDetail({
               <li key={e.id} className="border-b border-line py-2 text-sm">
                 {describeEvent(e)}
                 {e.note && <span className="block text-mid">{e.note}</span>}
+                {e.captureId && proofFiles[e.captureId] && (
+                  <a href={proofFiles[e.captureId].url} target="_blank" rel="noopener noreferrer" className="link block w-fit">
+                    {proofFiles[e.captureId].mimeType === "application/pdf" ? "Confirmation (PDF)" : "Confirmation screenshot"}
+                  </a>
+                )}
               </li>
             ))}
           </ul>

@@ -106,6 +106,23 @@ describe("SubscriptionDetail", () => {
     expect(screen.getByText("Receipt text from the vendor")).toBeTruthy();
   });
 
+  it("links a cancellation's confirmation screenshot in the history", () => {
+    const cancelled: SubscriptionEvent = {
+      id: "1", subscriptionId: "1", kind: "cancelled", occurredOn: "2026-10-04", channel: "email", reference: null,
+      note: null, captureId: "c1", cancelBy: null, recordedAt: "2026-10-04T10:00:00Z",
+    };
+    render(
+      <SubscriptionDetail
+        row={computeSubscription(sub({ status: "cancelled" }), "2026-10-06")}
+        events={[cancelled]}
+        proofFiles={{ c1: { url: "https://files.example/c1.png", mimeType: "image/png" } }}
+      />,
+    );
+    const link = screen.getByRole("link", { name: "Confirmation screenshot" });
+    expect(link.getAttribute("href")).toBe("https://files.example/c1.png");
+    expect(link.getAttribute("target")).toBe("_blank");
+  });
+
   it("shows no History or Original capture without events or a capture", () => {
     render(<SubscriptionDetail row={computeSubscription(sub({}), "2026-10-03")} events={[]} />);
     expect(screen.queryByText("History")).toBeNull();
