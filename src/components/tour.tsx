@@ -1,5 +1,5 @@
 "use client";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 
 export interface TourStop {
@@ -82,7 +82,7 @@ export const APP_TOUR: TourStop[] = [
     path: "/settings",
     target: "alert-channel",
     title: "Email or app only",
-    body: "Settings is under the ☰ menu. Alerts always show in the app under Due soon. Choose whether they also come by email, at most one a day.",
+    body: "Settings is under the ☰ menu, next to Replay tour. Alerts always show in the app under Due soon. Choose whether they also come by email, at most one a day.",
   },
   {
     path: "/settings",
@@ -301,6 +301,14 @@ export function Tour({ stops, path, start, navigate, onSeen, onClose }: TourProp
 export function AppTour({ start, markSeen }: { start?: string; markSeen: () => Promise<void> }) {
   const path = usePathname();
   const router = useRouter();
+  // Each time `?tour` appears again (Replay tour after a closed tour on the same page), start a fresh tour.
+  const param = useSearchParams().get("tour");
+  const [prevParam, setPrevParam] = useState(param);
+  const [run, setRun] = useState(0);
+  if (param !== prevParam) {
+    setPrevParam(param);
+    if (param !== null) setRun((r) => r + 1);
+  }
   const onClose = useCallback(() => {
     const url = new URL(window.location.href);
     if (url.searchParams.has("tour")) {
@@ -308,5 +316,15 @@ export function AppTour({ start, markSeen }: { start?: string; markSeen: () => P
       window.history.replaceState(null, "", url.pathname + url.search);
     }
   }, []);
-  return <Tour stops={APP_TOUR} path={path} start={start} navigate={router.push} onSeen={markSeen} onClose={onClose} />;
+  return (
+    <Tour
+      key={run}
+      stops={APP_TOUR}
+      path={path}
+      start={param ?? start}
+      navigate={router.push}
+      onSeen={markSeen}
+      onClose={onClose}
+    />
+  );
 }

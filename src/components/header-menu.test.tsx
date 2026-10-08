@@ -7,7 +7,7 @@ const { HeaderMenu } = await import("./header-menu");
 afterEach(cleanup);
 
 describe("HeaderMenu", () => {
-  it("is closed until tapped, then shows Settings and Sign out", () => {
+  it("is closed until tapped, then shows Settings, Replay tour and Sign out", () => {
     render(<HeaderMenu />);
     const button = screen.getByRole("button", { name: "Menu" });
     expect(button.getAttribute("aria-expanded")).toBe("false");
@@ -15,6 +15,7 @@ describe("HeaderMenu", () => {
     fireEvent.click(button);
     expect(button.getAttribute("aria-expanded")).toBe("true");
     expect(screen.getByRole("link", { name: "Settings" }).getAttribute("href")).toBe("/settings");
+    expect(screen.getByRole("link", { name: "Replay tour" }).getAttribute("href")).toBe("/?tour=1");
     expect(screen.getByRole("button", { name: "Sign out" })).toBeTruthy();
   });
 
