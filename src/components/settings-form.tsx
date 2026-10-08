@@ -32,7 +32,7 @@ export function SettingsForm({
           Settings saved.
         </p>
       )}
-      <fieldset>
+      <fieldset data-tour="alert-channel">
         <legend className="section-label">Where alerts go</legend>
         <label className="flex min-h-11 items-start gap-2 py-1">
           <input type="radio" name="alertChannel" value="app_email" defaultChecked={alertChannel === "app_email"} className="mt-1 size-4" />
@@ -51,7 +51,7 @@ export function SettingsForm({
           </span>
         </label>
       </fieldset>
-      <fieldset>
+      <fieldset data-tour="reminder-days">
         <legend className="section-label">Remind me before the cancel-by</legend>
         <div className="mt-1 flex flex-col">
           {OFFSET_CHOICES.map((o) => (
@@ -61,7 +61,7 @@ export function SettingsForm({
             </label>
           ))}
         </div>
-        <p className="mt-1 text-xs text-mid">
+        <p data-tour="quiet-note" className="mt-1 text-xs text-mid">
           Subscriptions on Keep quietly get only the earliest of these, and only when they renew quarterly or yearly.
         </p>
       </fieldset>

@@ -155,6 +155,7 @@ export type Database = {
           display_name: string | null
           reminder_offsets: number[]
           time_zone: string
+          tour_done_at: string | null
           user_id: string
         }
         Insert: {
@@ -162,6 +163,7 @@ export type Database = {
           display_name?: string | null
           reminder_offsets?: number[]
           time_zone?: string
+          tour_done_at?: string | null
           user_id: string
         }
         Update: {
@@ -169,6 +171,7 @@ export type Database = {
           display_name?: string | null
           reminder_offsets?: number[]
           time_zone?: string
+          tour_done_at?: string | null
           user_id?: string
         }
         Relationships: []

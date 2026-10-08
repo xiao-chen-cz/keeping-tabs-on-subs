@@ -51,7 +51,7 @@ export function DueSoon<T extends SubscriptionCore & { keptForCancelBy?: string 
   const due = dueSoon(rows, offsets);
   if (due.length === 0) return null;
   return (
-    <section aria-labelledby="h-due-soon" className="rounded-control border-l-4 border-accent bg-accent-light p-3">
+    <section aria-labelledby="h-due-soon" data-tour="due-soon" className="rounded-control border-l-4 border-accent bg-accent-light p-3">
       <div className="flex items-baseline gap-1.5 border-b border-line pb-1">
         <h2 id="h-due-soon" className="section-label">
           Due soon

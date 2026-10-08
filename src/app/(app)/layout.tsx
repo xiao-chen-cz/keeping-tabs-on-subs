@@ -11,7 +11,7 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
             Keeping Tabs on Subs
           </Link>
           <div className="flex shrink-0 items-center gap-2">
-            <Link href="/capture" className="btn-primary min-h-9 whitespace-nowrap px-3 text-sm" aria-label="New subscription">
+            <Link href="/capture" className="btn-primary min-h-9 whitespace-nowrap px-3 text-sm" aria-label="New subscription" data-tour="new">
               + New
             </Link>
             <HeaderMenu />

@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { AddedNotice, AlertActions, KeptNotice, QuietNotice, RemindNotice } from "@/components/alert-actions";
 import { RenewalsList } from "@/components/renewals-list";
+import { AppTour } from "@/components/tour";
 import { ReviewInbox } from "@/components/review-inbox";
 import { countKept } from "@/lib/dal/alerts";
 import { requireUser } from "@/lib/dal/auth";
@@ -17,11 +18,12 @@ import { TABS_COOKIE, tabsEnabledFrom } from "@/lib/tabs-pref";
 import { totalsByCurrency } from "@/lib/domain/totals";
 import { groupAndSort } from "@/lib/domain/upcoming";
 import { answerQuietOfferAction, keepRenewalAction, undoKeepAction, undoQuietAction } from "./alerts/actions";
+import { markTourDoneAction } from "./tour-actions";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
   await requireUser();
   const sp = await searchParams;
-  const { show, kept, quiet, added, reminders } = sp;
+  const { show, kept, quiet, added, reminders, tour } = sp;
   const filters = parseListFilters(sp);
   const tabsEnabled = tabsEnabledFrom((await cookies()).get(TABS_COOKIE)?.value);
   const linkFilters = { cat: tabsEnabled ? filters.category : null, q: filters.q, scope: filters.scope };
@@ -42,10 +44,13 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   // After approving a proposal (?added=<id>) or saving Remind me (?reminders=<id>).
   const addedRow = typeof added === "string" ? rows.find((r) => r.input.id === added) : undefined;
   const remindRow = typeof reminders === "string" ? subscriptions.find((s) => s.id === reminders) : undefined;
+  // First sign-in, a replay from Settings (?tour=1), or Back from the tour's Settings stops (?tour=<stop>).
+  const showTour = !profile.tourDone || typeof tour === "string";
   const offerQuiet = keptRow ? shouldOfferQuiet(keptRow, await countKept(keptRow.id)) : false;
 
   return (
     <main className="flex flex-1 flex-col">
+      {showTour && <AppTour start={typeof tour === "string" ? tour : undefined} markSeen={markTourDoneAction} />}
       {keptRow && (
         <KeptNotice
           name={keptRow.name}

@@ -109,6 +109,10 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
   // Same name on several visible rows (any section, ignoring filters): show each row's account label.
   const duplicates = duplicateNames([...groups.upcoming, ...groups.ending, ...(showArchived ? groups.archived : [])]);
   const key = (r: Row<T>, i: number) => `${r.input.name}-${i}`;
+  // Tour stop: the first row that still shows a cancel-by date (not one charged today or missing dates).
+  const tourRow = upcoming.findIndex(
+    (r) => !r.computed.tags.needsUpdate && (r.computed.daysUntilRenewal ?? 0) > 0 && (r.computed.daysUntilCancelBy ?? -1) >= 0,
+  );
 
   return (
     <div className="space-y-5 pb-8">
@@ -163,7 +167,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
               <SectionHeading id="h-upcoming" count={upcoming.length}>Upcoming</SectionHeading>
               <ul>
                 {upcoming.map((r, i) => (
-                  <li key={key(r, i)}>
+                  <li key={key(r, i)} data-tour={i === tourRow ? "first-row" : undefined}>
                     <RenewalRow row={r} href={hrefFor?.(r)} duplicates={duplicates} />
                   </li>
                 ))}

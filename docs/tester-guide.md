@@ -8,7 +8,7 @@ Keeping Tabs on Subs is a small app that shows every subscription you pay for, s
 
 ## Signing in
 
-Xiao will send you an email address and password privately. Open the link Xiao gave you, sign in, and you will land on a list that already holds a few made-up subscriptions (for example The Daily Ledger, VoiceDraft Pro and CodePilot Pro). None of it is real.
+Xiao will send you an email address and password privately. Open the link Xiao gave you, sign in, and you will land on a list that already holds a few made-up subscriptions (for example The Daily Ledger, VoiceDraft Pro and CodePilot Pro). None of it is real. The first time, a short tour (five stops) shows you around; you can skip it and replay it later from Settings.
 
 If you only want a look around first, the link plus `/demo` shows a read-only sample with no sign-in.
 

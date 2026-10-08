@@ -1,4 +1,5 @@
 // Reset an existing account to a seed set: deletes events, proposals, captures, subscriptions, then lookups, and reseeds.
+// The first-sign-in tour shows again.
 //   pnpm reset-account --email x@example.com --set starter|full [--today YYYY-MM-DD]
 import { createAdminClient } from "../src/lib/supabase/admin";
 import { clearUserData, findUserId, insertSeed, parseArgs } from "./lib-seed-account";
@@ -15,7 +16,7 @@ async function main() {
     process.exit(1);
   }
   await clearUserData(db, userId);
-  const profile = await db.from("profiles").upsert({ user_id: userId });
+  const profile = await db.from("profiles").upsert({ user_id: userId, tour_done_at: null });
   if (profile.error) throw profile.error;
   const counts = await insertSeed(db, userId, set, today);
   console.log(`Reset ${email} to the ${set} set (${counts.subscriptions} subscriptions, ${counts.proposals} proposals, today = ${today}).`);
