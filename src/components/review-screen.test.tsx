@@ -28,7 +28,13 @@ function setup(p: Proposal, updatesName: string | null = null) {
   return approve;
 }
 
-const approveButton = () => screen.getByRole("button", { name: "Approve" }) as HTMLButtonElement;
+// Approve appears twice (top and bottom of the form); both must always agree.
+const approveButton = () => {
+  const [top, bottom, ...rest] = screen.getAllByRole("button", { name: "Approve" }) as HTMLButtonElement[];
+  expect(rest).toHaveLength(0);
+  expect(top.disabled).toBe(bottom.disabled);
+  return top;
+};
 
 describe("ReviewScreen", () => {
   it("asks no questions when nothing is missing, and Approve is enabled", () => {

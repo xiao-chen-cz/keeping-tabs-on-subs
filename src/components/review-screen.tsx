@@ -109,6 +109,7 @@ export function ReviewScreen({
         missingFields={openFormFields(questions, vals)}
         submitLabel="Approve"
         submitDisabled={!allAnswered}
+        actionsAtTop
         confidenceFlags={flagsFor(proposal.draft.fieldConfidence)}
       />
 

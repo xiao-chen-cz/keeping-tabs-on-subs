@@ -93,7 +93,7 @@ describe("demo review queue", () => {
 
   it("demo Approve waits for the answers, then explains instead of saving; no Reject", () => {
     view("P1");
-    const approve = screen.getByRole("button", { name: "Approve (demo)" }) as HTMLButtonElement;
+    const approve = screen.getAllByRole("button", { name: "Approve (demo)" })[0] as HTMLButtonElement;
     expect(approve.disabled).toBe(true); // the billing-cycle question is still open
     expect(screen.queryByRole("button", { name: /reject/i })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Monthly" }));
