@@ -53,4 +53,4 @@ D9–15 (Oct 3–9) schema, seed, list, detail, add/edit, preview live · D16–
 ## Working notes
 - Never write to H, I, K, L, U, V below row 2 in the Sheet (#REF!). The Sheets tools can't set protection or validation.
 - Project folder is being turned into a git repo; app code lives at the root next to `specs/`.
-- Inbound email (parked feature): receiving domain is a new subdomain `in.` of the owner's domain (decided 2026-10-07); provider Brevo pending a free-plan and retention check (F2).
+- Inbound email (parked feature): receiving domain is a new subdomain `in.` of the owner's domain (decided 2026-10-07); Brevo ruled out 2026-10-07 (inbound only on paid plans, kept indefinitely, EU not guaranteed); no provider chosen (F2).

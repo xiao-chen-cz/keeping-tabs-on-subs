@@ -1,6 +1,6 @@
 # Plan: forward an email to capture a subscription
 
-Created 2026-10-06 · **PARKED (2026-10-07): build only if testers ask for it; not offered in the tester guide or the app.** F1 and F3 approved; F2 open (see Phase 0 notes); F4 open · Builds on D16–20 Part B (`specs/todo/d16-20-capture-and-review.md`) · Not a brief milestone: extra scope, after the first tester round has started.
+Created 2026-10-06 · **PARKED (2026-10-07): build only if testers ask for it; not offered in the tester guide or the app.** F1 and F3 approved; F2 Brevo ruled out 2026-10-07, no provider chosen (see Phase 0 notes); F4 open · Builds on D16–20 Part B (`specs/todo/d16-20-capture-and-review.md`) · Not a brief milestone: extra scope, after the first tester round has started.
 
 ## 1. Problem and goal
 
@@ -15,7 +15,7 @@ Owner decisions (Phase 0):
 | # | Question | Recommendation |
 |---|---|---|
 | F1 | Lift "forward-to-address email capture" from CLAUDE.md *Out of scope* and add it to the brief as an extra after D24? | Yes, as optional scope. The minimum demo is already met. |
-| F2 | Inbound provider | Brevo inbound parsing ([docs](https://developers.brevo.com/docs/inbound-parse-webhooks)): already our sender, EU company, delivers parsed JSON (text, HTML, attachments) to a webhook. This resolves the CLAUDE.md open question "inbound-email provider". Must be confirmed in Phase 0: available on the free plan, and how long Brevo keeps inbound mail. |
+| F2 | Inbound provider | Brevo inbound parsing ([docs](https://developers.brevo.com/docs/inbound-parse-webhooks)): already our sender, EU company, delivers parsed JSON (text, HTML, attachments) to a webhook. This resolves the CLAUDE.md open question "inbound-email provider". Must be confirmed in Phase 0: available on the free plan, and how long Brevo keeps inbound mail. **Ruled out 2026-10-07** (Brevo support: paid plans only, kept indefinitely, EU not guaranteed; see Phase 0 notes). Brevo stays our sender for alerts. |
 | F3 | Receiving domain | A new subdomain `in.<owner domain>` (Brevo requires a different subdomain from the sending one, `alerts.`). The owner adds the MX records at the DNS host. Resolves the CLAUDE.md open question "capture domain". |
 | F4 | Who may send | Only mail whose sender (From) is the account's own email address, sent to that account's private address. Anything else is dropped and logged (count only, no content). Testers' accounts are created with their real email, so their own forwards pass. Can be loosened later to a per-user list of extra senders. |
 
@@ -39,6 +39,14 @@ Decided while planning (decide-and-log, owner can overturn):
 Notes 2026-10-07 (F2 check from public docs): setup (2 MX records, one webhook API call) and payload fields (`From`, `To`, `Recipients`, `Subject`, `MessageId`, `RawTextBody`, `RawHtmlBody`, `SpamScore`, `Attachments[].DownloadToken`) match this plan. Not documented: which plans include inbound parsing, how long Brevo keeps inbound content and attachments (the events API defaults to the last 30 days), webhook signing. Open for the owner: check that the Inbound webhook type is selectable on the free plan; ask Brevo support about inbound content retention.
 
 Notes 2026-10-07 (owner, dashboard): Plugins & Integrations → Webhooks → "Inbound webhook" says "only available on enterprise plan". That screen is Brevo's feature for external tools sending events into Brevo (leads, form submissions), not inbound email parsing (API webhook `type: "inbound"`, event `inboundEmailProcessed`), so it is not conclusive, but it is a warning sign. Next: ask Brevo support whether inbound email parsing works on the free plan. If it is enterprise-only, research another EU inbound provider when (if) testers ask for forwarding.
+
+Notes 2026-10-07 (Brevo support's answer to the owner): **Brevo is ruled out for inbound.**
+- **Plan:** transactional inbound email parsing (event `inboundEmailProcessed`) is only on the Professional and Enterprise plans, not Free, Starter or Standard. Support confirmed this is separate from the dashboard's "Inbound webhooks" feature.
+- **Retention:** inbound messages, parsed payloads, raw emails and attachments are kept indefinitely. There is no retention setting, no deletion after the webhook runs, no self-service or API deletion of single messages, and attachment download tokens do not expire. This conflicts with "tester data is deleted after the test round".
+- **Residency:** runs on GCP and OVH in Europe, but Brevo cannot guarantee that every step stays in the EU/EEA (maintenance and support subprocessors may be outside it, under the DPA). This conflicts with "EU only" in CLAUDE.md.
+- Brevo itself recommends not using inbound parsing for sensitive content unless this retention and residency model is acceptable.
+
+Consequence: forwarding stays parked. If testers ask for it, research an inbound provider that meets all three: affordable or free at demo volume, deletes mail after delivery (or lets us delete it), and processes in the EU only. Otherwise drop the feature. Nothing for inbound was built (Phase 0 never passed); the `in.` subdomain decision (F3) still holds for any provider.
 
 1. Owner answers F1–F4.
 2. Confirm in the Brevo account: inbound parsing on the free plan, inbound retention and whether it can be shortened, and the exact payload field names (sender, recipients, subject, text and HTML bodies, attachments and how to download them). Record the answers here.
@@ -69,7 +77,7 @@ Notes 2026-10-07 (owner, dashboard): Plugins & Integrations → Webhooks → "In
 ## 4. Risks
 
 - **Real data from testers:** forwarding invites real receipts. The tester guide and the Settings text say made-up only; tester data is deleted after the round, as now.
-- **Brevo free plan or retention does not fit:** the fallback is another EU inbound provider (to research then), or dropping the feature. Phase 0 decides before any build.
+- **Brevo free plan or retention does not fit:** confirmed 2026-10-07 (Phase 0 notes). The fallback is another EU inbound provider (to research then), or dropping the feature.
 - **Forward formats:** Gmail, Apple Mail and Outlook quote forwards differently, and some send the original as an `.eml` attachment. First version: body text only plus pdf/image attachments; `.eml` attachments are listed in the notes as "not read".
 - **Cost:** bounded by the shared daily cap; an email with two attachments costs more than a paste (estimate $0.05–0.15).
 
