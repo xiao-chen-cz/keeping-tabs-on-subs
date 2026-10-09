@@ -20,6 +20,10 @@ describe("nextRenewal", () => {
     expect(nextRenewal(core({ billingCycle: "quarterly", lastRenewalDate: "2026-11-30" }), "2027-02-01")).toBe("2027-02-28");
     expect(nextRenewal(core({ billingCycle: "quarterly", lastRenewalDate: "2026-11-30" }), "2027-03-01")).toBe("2027-05-30");
   });
+  it("every 6 months steps from the anchor, clamped", () => {
+    expect(nextRenewal(core({ billingCycle: "every_6_months", lastRenewalDate: "2026-08-31" }), "2026-10-01")).toBe("2027-02-28");
+    expect(nextRenewal(core({ billingCycle: "every_6_months", lastRenewalDate: "2026-08-31" }), "2027-03-01")).toBe("2027-08-31");
+  });
   it("monthly over a year boundary and many months later", () => {
     expect(nextRenewal(monthly("2025-12-15"), "2026-01-16")).toBe("2026-02-15");
     expect(nextRenewal(monthly("2020-01-31"), "2026-10-01")).toBe("2026-10-31");

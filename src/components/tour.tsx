@@ -94,7 +94,7 @@ export const APP_TOUR: TourStop[] = [
     path: "/settings",
     target: "quiet-note",
     title: "Fewer reminders: Keep quietly",
-    body: "For subscriptions you always keep, open one and choose Keep quietly under Reminders. Monthly ones then get no routine reminders, quarterly and yearly ones just one. Price rises and trials still alert you.",
+    body: "For subscriptions you always keep, open one and choose Keep quietly under Reminders. Monthly ones then get no routine reminders, ones that renew every 3 months or less often just one. Price rises and trials still alert you.",
     exampleAlways: true,
     example: (
       <Example>

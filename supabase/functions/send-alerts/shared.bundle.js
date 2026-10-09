@@ -34,11 +34,14 @@ function relativeDays(n) {
 }
 
 // src/lib/domain/alerts.ts
+function isLongCycle(cycle) {
+  return cycle === "quarterly" || cycle === "every_6_months" || cycle === "yearly";
+}
 function effectiveOffsets(row, offsets) {
   const { input, computed: c } = row;
   if (input.alertMode !== "quiet" || c.priceRises === true || c.tags.trial) return offsets;
   if (offsets.length === 0) return [];
-  return input.billingCycle === "quarterly" || input.billingCycle === "yearly" ? [
+  return isLongCycle(input.billingCycle) ? [
     Math.max(...offsets)
   ] : [];
 }
@@ -135,6 +138,9 @@ var CYCLE_STEP = {
   every_4_weeks: {
     days: 28
   },
+  every_6_months: {
+    months: 6
+  },
   yearly: {
     months: 12
   }
@@ -143,6 +149,7 @@ var MONTHLY_FACTOR = {
   monthly: 1,
   quarterly: 1 / 3,
   every_4_weeks: 13 / 12,
+  every_6_months: 1 / 6,
   yearly: 1 / 12
 };
 

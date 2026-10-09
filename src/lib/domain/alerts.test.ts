@@ -158,6 +158,9 @@ describe("Keep quietly (D13)", () => {
   it("quiet quarterly counts as a long cycle", () => {
     expect(offsetOn("2026-10-01", { ...quiet, billingCycle: "quarterly", lastRenewalDate: "2026-07-11" })).toBe(3);
   });
+  it("quiet every 6 months counts as a long cycle", () => {
+    expect(offsetOn("2026-10-01", { ...quiet, billingCycle: "every_6_months", lastRenewalDate: "2026-04-11" })).toBe(3);
+  });
   it("E42: quiet during an active trial alerts like Remind", () => {
     const trial = { ...quiet, lastRenewalDate: null, trialEnds: "2026-10-07" };
     expect([offsetOn("2026-10-01", trial), offsetOn("2026-10-03", trial), offsetOn("2026-10-04", trial)]).toEqual([3, 1, 0]);
@@ -177,6 +180,7 @@ describe("describeReminders", () => {
     expect(describeReminders("remind", "monthly", [3, 1, 0])).toBe("Reminders 3, 1 and 0 days before the cancel-by.");
     expect(describeReminders("quiet", "yearly", [3, 1, 0])).toBe("One reminder, 3 days before the cancel-by.");
     expect(describeReminders("quiet", "quarterly", [7, 3])).toBe("One reminder, 7 days before the cancel-by.");
+    expect(describeReminders("quiet", "every_6_months", [3, 1, 0])).toBe("One reminder, 3 days before the cancel-by.");
     expect(describeReminders("quiet", "every_4_weeks", [3, 1, 0])).toBe("No routine reminders.");
     expect(describeReminders("remind", "monthly", [3])).toBe("Reminders 3 days before the cancel-by.");
   });

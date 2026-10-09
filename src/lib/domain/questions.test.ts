@@ -5,7 +5,7 @@ import { parseAnswer, QUESTIONS, questionsFor } from "./questions";
 describe("QUESTIONS", () => {
   it("has the fixed shapes", () => {
     expect(QUESTIONS.billingCycle).toMatchObject({ input: "options" });
-    expect(QUESTIONS.billingCycle.input === "options" && QUESTIONS.billingCycle.options).toHaveLength(4);
+    expect(QUESTIONS.billingCycle.input === "options" && QUESTIONS.billingCycle.options).toHaveLength(5);
     expect(QUESTIONS.currency.input === "options" && QUESTIONS.currency.options.map((o) => o.value)).toEqual([
       "EUR", "USD", "GBP", "CHF",
     ]);

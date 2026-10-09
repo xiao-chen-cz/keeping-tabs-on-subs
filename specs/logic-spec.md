@@ -16,7 +16,7 @@ One record per subscription. "Input" fields are entered by a person or by the Gm
 | B | Status | Input, required | enum | `Confirmed`, `Cancelled` (D6, D11). Cancelled rows have no renewals |
 | C | Amount | Input | decimal (2 dp) | Price charged at the most recent renewal, in Currency |
 | D | Currency | Input | enum | Seen: `EUR`, `USD`. No conversion anywhere |
-| E | Billing cycle | Input | enum | `Monthly`, `Quarterly`, `Every 4 weeks`, `Yearly`. `Trial` is no longer a cycle value (D3). More cycles can be added later (§2.1) |
+| E | Billing cycle | Input | enum | `Monthly`, `Quarterly`, `Every 4 weeks`, `Every 6 months`, `Yearly`. `Trial` is no longer a cycle value (D3). More cycles can be added later (§2.1) |
 | F | Last renewal date | Input | date | Date of the most recent charge (the anchor date for the schedule) |
 | G | Trial ends | Input | date | Only for trials. A trial is identified by this date, not by the cycle (D3). Billing cycle holds the plan the trial converts to |
 | H | Next renewal | Computed | date | §2.1 |
@@ -51,7 +51,7 @@ Evaluated in order; the first matching rule wins:
 2. **Missing data:** Last renewal date or Billing cycle is empty, or the cycle is not in the list → empty, and the row is flagged **Needs update** (§2.8).
 3. **Last renewal today or in the future:** Last renewal date ≥ today → Next renewal = Last renewal date (valid for a pending plan change, see D4).
 4. **Every 4 weeks:** the first date Last renewal + 28 × n days (n ≥ 1) on or after today.
-5. **Month-based cycles:** the first date Last renewal + n × k months (n ≥ 1) on or after today, with k = 1 (Monthly), 3 (Quarterly), 12 (Yearly).
+5. **Month-based cycles:** the first date Last renewal + n × k months (n ≥ 1) on or after today, with k = 1 (Monthly), 3 (Quarterly), 6 (Every 6 months, added 2026-10-09, e.g. school fees), 12 (Yearly).
 
 A new cycle is added by one enum value plus one entry: either a day interval (like Every 4 weeks) or a month interval k. Unknown values are rejected, never treated as Monthly (D3).
 
@@ -61,7 +61,7 @@ Month addition clamps to the end of the month (31 Jan + 1 month = 28/29 Feb) and
 Next renewal − today, in days. Empty if Next renewal is empty. Always ≥ 0; 0 means the renewal is charged today.
 
 ### 2.3 Cancel notice (J)
-Default by cycle, overridable per row (D5, decided 2026-10-02). Empty if Name is empty. Default: `Monthly` or `Every 4 weeks` → 3 days; every other cycle (Quarterly, Yearly) → 7 days. An empty or unknown cycle also gets 7 days (e.g. a trial with no follow-up plan yet, E12). A number typed into the cell replaces the default for that subscription (e.g. 30 for a contract with a one-month notice period).
+Default by cycle, overridable per row (D5, decided 2026-10-02). Empty if Name is empty. Default: `Monthly` or `Every 4 weeks` → 3 days; every other cycle (Quarterly, Every 6 months, Yearly) → 7 days. An empty or unknown cycle also gets 7 days (e.g. a trial with no follow-up plan yet, E12). A number typed into the cell replaces the default for that subscription (e.g. 30 for a contract with a one-month notice period).
 
 ### 2.4 Cancel-by (K)
 Next renewal − Cancel notice. Empty if Next renewal is empty. If Cancel notice is empty or not a number, the default from §2.3 is used, so a new row without a J value still gets a correct cancel-by.
@@ -114,7 +114,7 @@ Per-user list of alert offsets in days before Cancel-by, default **3, 1, 0**. Al
 
 **Alert mode (D13).** Per subscription, `Remind` (default for every new row) or `Keep quietly`. A quiet row:
 - gets **no routine alerts** when its cycle is Monthly or Every 4 weeks;
-- gets **one alert per renewal**, at the user's largest offset only, when its cycle is Quarterly or Yearly (E40, E41, E48);
+- gets **one alert per renewal**, at the user's largest offset only, when its cycle is Quarterly, Every 6 months or Yearly (E40, E41, E48);
 - always alerts at every offset, like `Remind`, when Price rises? = Yes (a known promo end or a captured price change) or while a trial is active (E39, E42);
 - stays in Upcoming with a quiet mark, never in Due soon unless one of the rules above applies.
 The app only knows about price changes it has been given (promo dates, captures, edits); a vendor's price rise that was never captured is invisible until a receipt is captured. The setting's help text says so.
@@ -124,7 +124,7 @@ The app only knows about price changes it has been given (promo dates, captures,
 **Rules.** Changing Cancel-by (new anchor, notice or plan change) invalidates Keep and resets which offsets were sent. Rows flagged Needs update get no cancel-by alerts (they have no date); they are flagged in the app, whatever the alert mode. Active trials alert on the Trial ends date like any renewal. "Today" uses the time zone from D8. The email job records each sent row, Cancel-by and offset, so a rerun on the same day sends nothing twice (E46); when a user switches email on, the next run sends whatever is due at that point (the smallest reached offset not yet emailed), not every offset missed while email was off (decided 2026-10-05).
 
 ### 3.3 Totals (D7)
-Running cost shown per currency, never converted: one monthly and one yearly total for EUR and one for USD. Included: Status = Confirmed and no active trial. Excluded: Cancelled (including Ending), active trials and rows without a cycle (Needs update). Based on Amount (the current price), not Renewal amount. Monthly equivalent per row: Monthly × 1, Quarterly ÷ 3, Yearly ÷ 12, Every 4 weeks × 13 ÷ 12. Yearly total = monthly total × 12. Other currencies are listed as their own total.
+Running cost shown per currency, never converted: one monthly and one yearly total for EUR and one for USD. Included: Status = Confirmed and no active trial. Excluded: Cancelled (including Ending), active trials and rows without a cycle (Needs update). Based on Amount (the current price), not Renewal amount. Monthly equivalent per row: Monthly × 1, Quarterly ÷ 3, Every 6 months ÷ 6, Yearly ÷ 12, Every 4 weeks × 13 ÷ 12. Yearly total = monthly total × 12. Other currencies are listed as their own total.
 
 ## 4. Data entry and extraction rules
 From the Rules tab. These apply to whoever adds rows, today the Gmail extraction, later the app's input validation.
@@ -170,6 +170,7 @@ Today = 2026-10-01 unless stated. "Current" is the Sheet's output; where a Decis
 | E15 | Missing anchor | F empty, no trial (or E empty) | H, I, K, L empty | — |
 | E16 | Unknown cycle with F set | E `Trial` or `Biweekly`, F 2026-09-15 | Rejected on entry; if present: H empty, tag Needs update (D3) | Current in the Sheet: treated as Monthly, H 2026-10-15, J 7 |
 | E16b | Quarterly | Quarterly, F 2026-08-15, today 2026-10-01 | H 2026-11-15, J 7, K 2026-11-08 | Current in the Sheet: treated as Monthly (H 2026-10-15) until H is updated |
+| E16c | Every 6 months | Every 6 months, F 2026-03-31, today 2026-10-01 | H 2027-03-31 (2026-09-30 already passed), J 7, K 2027-03-24 | — |
 | E17 | Cancel-by already passed | Monthly, F 2026-09-02 (ChatPal Plus) | H 2026-10-02, I 1, K 2026-09-29, L −2 | — |
 | E18 | Promo ends on next renewal | C 120, S 200, T = H = 2027-06-06 (VoiceDraft Pro) | U 200, V Yes | — |
 | E19 | Promo ends after next renewal | C 2, S 12, T 2027-09-09, H 2026-10-08 (The Daily Ledger) | U 2, V No | — |
@@ -216,7 +217,7 @@ Today = 2026-10-01 unless stated. "Current" is the Sheet's output; where a Decis
 - **D8 Time zone: DECIDED 2026-10-02.** Not relevant at day granularity: "today" is the user's local date, default Europe/Berlin, same value for the app and the reminder job. Tests inject a fixed today.
 - **D9 After a promo: DECIDED 2026-10-02.** The price must be updated: when the first full-price receipt arrives, the review queue proposes a new Amount and clears Regular price / Promo ends; the user approves. Until then Price rises? stays Yes (E23) so alerts keep showing the higher price. Not chosen: deriving the current price automatically from Regular price after the promo date.
 - **D10 Reminders: DECIDED 2026-10-02.** Alerts at 3, 1 and 0 days before Cancel-by (per-user list, default 3,1,0), each once per renewal; Keep or Cancelled in one tap stops the rest; price rises are part of the same alert, not a separate one (§3.2, E28–E33). Amended 2026-10-05: Cancelled from an alert opens the D12 cancel sheet pre-filled (proof record over a literal one tap); emails are bundled into at most one per user per day (none on a day with nothing due) instead of one per row.
-- **D13 Alert mode: DECIDED 2026-10-05.** Per subscription, `Remind` (default) or `Keep quietly`. Quiet = no routine reminders for Monthly / Every 4 weeks, one reminder at the largest offset for Quarterly / Yearly; price rises and active trials always alert at every offset; Needs update is unaffected. After a second Keep on the same row the app offers quiet mode once. Not chosen: snooze timers ("mute for 3 months") and a three-level setting. Known limit: the app only sees price changes it was given (§3.2, E38–E44, E48).
+- **D13 Alert mode: DECIDED 2026-10-05.** Per subscription, `Remind` (default) or `Keep quietly`. Quiet = no routine reminders for Monthly / Every 4 weeks, one reminder at the largest offset for Quarterly / Every 6 months / Yearly; price rises and active trials always alert at every offset; Needs update is unaffected. After a second Keep on the same row the app offers quiet mode once. Not chosen: snooze timers ("mute for 3 months") and a three-level setting. Known limit: the app only sees price changes it was given (§3.2, E38–E44, E48).
 - **D14 Alert channel: DECIDED 2026-10-05.** Per user, `App only` or `App and email` (default). In-app alerts cannot be switched off. Emails go to the account's login address (§3.2, E45–E46).
 - **D11 Status list: DECIDED 2026-10-02.** Status = Confirmed, Cancelled; Billing cycle per D3.
 - **D12 Cancellation record: DECIDED 2026-10-04.** Every change to Cancelled records, as proof, when the user cancelled with the vendor and how: `cancelled_on` (date, defaults to today, user can correct it), `channel` (Website / app, Email, Phone, Letter, In person, Other), optional `reference` (confirmation or ticket number, never card or account numbers) and `note`, optional link to a capture of the confirmation (email or screenshot; uploaded or pasted on the cancel form, stored as an `upload` capture with no extraction, never sent to the model and not counted in the daily capture cap), and `recorded_at` (timestamp, set by the system). Stored as an append-only event log (no edit, no delete), so reopening or editing the subscription never erases it; reopening (Cancelled → Confirmed) is recorded as its own event. The detail page shows the history. The Sheet does not track this.

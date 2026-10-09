@@ -21,6 +21,13 @@ describe("totals", () => {
     ]);
     expect(formatMoney(t.EUR?.monthly ?? 0, "EUR")).toBe("€40.67");
   });
+  it("every 6 months is a sixth per month", () => {
+    const t = totalsByCurrency([
+      calc({ amountCents: 30000, currency: "EUR", billingCycle: "every_6_months", lastRenewalDate: "2026-09-15" }, T),
+    ]);
+    expect(t.EUR?.monthly).toBeCloseTo(5000, 6);
+    expect(t.EUR?.yearly).toBeCloseTo(60000, 6);
+  });
   it("skips rows missing amount, currency or cycle, and cancelled rows", () => {
     const t = totalsByCurrency([
       calc({ amountCents: null, currency: "EUR", billingCycle: "monthly", lastRenewalDate: "2026-09-15" }, T),

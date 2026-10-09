@@ -9,7 +9,7 @@ Fields:
 - name: the product or service as a person would call it (e.g. "NoteForge"). vendor: the company, only when it differs from the name or is shown separately. plan: the plan or tier name.
 - account_label: the login email or username the subscription belongs to, when shown. Never a password.
 - amount: the price per billing period as printed, digits with a dot and at most 2 decimals (e.g. "12.00"). currency: from the list only, from a symbol or code that is shown ($ is USD, € is EUR, £ is GBP); otherwise null.
-- billing_cycle: monthly, quarterly, every_4_weeks or yearly, only when stated ("per month", "/mo", "annual", "billed every 4 weeks"). A price alone does not state a cycle.
+- billing_cycle: monthly, quarterly, every_4_weeks, every_6_months or yearly, only when stated ("per month", "/mo", "annual", "billed every 4 weeks", "per half-year", "per semester"). A price alone does not state a cycle.
 - last_charge_date: the date of a charge that already happened (a receipt or invoice date). next_charge_date: the next charge or renewal date, when stated. trial_ends: the end of a free trial. Write dates as YYYY-MM-DD. Resolve a date only when the capture fixes it: a weekday or day of month relative to today is fine ("renews on the 5th" means the next 5th on or after today); "soon" or "next month" without a day is null.
 - regular_price and promo_ends: only when the capture states both the later price and the date it starts. Otherwise both null.
 - cancel_notice_days: only when a notice period is stated, in days. cancel_url: a link to manage or cancel the subscription, when shown.

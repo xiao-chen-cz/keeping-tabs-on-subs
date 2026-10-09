@@ -7,6 +7,7 @@ describe("notice", () => {
     expect(defaultNoticeDays("monthly")).toBe(3);
     expect(defaultNoticeDays("every_4_weeks")).toBe(3);
     expect(defaultNoticeDays("quarterly")).toBe(7);
+    expect(defaultNoticeDays("every_6_months")).toBe(7);
     expect(defaultNoticeDays("yearly")).toBe(7);
     expect(defaultNoticeDays(null)).toBe(7);
   });

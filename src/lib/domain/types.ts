@@ -10,7 +10,7 @@ export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
 export const CURRENCIES = ["EUR", "USD", "GBP", "CHF"] as const;
 export type Currency = (typeof CURRENCIES)[number];
 
-export const BILLING_CYCLES = ["monthly", "quarterly", "every_4_weeks", "yearly"] as const;
+export const BILLING_CYCLES = ["monthly", "quarterly", "every_4_weeks", "every_6_months", "yearly"] as const;
 export type BillingCycle = (typeof BILLING_CYCLES)[number];
 
 /** How each cycle steps from the anchor date (logic-spec §2.1). A new cycle is one entry here. */
@@ -18,6 +18,7 @@ export const CYCLE_STEP: Record<BillingCycle, { months: number } | { days: numbe
   monthly: { months: 1 },
   quarterly: { months: 3 },
   every_4_weeks: { days: 28 },
+  every_6_months: { months: 6 },
   yearly: { months: 12 },
 };
 
@@ -26,6 +27,7 @@ export const MONTHLY_FACTOR: Record<BillingCycle, number> = {
   monthly: 1,
   quarterly: 1 / 3,
   every_4_weeks: 13 / 12,
+  every_6_months: 1 / 6,
   yearly: 1 / 12,
 };
 
@@ -33,6 +35,7 @@ export const BILLING_CYCLE_LABELS: Record<BillingCycle, string> = {
   monthly: "Monthly",
   quarterly: "Quarterly",
   every_4_weeks: "Every 4 weeks",
+  every_6_months: "Every 6 months",
   yearly: "Yearly",
 };
 

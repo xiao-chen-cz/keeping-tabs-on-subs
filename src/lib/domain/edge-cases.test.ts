@@ -57,6 +57,7 @@ const rows: Row[] = [
   { id: "E15", input: {}, expect: { next: null, days: null, cancelBy: null, daysCancelBy: null, needsUpdate: true } },
   { id: "E15b", input: { billingCycle: "monthly" }, expect: { next: null, needsUpdate: true } },
   { id: "E16b", input: { billingCycle: "quarterly", lastRenewalDate: "2026-08-15" }, expect: { next: "2026-11-15", notice: 7, cancelBy: "2026-11-08" } },
+  { id: "E16c", input: { billingCycle: "every_6_months", lastRenewalDate: "2026-03-31" }, expect: { next: "2027-03-31", notice: 7, cancelBy: "2027-03-24" } },
   { id: "E17", input: m("2026-09-02"), expect: { next: "2026-10-02", days: 1, cancelBy: "2026-09-29", daysCancelBy: -2 } },
   // Promo cases: yearly anchored 2026-06-06 gives next 2027-06-06 (E18); every-4-weeks anchored 2026-09-10 gives 2026-10-08.
   { id: "E18", input: { billingCycle: "yearly", lastRenewalDate: "2026-06-06", amountCents: 12000, regularPriceCents: 20000, promoEnds: "2027-06-06" }, expect: { next: "2027-06-06", renewal: 20000, rises: true } },

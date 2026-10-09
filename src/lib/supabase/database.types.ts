@@ -509,7 +509,7 @@ export type Database = {
     Enums: {
       alert_channel: "app" | "app_email"
       alert_mode: "remind" | "quiet"
-      billing_cycle: "monthly" | "quarterly" | "every_4_weeks" | "yearly"
+      billing_cycle: "monthly" | "quarterly" | "every_4_weeks" | "every_6_months" | "yearly"
       cancel_channel:
         | "website_app"
         | "email"
@@ -657,7 +657,7 @@ export const Constants = {
     Enums: {
       alert_channel: ["app", "app_email"],
       alert_mode: ["remind", "quiet"],
-      billing_cycle: ["monthly", "quarterly", "every_4_weeks", "yearly"],
+      billing_cycle: ["monthly", "quarterly", "every_4_weeks", "every_6_months", "yearly"],
       cancel_channel: [
         "website_app",
         "email",

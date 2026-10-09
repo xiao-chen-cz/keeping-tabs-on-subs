@@ -6,16 +6,21 @@ export const DEFAULT_ALERT_OFFSETS = [3, 1, 0] as const;
 /** A row may carry the cancel-by date the user tapped Keep for (E29, E32) and its alert mode (D13, default Remind). */
 export type AlertSource = SubscriptionCore & { keptForCancelBy?: PlainDate | null; alertMode?: AlertMode };
 
+/** Quarterly, Every 6 months and Yearly: Keep quietly still sends one reminder per renewal (D13). */
+function isLongCycle(cycle: SubscriptionCore["billingCycle"]): boolean {
+  return cycle === "quarterly" || cycle === "every_6_months" || cycle === "yearly";
+}
+
 /**
  * The offsets that apply to this row (D13). Remind: the user's offsets. Keep quietly: none for Monthly /
- * Every 4 weeks, only the largest for Quarterly / Yearly; but every offset while a price rise is known or a
+ * Every 4 weeks, only the largest for longer cycles (Quarterly, Every 6 months, Yearly); but every offset while a price rise is known or a
  * trial is active (E38-E42, E48).
  */
 export function effectiveOffsets<T extends AlertSource>(row: ComputedSubscription<T>, offsets: number[]): number[] {
   const { input, computed: c } = row;
   if (input.alertMode !== "quiet" || c.priceRises === true || c.tags.trial) return offsets;
   if (offsets.length === 0) return [];
-  return input.billingCycle === "quarterly" || input.billingCycle === "yearly" ? [Math.max(...offsets)] : [];
+  return isLongCycle(input.billingCycle) ? [Math.max(...offsets)] : [];
 }
 
 export interface DueAlert {
@@ -114,6 +119,6 @@ function daysList(offsets: number[]): string {
 export function describeReminders(mode: AlertMode, cycle: SubscriptionCore["billingCycle"], offsets: number[]): string {
   if (offsets.length === 0) return "No reminders.";
   if (mode === "remind") return `Reminders ${daysList(offsets)} days before the cancel-by.`;
-  if (cycle === "quarterly" || cycle === "yearly") return `One reminder, ${Math.max(...offsets)} days before the cancel-by.`;
+  if (isLongCycle(cycle)) return `One reminder, ${Math.max(...offsets)} days before the cancel-by.`;
   return "No routine reminders.";
 }

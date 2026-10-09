@@ -62,7 +62,7 @@ export function SettingsForm({
           ))}
         </div>
         <p data-tour="quiet-note" className="mt-1 text-xs text-mid">
-          Subscriptions on Keep quietly get only the earliest of these, and only when they renew quarterly or yearly.
+          Subscriptions on Keep quietly get only the earliest of these, and only when they renew every 3 months or less often.
         </p>
       </fieldset>
       {state.error && (
