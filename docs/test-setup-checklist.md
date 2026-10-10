@@ -28,11 +28,16 @@ Run on production (`keeping-tabs-on-subs.vercel.app`) on 2026-10-09, with the te
 | 22 | Email alerts | Pass (job only) | Daily job ran today at 07:00 Berlin and recorded each send with an email id; no tester inbox checked today |
 | 23 | Desktop layout (1280 px) | Pass | |
 
-## Confusing, not blocking (not fixed)
+## Confusing, not blocking
 
-- **Stale note after answering a question.** The extraction wrote "billing cycle not stated" into Notes; it stays after the tester answers Monthly.
-- **"Next charge" on a cancelled subscription.** The detail page of a cancelled entry still shows "Next charge 20 Oct" (the billing date). It reads as if a charge is still coming.
+- **Stale note after answering a question.** The extraction wrote "billing cycle not stated" into Notes; it stays after the tester answers Monthly. **Fixed 2026-10-10** (`7fa8f28`): Notes no longer hold remarks about missing fields; verified in production (capture without a cycle leaves Notes empty).
+- **"Next charge" on a cancelled subscription.** The detail page of a cancelled entry still shows "Next charge 20 Oct" (the billing date). It reads as if a charge is still coming. **Fixed 2026-10-10** (`7fa8f28`): a future charge is hidden on cancelled rows, a past one still shows as Last charge; verified in production (hidden when cancelled, back after Reopen).
 
 ## Fixes today
 
 None: no blockers found.
+
+## Fixes 2026-10-10
+
+- The two points above.
+- Tester feedback: saving Settings now returns to the list with a "Settings saved." notice instead of staying on Settings. Verified in production.
