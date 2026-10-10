@@ -55,6 +55,17 @@ describe("SubscriptionDetail", () => {
     expect(screen.getByText("Edit").getAttribute("href")).toBe("/subscriptions/1/edit");
   });
 
+  it("hides a future charge on cancelled rows but keeps a past one", () => {
+    const future = sub({ status: "cancelled", lastRenewalDate: "2026-10-20" });
+    const { unmount } = render(<SubscriptionDetail row={computeSubscription(future, "2026-10-03")} />);
+    expect(screen.queryByText("Next charge")).toBeNull();
+    expect(screen.queryByText("20 Oct 2026")).toBeNull();
+    unmount();
+    render(<SubscriptionDetail row={computeSubscription(sub({ status: "cancelled" }), "2026-10-03")} />);
+    expect(screen.getByText("Last charge")).toBeTruthy();
+    expect(screen.getByText("8 Sep 2026")).toBeTruthy();
+  });
+
   it("offers Mark as cancelled for confirmed rows and Reopen for cancelled rows", () => {
     const reopen = async () => {};
     const { unmount } = render(

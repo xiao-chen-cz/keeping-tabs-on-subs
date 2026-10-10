@@ -88,6 +88,15 @@ export function RemindNotice({ name }: { name: string }) {
   );
 }
 
+/** Shown on the list after saving Settings. */
+export function SettingsSavedNotice() {
+  return (
+    <p role="status" className={noticeClass}>
+      Settings saved.
+    </p>
+  );
+}
+
 /** Shown on the list after approving a proposal: the entry is in the list now. */
 export function AddedNotice({
   name,

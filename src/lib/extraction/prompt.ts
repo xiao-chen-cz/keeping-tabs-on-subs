@@ -17,7 +17,7 @@ Fields:
 - category: one name from the category list, inferred from the service name, plan and sender; null if none fits (then suggest a category in notes). category_confidence: high for explicit evidence, medium for indirect, low for a guess.
 - scope: business when the capture names a business, shows a VAT or reverse-charge number or a company address; family only when a shared family account visibly pays; personal only when visibly private. With no evidence, still suggest a scope with scope_confidence low.
 - field_confidence: for name, amount, currency, billing_cycle and the date you filled: high when stated plainly, medium when read from layout or context, low when unclear. Null for fields you left empty.
-- notes: one short sentence with anything useful the form cannot hold (a price change, a new category suggestion). Never payment details.
+- notes: one short sentence with anything useful the form cannot hold (a price change, a new category suggestion). Never payment details. Never remarks about what is missing or not stated (the app asks for missing fields itself); if nothing useful remains, null.
 - is_subscription: false when the capture is not about a recurring charge at all.`;
 
 export type CaptureContent =

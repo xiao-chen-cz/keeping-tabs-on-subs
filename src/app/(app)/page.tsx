@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { AddedNotice, AlertActions, KeptNotice, QuietNotice, RemindNotice } from "@/components/alert-actions";
+import { AddedNotice, AlertActions, KeptNotice, QuietNotice, RemindNotice, SettingsSavedNotice } from "@/components/alert-actions";
 import { RenewalsList } from "@/components/renewals-list";
 import { AppTour } from "@/components/tour";
 import { ReviewInbox } from "@/components/review-inbox";
@@ -23,7 +23,7 @@ import { markTourDoneAction } from "./tour-actions";
 export default async function Home({ searchParams }: PageProps<"/">) {
   await requireUser();
   const sp = await searchParams;
-  const { show, kept, quiet, added, reminders, tour } = sp;
+  const { show, kept, quiet, added, reminders, settings, tour } = sp;
   const filters = parseListFilters(sp);
   const tabsEnabled = tabsEnabledFrom((await cookies()).get(TABS_COOKIE)?.value);
   const linkFilters = { cat: tabsEnabled ? filters.category : null, q: filters.q, scope: filters.scope };
@@ -75,6 +75,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         />
       )}
       {remindRow && <RemindNotice name={remindRow.name} />}
+      {settings === "saved" && <SettingsSavedNotice />}
       {quietRow && <QuietNotice name={quietRow.name} undo={undoQuietAction.bind(null, quietRow.id)} />}
       <RenewalsList
         groups={groups}

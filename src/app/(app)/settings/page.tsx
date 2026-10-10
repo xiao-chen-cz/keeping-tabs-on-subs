@@ -8,7 +8,7 @@ import { saveSettingsAction } from "./actions";
 
 export default async function SettingsPage({ searchParams }: PageProps<"/settings">) {
   const user = await requireUser();
-  const [profile, { saved, tour }] = await Promise.all([getProfile(), searchParams]);
+  const [profile, { tour }] = await Promise.all([getProfile(), searchParams]);
   return (
     <main className="flex flex-1 flex-col gap-3">
       {/* The tour's Settings stops (?tour=<stop>), reached from the list. */}
@@ -22,7 +22,6 @@ export default async function SettingsPage({ searchParams }: PageProps<"/setting
         alertChannel={profile.alertChannel}
         reminderOffsets={profile.reminderOffsets}
         email={user.email}
-        saved={saved === "1"}
       />
       <p className="border-t border-line pt-4 text-sm">
         <Link href="/?tour=1" className="link inline-flex min-h-10 items-center">

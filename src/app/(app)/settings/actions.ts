@@ -13,5 +13,5 @@ export async function saveSettingsAction(_prev: SettingsState, formData: FormDat
   const parsed = parseAlertSettings(formData.get("alertChannel"), formData.getAll("offset"));
   if (!parsed.ok) return { error: parsed.error };
   await updateAlertSettings(parsed.alertChannel, parsed.reminderOffsets);
-  redirect("/settings?saved=1");
+  redirect("/?settings=saved");
 }

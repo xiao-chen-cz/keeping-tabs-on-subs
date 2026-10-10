@@ -138,7 +138,10 @@ export function SubscriptionDetail({
         <Item label="Notice">
           {!cancelled && `${c.noticeDays} days ${c.noticeIsDefault ? "(default)" : "(custom)"}`}
         </Item>
-        <Item label={c.anchorInFuture ? "Next charge" : "Last charge"}>{s.lastRenewalDate && formatDayLong(s.lastRenewalDate)}</Item>
+        {/* A cancelled row has no next charge; only a past charge is shown. */}
+        <Item label={c.anchorInFuture ? "Next charge" : "Last charge"}>
+          {s.lastRenewalDate && !(cancelled && c.anchorInFuture) && formatDayLong(s.lastRenewalDate)}
+        </Item>
         <Item label="Trial ends">{s.trialEnds && formatDayLong(s.trialEnds)}</Item>
         <Item label="Regular price">{money(s.regularPriceCents)}</Item>
         <Item label="Promo ends">{s.promoEnds && formatDayLong(s.promoEnds)}</Item>

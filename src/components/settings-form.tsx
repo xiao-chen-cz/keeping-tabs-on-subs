@@ -15,23 +15,15 @@ export function SettingsForm({
   alertChannel,
   reminderOffsets,
   email,
-  saved,
 }: {
   action: (prev: SettingsState, formData: FormData) => Promise<SettingsState>;
   alertChannel: AlertChannel;
   reminderOffsets: number[];
   email: string | null;
-  /** Just saved (?saved=1); hidden again once the form shows an error. */
-  saved?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(action, { error: null });
   return (
     <form action={formAction} className="flex flex-col gap-5 text-sm">
-      {saved && !state.error && (
-        <p role="status" className="rounded-control border border-green-ink/30 bg-green-light p-3 text-green-ink">
-          Settings saved.
-        </p>
-      )}
       <fieldset data-tour="alert-channel">
         <legend className="section-label">Where alerts go</legend>
         <label className="flex min-h-11 items-start gap-2 py-1">
