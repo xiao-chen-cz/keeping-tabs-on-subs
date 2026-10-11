@@ -9,7 +9,7 @@ Decided 2026-10-11. The final submission gives the AI grader its own sign-in to 
 - **Timing:** seed dates are offsets from the day the account is seeded, and Due soon entries drop out after a few days. Reseed on submission day: `pnpm reset-account --email grader@example.com --set full`.
 - **Submission:** the email and password go in the submission. They stay in `local-data/accounts.jsonl`, never in tracked files.
 - **Cost:** captures by the grader run real Claude API calls on the owner's key; acceptable at grader scale.
-- **After grading:** delete the account, like the tester accounts.
-
-## Open
-- Whether the grader also gets a pointer to the sample captures (`seed/captures/`) to try a capture end to end.
+- **Sample captures:** the submission points the grader to `seed/captures/` in the public repo (https://github.com/xiao-chen-cz/keeping-tabs-on-subs/tree/main/seed/captures), all written for the demo:
+  - `readloop-trial-email.txt`: paste it (or type a short description) to see a fresh extraction create a Trial entry. Not seeded, so this is the one to try first.
+  - `noteforge-billing.png`, `codepilot-receipt.txt`, `gymbox-invoice.pdf`: already in the review queue as P1–P3 (new entry with a missing-cycle question, update with a price change, sparse invoice). The grader can review those, or upload one again to watch the extraction run.
+- **After grading:** delete the account, like the tester accounts. (Decided 2026-10-11: point the grader to the captures.)
