@@ -13,7 +13,7 @@ Next.js (TypeScript strict, Tailwind, mobile-first), Supabase (Postgres, auth, s
 
 ## Source of truth
 - `specs/logic-spec.md`: data model, computed fields, edge cases E1–E27, open decisions D1–D11. Port this logic; keep it in sync when behaviour changes.
-- `specs/seed-data.md`: fictional demo data (dates as offsets from today), two sets: starter (4 subscriptions + 1 proposal, for testers) and full (12 + 3, for the demo account and tests), with expected totals/alerts.
+- `specs/seed-data.md`: fictional demo data (dates as offsets from today), two sets: starter (4 subscriptions + 1 proposal, for testers) and full (13 + 3, for the demo account and tests), with expected totals/alerts.
 - `specs/handoffs/`: session history (`/EA-handoff`, `/EA-pickup`).
 - The owner's private Google Sheet (ID in `/local-data/private-notes.md`, not in git) holds the owner's real data and feeds the private instance. Its logic is ported, its data is not. AppSheet is abandoned.
 

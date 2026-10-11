@@ -56,7 +56,7 @@ Each item below is a real feature for later, but would not fit into 22 days safe
 **Decision: private preview, not a local run.** Testers need to reach the app from their own phones, which a local run can't offer.
 
 - Access is invite-only: login required, accounts created by me, no public sign-up.
-- Every demo account starts with the seeded sample dataset in `specs/seed-data.md`. Testers get the starter set (4 common fictional subscriptions incl. one price-rise alert, plus 1 pending proposal); my demo account gets the full set (12 subscriptions covering every flag and alert, plus 3 proposals). Dates are computed from the day the account is created.
+- Every demo account starts with the seeded sample dataset in `specs/seed-data.md`. Testers get the starter set (4 common fictional subscriptions incl. one price-rise alert, plus 1 pending proposal); my demo account gets the full set (13 subscriptions covering every flag and alert, plus 3 proposals). Dates are computed from the day the account is created.
 - Sample captures (screenshots, PDFs, pasted email text) are written for the demo; none come from my real inbox.
 - Testers may try their own screenshots or text. They are told this up front, and all tester data is deleted after the test round.
 - Data stays in the EU: database, file storage and hosting in an EU region; the LLM call sends only the capture being extracted.
