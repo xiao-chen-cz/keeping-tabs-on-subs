@@ -27,3 +27,13 @@ LK tested alone on her phone, without a walkthrough. Her account shows 3 capture
    - Forwarding to an address would work on every phone but is parked (`specs/todo/email-forward-capture.md`); this is the first tester request for it.
    - Meanwhile, the upload tab on phones says "Got an email? Take a screenshot and upload it here." (`e5fdc1c`).
 3. **New entries did not show in Total spend.** Working as designed, but unclear. 2 of her 3 approved entries are active trials, and totals exclude trials (D7). The totals card now says "Excludes trials and cancelled subscriptions." (`e5fdc1c`).
+
+## Status 2026-10-12 (D18)
+
+- **LK: tested and gave feedback.** Fixed the same day and pushed (`e5fdc1c`):
+  - "Take a photo" button on phones, so a receipt can be photographed without leaving the app.
+  - The keyboard paste hint (⌘V / Ctrl+V) is hidden on phones.
+  - The upload tab on phones says "Got an email? Take a screenshot and upload it here."
+  - The totals card says "Excludes trials and cancelled subscriptions." Her new entries were missing from Total spend because 2 of 3 were trials.
+  - Sharing an email straight from the mail app is parked until after the demo.
+- **JB and RG:** the owner follows up tomorrow (Tue 13 Oct): JB for feedback, RG on the follow-up questions.
