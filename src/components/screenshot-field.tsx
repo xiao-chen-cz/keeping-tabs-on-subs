@@ -30,7 +30,7 @@ export function usePastedFile(onFile: (file: File) => void, enabled = true) {
 }
 
 /**
- * File picker plus a paste zone and a thumbnail. Controlled: the parent holds the file and uploads it on
+ * File picker (plus a camera button on phones), a paste zone (not on phones) and a thumbnail. Controlled: the parent holds the file and uploads it on
  * submit (pair with usePastedFile so a paste anywhere on the page lands here).
  */
 export function ScreenshotField({
@@ -71,18 +71,37 @@ export function ScreenshotField({
       <label htmlFor={id} className="label">
         {label}
       </label>
-      <input
-        ref={input}
-        id={id}
-        type="file"
-        accept="image/png,image/jpeg,image/webp,application/pdf"
-        className="input py-2"
-        disabled={disabled}
-        onChange={(e) => onFile(e.currentTarget.files?.[0] ?? null)}
-      />
+      <div className="flex flex-wrap gap-2">
+        <input
+          ref={input}
+          id={id}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,application/pdf"
+          className="input min-w-0 flex-1 py-2"
+          disabled={disabled}
+          onChange={(e) => onFile(e.currentTarget.files?.[0] ?? null)}
+        />
+        {/* Phones only: opens the camera straight away instead of the file browser. */}
+        <label className="btn-secondary hidden shrink-0 cursor-pointer has-disabled:opacity-60 pointer-coarse:inline-flex">
+          Take a photo
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="sr-only"
+            disabled={disabled}
+            onChange={(e) => {
+              const photo = e.currentTarget.files?.[0];
+              e.currentTarget.value = "";
+              if (photo) onFile(photo);
+            }}
+          />
+        </label>
+      </div>
+      {/* Pasting a screenshot is a keyboard thing; hidden on touch screens. */}
       <div
         tabIndex={0}
-        className="rounded-lg border border-dashed border-line px-4 py-3 text-mid focus:outline-none focus:ring-2 focus:ring-primary"
+        className="rounded-lg border border-dashed border-line px-4 py-3 text-mid focus:outline-none focus:ring-2 focus:ring-primary pointer-coarse:hidden"
       >
         Or copy a screenshot and paste it here (⌘V / Ctrl+V).
       </div>

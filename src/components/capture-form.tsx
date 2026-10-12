@@ -105,14 +105,18 @@ export function CaptureForm({
         </label>
       )}
       {kind === "upload" && (
-        <ScreenshotField
-          id="file"
-          label="A screenshot of a billing page, a photo of an invoice, or a PDF (max 10 MB)"
-          hint={`Pictures are made smaller (up to ${MAX_IMAGE_EDGE} px) before they are sent.`}
-          file={file}
-          onFile={setFile}
-          disabled={busy}
-        />
+        <>
+          {/* Phones only: on a desktop, pasting the email text is easier. */}
+          <p className="hidden text-sm text-mid pointer-coarse:block">Got an email? Take a screenshot and upload it here.</p>
+          <ScreenshotField
+            id="file"
+            label="A screenshot of a billing page, a photo of an invoice, or a PDF (max 10 MB)"
+            hint={`Pictures are made smaller (up to ${MAX_IMAGE_EDGE} px) before they are sent.`}
+            file={file}
+            onFile={setFile}
+            disabled={busy}
+          />
+        </>
       )}
 
       <p className="text-xs text-mid">

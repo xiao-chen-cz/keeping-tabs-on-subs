@@ -16,6 +16,7 @@ export function TotalsCard({ totals, label = "Total spend" }: { totals: Currency
           </li>
         ))}
       </ul>
+      <p className="mt-0.5 text-xs">Excludes trials and cancelled subscriptions.</p>
     </section>
   );
 }
