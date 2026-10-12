@@ -15,7 +15,7 @@ describe("parseCaptureForm", () => {
   });
 
   it("refuses empty or overlong text before any model call", () => {
-    expect(parseCaptureForm({ kind: "text", text: "   " })).toEqual({ ok: false, error: "Describe the subscription first." });
+    expect(parseCaptureForm({ kind: "text", text: "   " })).toEqual({ ok: false, error: "Describe the subscription or paste an email first." });
     expect(parseCaptureForm({ kind: "paste" })).toEqual({ ok: false, error: "Paste the email text first." });
     expect(parseCaptureForm({ kind: "paste", text: "x".repeat(MAX_TEXT_CHARS + 1) }).ok).toBe(false);
   });

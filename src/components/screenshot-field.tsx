@@ -40,6 +40,7 @@ export function ScreenshotField({
   file,
   onFile,
   disabled,
+  camera = true,
 }: {
   id: string;
   label: ReactNode;
@@ -47,6 +48,8 @@ export function ScreenshotField({
   file: File | null;
   onFile: (file: File | null) => void;
   disabled?: boolean;
+  /** Show the Take a photo button on touch screens (off where the page has its own camera option). */
+  camera?: boolean;
 }) {
   const input = useRef<HTMLInputElement>(null);
   const thumb = useRef<HTMLImageElement>(null);
@@ -82,21 +85,23 @@ export function ScreenshotField({
           onChange={(e) => onFile(e.currentTarget.files?.[0] ?? null)}
         />
         {/* Phones only: opens the camera straight away instead of the file browser. */}
-        <label className="btn-secondary hidden shrink-0 cursor-pointer has-disabled:opacity-60 pointer-coarse:inline-flex">
-          Take a photo
-          <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="sr-only"
-            disabled={disabled}
-            onChange={(e) => {
-              const photo = e.currentTarget.files?.[0];
-              e.currentTarget.value = "";
-              if (photo) onFile(photo);
-            }}
-          />
-        </label>
+        {camera && (
+          <label className="btn-secondary hidden shrink-0 cursor-pointer has-disabled:opacity-60 pointer-coarse:inline-flex">
+            Take a photo
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="sr-only"
+              disabled={disabled}
+              onChange={(e) => {
+                const photo = e.currentTarget.files?.[0];
+                e.currentTarget.value = "";
+                if (photo) onFile(photo);
+              }}
+            />
+          </label>
+        )}
       </div>
       {/* Pasting a screenshot is a keyboard thing; hidden on touch screens. */}
       <div

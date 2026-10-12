@@ -76,7 +76,7 @@ export const APP_TOUR: TourStop[] = [
     path: "/",
     target: "new",
     title: "Add a subscription",
-    body: "Describe it in a few words, upload a screenshot or PDF, or paste an email. The app reads it and asks you to check the result.",
+    body: "Take a photo, upload a screenshot or PDF, or type a few words or paste an email. The app reads it and asks you to check the result.",
   },
   {
     path: "/settings",

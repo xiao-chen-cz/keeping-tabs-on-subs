@@ -12,7 +12,7 @@ export function parseCaptureForm(values: Record<string, string | undefined>): Ca
   if (kind === "text" || kind === "paste") {
     const text = (values.text ?? "").trim();
     if (text === "") {
-      return { ok: false, error: kind === "text" ? "Describe the subscription first." : "Paste the email text first." };
+      return { ok: false, error: kind === "text" ? "Describe the subscription or paste an email first." : "Paste the email text first." };
     }
     if (text.length > MAX_TEXT_CHARS) return { ok: false, error: "That is too long. Paste only the part about the charge." };
     return { ok: true, request: { kind, text } };
