@@ -143,6 +143,9 @@ export function SubscriptionForm({
   const [demoSubmitted, setDemoSubmitted] = useState(false);
   const vals = values ?? inner;
   const errors = state.fieldErrors;
+  // Trial ends shows only for trials, so a contract end or minimum term is not typed in as a trial end.
+  const [trialChecked, setTrialChecked] = useState(false);
+  const isTrial = trialChecked || vals.trial_ends !== "";
 
   const miss = (name: FormField) => (missingFields?.includes(name) ?? false);
   const ic = (name: FormField) => (miss(name) ? `${inputClass} border-warn-line bg-warn-bg` : inputClass);
@@ -150,15 +153,17 @@ export function SubscriptionForm({
     [errors[name] ? `${name}-error` : null, miss(name) ? `${name}-missing` : null].filter(Boolean).join(" ") ||
     undefined;
 
+  const setValue = (name: FormField, value: string) => {
+    const next = { ...vals, [name]: value };
+    setInner(next);
+    onValuesChange?.(next);
+  };
+
   const bind = (name: FormField) => ({
     id: name,
     name,
     value: vals[name],
-    onChange: (e: { target: { value: string } }) => {
-      const next = { ...vals, [name]: e.target.value };
-      setInner(next);
-      onValuesChange?.(next);
-    },
+    onChange: (e: { target: { value: string } }) => setValue(name, e.target.value),
     "aria-invalid": errors[name] ? (true as const) : undefined,
     "aria-describedby": describedBy(name),
   });
@@ -267,9 +272,28 @@ export function SubscriptionForm({
           <p className="mt-1 text-xs text-mid">The most recent charge, or the next one if you know it.</p>
         </Field>
 
-        <Field name="trial_ends" missing={miss("trial_ends")} flag={confidenceFlags?.trial_ends} label="Trial ends" errors={errors.trial_ends}>
-          <input {...bind("trial_ends")} type="date" className={ic("trial_ends")} />
-        </Field>
+        <div className="flex flex-col gap-1">
+          <label className="flex min-h-11 items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={isTrial}
+              onChange={(e) => {
+                setTrialChecked(e.target.checked);
+                // Unticking clears the date, so saving removes it.
+                if (!e.target.checked) setValue("trial_ends", "");
+              }}
+              className="size-5 accent-primary"
+            />
+            Free or discounted trial
+          </label>
+          {isTrial ? (
+            <Field name="trial_ends" missing={miss("trial_ends")} flag={confidenceFlags?.trial_ends} label="Trial ends" errors={errors.trial_ends}>
+              <input {...bind("trial_ends")} type="date" className={ic("trial_ends")} />
+            </Field>
+          ) : (
+            <input type="hidden" name="trial_ends" value="" />
+          )}
+        </div>
 
         <Field
           name="cancel_notice_days"

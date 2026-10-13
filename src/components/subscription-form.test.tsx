@@ -21,6 +21,37 @@ function setup(action = vi.fn<(p: SubscriptionFormState, f: FormData) => Promise
 }
 
 describe("SubscriptionForm", () => {
+  it("shows Trial ends only after ticking the trial box, and unticking clears it", () => {
+    setup();
+    expect(screen.queryByLabelText("Trial ends")).toBeNull();
+    const box = screen.getByLabelText("Free or discounted trial") as HTMLInputElement;
+    expect(box.checked).toBe(false);
+
+    fireEvent.click(box);
+    const date = screen.getByLabelText("Trial ends") as HTMLInputElement;
+    fireEvent.change(date, { target: { value: "2026-11-01" } });
+    expect(date.value).toBe("2026-11-01");
+
+    fireEvent.click(box);
+    expect(screen.queryByLabelText("Trial ends")).toBeNull();
+    const form = box.closest("form")!;
+    expect(new FormData(form).get("trial_ends")).toBe("");
+  });
+
+  it("ticks the trial box when the entry already has a trial end", () => {
+    render(
+      <SubscriptionForm
+        mode="edit"
+        action={vi.fn()}
+        initialValues={{ ...emptyFormValues(), status: "confirmed", trial_ends: "2026-11-01" }}
+        lookups={lookups}
+        cancelHref="/"
+      />,
+    );
+    expect((screen.getByLabelText("Free or discounted trial") as HTMLInputElement).checked).toBe(true);
+    expect((screen.getByLabelText("Trial ends") as HTMLInputElement).value).toBe("2026-11-01");
+  });
+
   it("renders server field errors under the right field and keeps entered values", async () => {
     const action = vi.fn(async (_p: SubscriptionFormState, f: FormData) => ({
       fieldErrors: { amount: ["Enter an amount like 9.99"], currency: ["Choose a currency for the amount"] },

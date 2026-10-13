@@ -18,7 +18,7 @@ One record per subscription. "Input" fields are entered by a person or by the Gm
 | D | Currency | Input | enum | Seen: `EUR`, `USD`. No conversion anywhere |
 | E | Billing cycle | Input | enum | `Monthly`, `Quarterly`, `Every 4 weeks`, `Every 6 months`, `Yearly`. `Trial` is no longer a cycle value (D3). More cycles can be added later (§2.1) |
 | F | Last renewal date | Input | date | Date of the most recent charge (the anchor date for the schedule) |
-| G | Trial ends | Input | date | Only for trials. A trial is identified by this date, not by the cycle (D3). Billing cycle holds the plan the trial converts to |
+| G | Trial ends | Input | date | Only for trials. A trial is identified by this date, not by the cycle (D3). Billing cycle holds the plan the trial converts to. In the app the field shows only after ticking "Free or discounted trial"; unticking clears it (decided 2026-10-13, after a tester typed a contract end into it) |
 | H | Next renewal | Computed | date | §2.1 |
 | I | Days until renewal | Computed | integer | §2.2 |
 | J | Cancel notice (days) | Computed default, overridable | integer | §2.3 |
