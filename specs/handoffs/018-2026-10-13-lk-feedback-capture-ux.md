@@ -16,12 +16,12 @@ Tester round 1, D18/D19: LK's feedback (tested alone on her phone) drove a serie
 - Verified by the owner on iPhone: Take photo works (the preview distortion was found that way). 364 tests pass; lint and typecheck green. Nothing in `src/lib/domain` changed, so no alert function redeploy.
 
 ## In Progress
-- Owner to check on iPhone after deploy: preview proportions, Free trial toggle, Paste screenshot flow (screenshot → tap preview → Done → Copy and Delete → Paste screenshot), icons and whether the three capture buttons fit (shorter labels "Photo / Upload / Text" offered if too tight).
+- Paste screenshot verified by the owner on iPhone (2026-10-13). Still to check there: preview proportions, Free trial toggle, icons and whether the three capture buttons fit (shorter labels "Photo / Upload / Text" offered if too tight).
 - Owner's reply to LK: what changed, made-up data only (bill deleted), and which phone she used (she has iPhone and Android).
 
 ## Next Steps
 1. **Tue 13 Oct:** owner follows up with JB (feedback) and RG (follow-up questions); update `docs/tester-round.md`.
-2. Act on the owner's iPhone check of today's changes (Paste screenshot on iOS is untested on a real device).
+2. Act on the owner's iPhone check of the remaining changes (preview, Free trial toggle, icons).
 3. LK can fix her entry: Edit → untick Free trial → Save (it then counts in the totals).
 4. If a tester has not replied by Wed 14 Oct: recruit one more (consent first, account after).
 5. Parked, after the demo: sharing an email straight to the app. Options: Android Web Share Target (needs home-screen install, ~half a day); forward-to-address (`specs/todo/email-forward-capture.md`, LK's request is the first tester ask; provider F2 open). iPhone websites cannot appear in the share menu.
