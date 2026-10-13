@@ -42,4 +42,4 @@ LK tested alone on her phone, without a walkthrough. Her account shows 3 capture
 
 - One of LK's two "trials" was an uploaded annual energy bill. The model read no dates (correct); in the review form LK entered the last charge and, in "Trial ends", what looks like the end of a 12-month price guarantee. The app has no field for a contract end or minimum term (parked: `specs/todo/installments-and-intervals.md`).
 - Fix: "Trial ends" now shows only after ticking "Free or discounted trial"; unticking clears it.
-- The PDF looked like a real bill, although testers were asked to use made-up data. The owner decides whether to raise it with LK or delete the capture.
+- The PDF looked like a real bill, although testers were asked to use made-up data. Its stored fields hold no personal data (no account label or payment method). On the owner's instruction the PDF file was deleted from storage on 2026-10-13 and the capture's file path cleared; the entry stays.
