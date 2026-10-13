@@ -284,8 +284,13 @@ export function SubscriptionForm({
               }}
               className="size-5 accent-primary"
             />
-            Free or discounted trial
+            Free trial
           </label>
+          {!isTrial && (
+            <p className="text-xs text-mid">
+              Paying a reduced price first? Leave this off and use Regular price and Promo ends.
+            </p>
+          )}
           {isTrial ? (
             <Field name="trial_ends" missing={miss("trial_ends")} flag={confidenceFlags?.trial_ends} label="Trial ends" errors={errors.trial_ends}>
               <input {...bind("trial_ends")} type="date" className={ic("trial_ends")} />

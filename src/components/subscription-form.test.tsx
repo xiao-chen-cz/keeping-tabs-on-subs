@@ -24,7 +24,7 @@ describe("SubscriptionForm", () => {
   it("shows Trial ends only after ticking the trial box, and unticking clears it", () => {
     setup();
     expect(screen.queryByLabelText("Trial ends")).toBeNull();
-    const box = screen.getByLabelText("Free or discounted trial") as HTMLInputElement;
+    const box = screen.getByLabelText("Free trial") as HTMLInputElement;
     expect(box.checked).toBe(false);
 
     fireEvent.click(box);
@@ -48,7 +48,7 @@ describe("SubscriptionForm", () => {
         cancelHref="/"
       />,
     );
-    expect((screen.getByLabelText("Free or discounted trial") as HTMLInputElement).checked).toBe(true);
+    expect((screen.getByLabelText("Free trial") as HTMLInputElement).checked).toBe(true);
     expect((screen.getByLabelText("Trial ends") as HTMLInputElement).value).toBe("2026-11-01");
   });
 
