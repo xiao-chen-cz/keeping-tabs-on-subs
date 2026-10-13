@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { CameraIcon, PasteIcon } from "@/components/icons";
 
 /** First picture or PDF in a paste, or null when the clipboard holds text (so pasting text still works). */
 function pastedFile(data: DataTransfer | null): File | null {
@@ -111,7 +112,7 @@ export function ScreenshotField({
         {/* Phones only: a copied screenshot, without saving it to the photo library first. */}
         <button
           type="button"
-          className="btn-secondary hidden shrink-0 pointer-coarse:inline-flex"
+          className="btn-secondary hidden shrink-0 gap-2 px-4 pointer-coarse:inline-flex"
           disabled={disabled}
           onClick={async () => {
             setPasteError(null);
@@ -120,11 +121,13 @@ export function ScreenshotField({
             else setPasteError(result.error);
           }}
         >
+          <PasteIcon />
           Paste screenshot
         </button>
         {/* Phones only: opens the camera straight away instead of the file browser. */}
         {camera && (
-          <label className="btn-secondary hidden shrink-0 cursor-pointer has-disabled:opacity-60 pointer-coarse:inline-flex">
+          <label className="btn-secondary hidden shrink-0 cursor-pointer gap-2 px-4 has-disabled:opacity-60 pointer-coarse:inline-flex">
+            <CameraIcon />
             Take a photo
             <input
               type="file"

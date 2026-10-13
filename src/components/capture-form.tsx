@@ -1,5 +1,6 @@
 "use client";
-import { startTransition, useActionState, useEffect, useRef, useState, type FormEvent } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { CameraIcon, TextIcon, UploadIcon } from "@/components/icons";
 import { ScreenshotField, usePastedFile } from "@/components/screenshot-field";
 import { uploadCaptureFile } from "@/lib/capture-upload";
 import { MAX_IMAGE_EDGE } from "@/lib/extraction/limits";
@@ -11,10 +12,10 @@ export interface CaptureFormState {
 type Kind = "photo" | "upload" | "text";
 
 // Take photo is for phones only (touch screens); a desktop shows Upload and Type or paste.
-const TABS: { kind: Kind; label: string; className?: string }[] = [
-  { kind: "photo", label: "Take photo", className: "hidden pointer-coarse:inline-flex" },
-  { kind: "upload", label: "Upload" },
-  { kind: "text", label: "Type or paste" },
+const TABS: { kind: Kind; label: string; icon: ReactNode; className?: string }[] = [
+  { kind: "photo", label: "Take photo", icon: <CameraIcon />, className: "hidden pointer-coarse:inline-flex" },
+  { kind: "upload", label: "Upload", icon: <UploadIcon /> },
+  { kind: "text", label: "Type or paste", icon: <TextIcon /> },
 ];
 
 /**
@@ -85,9 +86,10 @@ export function CaptureForm({
               // Take photo opens the camera straight away.
               if (t.kind === "photo") camera.current?.click();
             }}
-            className={`${kind === t.kind ? "btn-primary" : "btn-secondary"} ${t.className ?? ""}`}
+            className={`${kind === t.kind ? "btn-primary" : "btn-secondary"} gap-2 px-4 ${t.className ?? ""}`}
             disabled={busy}
           >
+            {t.icon}
             {t.label}
           </button>
         ))}
@@ -194,7 +196,8 @@ function PhotoPreview({
   if (!file) {
     return (
       <div>
-        <button type="button" className="btn-secondary" onClick={onRetake} disabled={disabled}>
+        <button type="button" className="btn-secondary gap-2" onClick={onRetake} disabled={disabled}>
+          <CameraIcon />
           Open the camera
         </button>
       </div>
