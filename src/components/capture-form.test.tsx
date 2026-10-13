@@ -44,6 +44,6 @@ describe("CaptureForm", () => {
     renderForm();
     fireEvent.click(screen.getByRole("button", { name: "Upload" }));
     expect(screen.queryByText("Take a photo")).toBeNull();
-    expect(screen.getByText("Got an email? Take a screenshot and upload it here.")).toBeTruthy();
+    expect(screen.getByText("Got an email? Take a screenshot, copy it, then tap Paste screenshot.")).toBeTruthy();
   });
 });

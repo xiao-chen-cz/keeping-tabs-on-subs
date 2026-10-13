@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 /** First picture or PDF in a paste, or null when the clipboard holds text (so pasting text still works). */
 function pastedFile(data: DataTransfer | null): File | null {
@@ -8,6 +8,29 @@ function pastedFile(data: DataTransfer | null): File | null {
   if (!file) return null;
   // Clipboard screenshots are all called "image.png"; give them a clearer name for the file field.
   return file.name === "image.png" ? new File([file], "pasted-screenshot.png", { type: file.type }) : file;
+}
+
+export const NO_CLIPBOARD_IMAGE =
+  "No screenshot to paste. After taking a screenshot, tap the preview, then Done → Copy and Delete.";
+export const CLIPBOARD_BLOCKED = "Pasting was not allowed here. Save the screenshot and use Choose file instead.";
+
+/**
+ * The first picture on the clipboard, for the Paste screenshot button on phones (no keyboard to press ⌘V).
+ * Must run inside a tap: Safari then shows its own "Paste" confirmation.
+ */
+export async function readClipboardImage(): Promise<{ file: File } | { error: string }> {
+  if (!navigator.clipboard?.read) return { error: CLIPBOARD_BLOCKED };
+  try {
+    for (const item of await navigator.clipboard.read()) {
+      const type = item.types.find((t) => t.startsWith("image/"));
+      if (!type) continue;
+      const blob = await item.getType(type);
+      return { file: new File([blob], `pasted-screenshot.${type.split("/")[1]}`, { type }) };
+    }
+    return { error: NO_CLIPBOARD_IMAGE };
+  } catch {
+    return { error: CLIPBOARD_BLOCKED };
+  }
 }
 
 /** Calls onFile when a screenshot is pasted anywhere on the page (⌘V / Ctrl+V), while enabled. */
@@ -53,6 +76,7 @@ export function ScreenshotField({
 }) {
   const input = useRef<HTMLInputElement>(null);
   const thumb = useRef<HTMLImageElement>(null);
+  const [pasteError, setPasteError] = useState<string | null>(null);
   const isImage = file?.type.startsWith("image/") ?? false;
 
   // Keep the native field (it shows the file name) and the thumbnail in step with the parent's file.
@@ -84,6 +108,20 @@ export function ScreenshotField({
           disabled={disabled}
           onChange={(e) => onFile(e.currentTarget.files?.[0] ?? null)}
         />
+        {/* Phones only: a copied screenshot, without saving it to the photo library first. */}
+        <button
+          type="button"
+          className="btn-secondary hidden shrink-0 pointer-coarse:inline-flex"
+          disabled={disabled}
+          onClick={async () => {
+            setPasteError(null);
+            const result = await readClipboardImage();
+            if ("file" in result) onFile(result.file);
+            else setPasteError(result.error);
+          }}
+        >
+          Paste screenshot
+        </button>
         {/* Phones only: opens the camera straight away instead of the file browser. */}
         {camera && (
           <label className="btn-secondary hidden shrink-0 cursor-pointer has-disabled:opacity-60 pointer-coarse:inline-flex">
@@ -110,6 +148,11 @@ export function ScreenshotField({
       >
         Or copy a screenshot and paste it here (⌘V / Ctrl+V).
       </div>
+      {pasteError && (
+        <p role="alert" className="text-danger">
+          {pasteError}
+        </p>
+      )}
       {hint && <span className="text-xs text-mid">{hint}</span>}
       {file && (
         <div className="mt-2 flex items-start gap-3">

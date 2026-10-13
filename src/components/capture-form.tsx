@@ -133,7 +133,7 @@ export function CaptureForm({
       {kind === "upload" && (
         <>
           {/* Phones only: on a desktop, pasting the email text is easier. */}
-          <p className="hidden text-sm text-mid pointer-coarse:block">Got an email? Take a screenshot and upload it here.</p>
+          <p className="hidden text-sm text-mid pointer-coarse:block">Got an email? Take a screenshot, copy it, then tap Paste screenshot.</p>
           <ScreenshotField
             id="file"
             camera={false}
