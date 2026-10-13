@@ -114,8 +114,10 @@ export function ScreenshotField({
       {file && (
         <div className="mt-2 flex items-start gap-3">
           {isImage && (
-            // eslint-disable-next-line @next/next/no-img-element -- local object URL, not an optimisable asset
-            <img ref={thumb} alt="The screenshot you picked" className="max-h-48 w-fit rounded border border-line" />
+            <div className="min-w-0">
+              {/* eslint-disable-next-line @next/next/no-img-element -- local object URL, not an optimisable asset */}
+              <img ref={thumb} alt="The screenshot you picked" className="block h-auto max-w-full max-h-48 w-auto rounded border border-line" />
+            </div>
           )}
           <button type="button" className="link text-sm" onClick={() => onFile(null)} disabled={disabled}>
             Remove

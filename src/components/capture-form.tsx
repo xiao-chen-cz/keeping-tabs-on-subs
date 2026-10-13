@@ -203,8 +203,10 @@ function PhotoPreview({
   return (
     <div className="flex items-start gap-3">
       {isImage ? (
-        // eslint-disable-next-line @next/next/no-img-element -- local object URL, not an optimisable asset
-        <img ref={thumb} alt="The photo you took" className="max-h-64 w-fit rounded border border-line" />
+        <div className="min-w-0">
+          {/* eslint-disable-next-line @next/next/no-img-element -- local object URL, not an optimisable asset */}
+          <img ref={thumb} alt="The photo you took" className="block h-auto max-w-full max-h-64 w-auto rounded border border-line" />
+        </div>
       ) : (
         <span className="text-mid">{file.name}</span>
       )}
