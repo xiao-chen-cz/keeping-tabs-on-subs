@@ -1,7 +1,8 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { existingSub, proposal } from "./review-fixtures";
-import { applyAnswer, confidenceFlags, isAnswered, missingFromValues, proposalChanges, proposalFormValues } from "./review-values";
+import { applyAnswer, confidenceFlags, isAnswered, missingFromValues, previewCore, proposalChanges, proposalFormValues } from "./review-values";
+import { emptyFormValues } from "./subscription-form-values";
 import { missingRequired } from "@/lib/domain/proposal";
 
 describe("proposalFormValues", () => {
@@ -115,5 +116,20 @@ describe("account label in review", () => {
     expect(keys(null)).toEqual([]);
     const c = proposalChanges(proposal({ accountLabel: "work@example.com" }), existing.subscription)[0];
     expect([c.label, c.from, c.to]).toEqual(["Account", "me@example.com", "work@example.com"]);
+  });
+});
+
+describe("previewCore", () => {
+  it("reads valid values and treats anything unfinished as empty", () => {
+    const v = { ...emptyFormValues(), name: " Gymbox ", amount: "12,5", currency: "EUR", billing_cycle: "monthly", last_renewal_date: "2026-10-3", cancel_notice_days: "x" };
+    expect(previewCore(v)).toMatchObject({
+      name: "Gymbox",
+      amountCents: 1250,
+      currency: "EUR",
+      billingCycle: "monthly",
+      lastRenewalDate: null,
+      cancelNoticeDays: null,
+    });
+    expect(previewCore(emptyFormValues())).toMatchObject({ name: "Unnamed", amountCents: null, currency: null, billingCycle: null });
   });
 });

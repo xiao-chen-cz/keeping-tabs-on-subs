@@ -67,3 +67,9 @@ export const InfoIcon = () => (
     <path d="M12 8h.01" />
   </Icon>
 );
+
+export const ChevronDownIcon = () => (
+  <Icon>
+    <path d="m6 9 6 6 6-6" />
+  </Icon>
+);

@@ -3,7 +3,6 @@ import { startTransition, useActionState, useEffect, useRef, useState, type Form
 import { CameraIcon, TextIcon, UploadIcon } from "@/components/icons";
 import { ScreenshotField, usePastedFile } from "@/components/screenshot-field";
 import { uploadCaptureFile } from "@/lib/capture-upload";
-import { MAX_IMAGE_EDGE } from "@/lib/extraction/limits";
 
 export interface CaptureFormState {
   error: string | null;
@@ -13,7 +12,7 @@ type Kind = "photo" | "upload" | "text";
 
 // Take photo is for phones only (touch screens); a desktop shows Upload and Enter text.
 const TABS: { kind: Kind; label: string; icon: ReactNode; className?: string }[] = [
-  { kind: "photo", label: "Take photo", icon: <CameraIcon />, className: "hidden pointer-coarse:inline-flex" },
+  { kind: "photo", label: "Take photo", icon: <CameraIcon />, className: "hidden pointer-coarse:flex" },
   { kind: "upload", label: "Upload", icon: <UploadIcon /> },
   { kind: "text", label: "Enter text", icon: <TextIcon /> },
 ];
@@ -74,7 +73,7 @@ export function CaptureForm({
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4 text-sm">
       <input type="hidden" name="kind" value={kind} />
-      <div className="flex flex-wrap gap-2" role="group" aria-label="How do you want to add it?">
+      <div className="grid grid-flow-col auto-cols-fr gap-2" role="group" aria-label="How do you want to add it?">
         {TABS.map((t) => (
           <button
             key={t.kind}
@@ -86,7 +85,9 @@ export function CaptureForm({
               // Take photo opens the camera straight away.
               if (t.kind === "photo") camera.current?.click();
             }}
-            className={`${kind === t.kind ? "btn-primary" : "btn-secondary"} gap-2 px-4 ${t.className ?? ""}`}
+            className={`flex min-h-20 flex-col items-center justify-center gap-1.5 rounded-xl border px-2 text-sm font-medium disabled:opacity-60 [&_svg]:size-6 ${
+              kind === t.kind ? "border-primary bg-primary text-on-primary" : "border-line bg-surface text-text active:bg-light"
+            } ${t.className ?? ""}`}
             disabled={busy}
           >
             {t.icon}
@@ -122,7 +123,7 @@ export function CaptureForm({
       )}
       {kind === "text" && (
         <label className="flex flex-col gap-1">
-          <span className="label">Describe the subscription in a few words, or paste a receipt or reminder email</span>
+          <span className="label">Describe it in a few words, or paste an email</span>
           <textarea
             name="text"
             rows={6}
@@ -139,8 +140,7 @@ export function CaptureForm({
           <ScreenshotField
             id="file"
             camera={false}
-            label="A screenshot of a billing page, a photo of an invoice, or a PDF (max 10 MB)"
-            hint={`Pictures are made smaller (up to ${MAX_IMAGE_EDGE} px) before they are sent.`}
+            label="Screenshot, photo or PDF (max 10 MB)"
             file={file}
             onFile={setFile}
             disabled={busy}
@@ -149,8 +149,8 @@ export function CaptureForm({
       )}
 
       <p className="text-xs text-mid">
-        To read it, the app sends this capture (and nothing else from your account) once to Anthropic&apos;s Claude model,
-        which runs outside the EU. You then check the proposal: nothing is added to your list until you approve it.
+        Only this capture is sent, once, to Anthropic&apos;s Claude (outside the EU) to read it. Nothing is added until you
+        approve it.
       </p>
 
       {error && (

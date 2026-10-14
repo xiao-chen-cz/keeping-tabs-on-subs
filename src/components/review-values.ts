@@ -5,7 +5,18 @@ import type { Proposal } from "@/lib/dal/map-proposal";
 import { parseAnswer } from "@/lib/domain/questions";
 import { formatDay } from "./format";
 import { formatMoney } from "@/lib/domain/totals";
-import { BILLING_CYCLE_LABELS, REQUIRED_FOR_APPROVAL, type Confidence, type Subscription } from "@/lib/domain/types";
+import {
+  BILLING_CYCLE_LABELS,
+  BILLING_CYCLES,
+  CURRENCIES,
+  REQUIRED_FOR_APPROVAL,
+  type BillingCycle,
+  type Confidence,
+  type Currency,
+  type Subscription,
+  type SubscriptionCore,
+} from "@/lib/domain/types";
+import { isPlainDate } from "@/lib/dates/plain-date";
 
 type RequiredField = (typeof REQUIRED_FOR_APPROVAL)[number];
 
@@ -159,4 +170,28 @@ export function proposalChanges(proposal: Proposal, existing: Subscription): Pro
     });
   }
   return out;
+}
+
+/** The form as it stands, read leniently for the preview row: anything not (yet) valid counts as empty. */
+export function previewCore(v: FormValues): SubscriptionCore & { category: string | null } {
+  const cents = (s: string) => {
+    const n = Number(s.trim().replace(",", "."));
+    return s.trim() !== "" && Number.isFinite(n) && n >= 0 ? Math.round(n * 100) : null;
+  };
+  const date = (s: string) => (isPlainDate(s) ? s : null);
+  const days = Number(v.cancel_notice_days);
+  return {
+    name: v.name.trim() || "Unnamed",
+    status: "confirmed",
+    amountCents: cents(v.amount),
+    currency: (CURRENCIES as readonly string[]).includes(v.currency) ? (v.currency as Currency) : null,
+    billingCycle: (BILLING_CYCLES as readonly string[]).includes(v.billing_cycle) ? (v.billing_cycle as BillingCycle) : null,
+    lastRenewalDate: date(v.last_renewal_date),
+    trialEnds: date(v.trial_ends),
+    cancelNoticeDays: v.cancel_notice_days.trim() !== "" && Number.isInteger(days) && days >= 0 ? days : null,
+    regularPriceCents: cents(v.regular_price),
+    promoEnds: date(v.promo_ends),
+    accessUntil: null,
+    category: null,
+  };
 }

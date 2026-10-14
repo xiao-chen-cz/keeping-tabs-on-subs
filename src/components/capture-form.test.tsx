@@ -14,9 +14,9 @@ describe("CaptureForm", () => {
     renderForm();
     const tabs = screen.getAllByRole("button", { pressed: false }).concat(screen.getAllByRole("button", { pressed: true }));
     expect(tabs.map((b) => b.textContent).sort()).toEqual(["Take photo", "Enter text", "Upload"].sort());
-    expect(screen.getByRole("button", { name: "Take photo" }).className).toMatch(/\bhidden\b.*pointer-coarse:inline-flex/);
+    expect(screen.getByRole("button", { name: "Take photo" }).className).toMatch(/\bhidden\b.*pointer-coarse:flex/);
     expect(screen.getByRole("button", { name: "Enter text" }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByLabelText(/Describe the subscription in a few words, or paste/)).toBeTruthy();
+    expect(screen.getByLabelText(/Describe it in a few words, or paste an email/)).toBeTruthy();
   });
 
   it("opens the camera from Take photo and shows the photo with Retake", () => {

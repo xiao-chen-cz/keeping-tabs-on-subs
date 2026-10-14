@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { existingSub, proposal } from "./review-fixtures";
 import { ReviewScreen } from "./review-screen";
 import { missingFromValues, proposalFormValues } from "./review-values";
@@ -10,7 +10,7 @@ afterEach(cleanup);
 
 const lookups = { categories: [{ id: "c1", name: "Software" }], paymentMethods: [] };
 
-function setup(p: Proposal, updatesName: string | null = null) {
+function setup(p: Proposal, updatesName: string | null = null, today?: string) {
   const initialValues = proposalFormValues(p, null);
   const approve = vi.fn<(prev: SubscriptionFormState, f: FormData) => Promise<SubscriptionFormState>>();
   render(
@@ -23,6 +23,7 @@ function setup(p: Proposal, updatesName: string | null = null) {
       lookups={lookups}
       approveAction={approve}
       rejectAction={vi.fn(async () => {})}
+      today={today}
     />,
   );
   return approve;
@@ -37,6 +38,23 @@ const approveButton = () => {
 };
 
 describe("ReviewScreen", () => {
+  it("previews the row as it will look in the list and updates it as questions are answered", () => {
+    setup(proposal({ name: "Gymbox", amountCents: 3000, currency: "EUR" }), null, "2026-10-03");
+    const preview = () => within(screen.getByRole("region", { name: "Preview" }));
+    expect(preview().getByText("Gymbox")).toBeTruthy();
+    expect(preview().getByText("Needs update")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Monthly" }));
+    fireEvent.change(screen.getByLabelText("When was the last charge, or when is the next one?"), { target: { value: "2026-10-31" } });
+    expect(preview().queryByText("Needs update")).toBeNull();
+    expect(preview().getByText("Cancel by 28 Oct").textContent).toBe("Cancel by 28 Oct (in 25 days)");
+    expect(preview().getByText("€30.00")).toBeTruthy();
+  });
+
+  it("shows no preview without today", () => {
+    setup(proposal({ name: "Gymbox", amountCents: 3000, currency: "EUR" }));
+    expect(screen.queryByRole("region", { name: "Preview" })).toBeNull();
+  });
+
   it("asks no questions when nothing is missing, and Approve is enabled", () => {
     setup(proposal({ name: "NoteForge", amountCents: 799, currency: "EUR", billingCycle: "monthly", lastRenewalDate: "2026-10-31" }));
     expect(screen.queryByRole("heading", { name: /question/ })).toBeNull();

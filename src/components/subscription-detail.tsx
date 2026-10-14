@@ -1,13 +1,15 @@
 import type { ReactNode } from "react";
 import type { SubscriptionEvent } from "@/lib/dal/map-proposal";
 import { CANCEL_CHANNEL_LABELS } from "@/lib/domain/cancellation";
-import type { ComputedSubscription, Subscription } from "@/lib/domain/types";
+import type { ComputedSubscription, PlainDate, Subscription } from "@/lib/domain/types";
 import { BILLING_CYCLE_LABELS } from "@/lib/domain/types";
 import { formatMoney } from "@/lib/domain/totals";
-import { formatDayLong, relativeDays } from "./format";
+import { formatDay, formatDayLong, relativeDays } from "./format";
 import { missingForSchedule } from "@/lib/domain/needs-update";
 import { Tag } from "./tag";
 import { CaptureView, type CaptureFile } from "./capture-view";
+import { ChevronDownIcon } from "./icons";
+import { CountdownTile, toneForDays } from "./renewal-row";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -35,6 +37,38 @@ export function describeEvent(e: SubscriptionEvent): string {
 }
 
 const buttonClass = "btn-secondary";
+
+const FILL = { calm: "bg-accent", soon: "bg-warn-line", urgent: "bg-danger", info: "bg-accent", warn: "bg-warn-line" } as const;
+
+/** Today → cancel-by (coloured: time left to decide) → renewal (grey: the notice period). */
+function Timeline({ cancelBy, daysToCancel, renewal, daysToRenewal }: { cancelBy: PlainDate; daysToCancel: number; renewal: PlainDate; daysToRenewal: number }) {
+  const pct = Math.max(6, Math.min(94, (daysToCancel / daysToRenewal) * 100));
+  return (
+    <div className="mt-4">
+      <p className="sr-only">
+        Cancel by {formatDayLong(cancelBy)} ({relativeDays(daysToCancel)}). Renews {formatDayLong(renewal)} ({relativeDays(daysToRenewal)}).
+      </p>
+      <div aria-hidden>
+        <div className="relative h-5 text-sm">
+          <span
+            className="absolute whitespace-nowrap font-semibold text-text"
+            style={{ left: `${pct}%`, transform: pct > 50 ? "translateX(-100%)" : undefined }}
+          >
+            Cancel by {formatDay(cancelBy)}
+          </span>
+        </div>
+        <div className="mt-1 flex h-2.5 gap-0.5">
+          <span className={`rounded-l-full ${FILL[toneForDays(daysToCancel)]}`} style={{ width: `${pct}%` }} />
+          <span className="flex-1 rounded-r-full bg-chip" />
+        </div>
+        <div className="mt-1 flex justify-between text-xs text-mid">
+          <span>Today</span>
+          <span>Renews {formatDay(renewal)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function SubscriptionDetail({
   row,
@@ -89,12 +123,55 @@ export function SubscriptionDetail({
         {c.tags.ending && <Tag kind="ending" />}
         {!cancelled && s.alertMode === "quiet" && <Tag kind="quiet" />}
       </header>
-      <div className="mb-3 flex flex-wrap items-center gap-2">
+      <section aria-label="Summary" className="mb-3 rounded-xl border border-line p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            {money(s.amountCents) && (
+              <p className="font-heading text-3xl font-semibold text-text tabular-nums">{money(s.amountCents)}</p>
+            )}
+            <p className="text-sm text-mid">
+              {cancelled ? "Cancelled" : s.billingCycle ? BILLING_CYCLE_LABELS[s.billingCycle] : null}
+            </p>
+            {!cancelled && c.priceRises && c.renewalAmountCents !== null && (
+              <p className="mt-1 text-sm font-medium text-danger">
+                ↑ {money(c.renewalAmountCents)}
+                {c.nextRenewal && ` from ${formatDay(c.nextRenewal)}`}
+              </p>
+            )}
+          </div>
+          {!cancelled && !c.tags.needsUpdate && c.daysUntilCancelBy !== null && c.daysUntilRenewal !== 0 &&
+            (c.daysUntilCancelBy < 0 ? (
+              <CountdownTile word="Late" tone="urgent" />
+            ) : c.daysUntilCancelBy === 0 ? (
+              <CountdownTile word="Today" tone="urgent" />
+            ) : (
+              <CountdownTile days={c.daysUntilCancelBy} tone={toneForDays(c.daysUntilCancelBy)} />
+            ))}
+        </div>
+        {!cancelled && c.nextRenewal && c.daysUntilRenewal !== null && c.cancelBy && c.daysUntilCancelBy !== null && (
+          c.daysUntilRenewal === 0 ? (
+            <p className="mt-3 text-sm text-text">
+              {c.tags.trial ? "Trial ends today" : "Charged today"}
+              {c.followingRenewal && <span className="text-mid"> · next {formatDay(c.followingRenewal)}</span>}
+            </p>
+          ) : c.daysUntilCancelBy < 0 ? (
+            <p className="mt-3 text-sm">
+              <span className="font-medium text-danger">Too late to cancel</span>
+              <span className="text-mid"> · renews {formatDayLong(c.nextRenewal)}</span>
+            </p>
+          ) : (
+            <Timeline cancelBy={c.cancelBy} daysToCancel={c.daysUntilCancelBy} renewal={c.nextRenewal} daysToRenewal={c.daysUntilRenewal} />
+          )
+        )}
+        {cancelled && s.accessUntil && (
+          <p className="mt-2 text-sm text-mid">
+            Access until <span className="font-medium text-text">{formatDayLong(s.accessUntil)}</span>
+          </p>
+        )}
+      </section>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         {editHref && (
-          <a
-            href={editHref}
-            className="btn-primary"
-          >
+          <a href={editHref} className="btn-primary">
             Edit
           </a>
         )}
@@ -110,62 +187,54 @@ export function SubscriptionDetail({
             </button>
           </form>
         )}
+        {s.cancelUrl && !cancelled && (
+          <a href={s.cancelUrl} target="_blank" rel="noopener noreferrer" className={`${buttonClass} gap-1`}>
+            Cancel page <span aria-hidden>↗</span>
+          </a>
+        )}
       </div>
-      <dl className="border-t border-line">
-        <Item label="Status">{cap(s.status)}</Item>
-        <Item label="Vendor">{s.vendor}</Item>
-        <Item label="Plan">{s.plan}</Item>
-        <Item label="Account">{s.accountLabel}</Item>
-        <Item label="Amount">{money(s.amountCents)}</Item>
-        <Item label="Renewal amount">
-          {!cancelled && c.renewalAmountCents !== null && c.renewalAmountCents !== s.amountCents
-            ? money(c.renewalAmountCents)
-            : null}
-        </Item>
-        <Item label="Billing cycle">{s.billingCycle && BILLING_CYCLE_LABELS[s.billingCycle]}</Item>
-        <Item label="Next renewal">
-          {c.nextRenewal && c.daysUntilRenewal !== null
-            ? `${formatDayLong(c.nextRenewal)} (${relativeDays(c.daysUntilRenewal)})`
-            : null}
-        </Item>
-        <Item label="Cancel by">
-          {c.cancelBy && c.daysUntilCancelBy !== null
-            ? c.daysUntilCancelBy < 0
-              ? `${formatDayLong(c.cancelBy)} (deadline passed)`
-              : `${formatDayLong(c.cancelBy)} (${relativeDays(c.daysUntilCancelBy)})`
-            : null}
-        </Item>
-        <Item label="Notice">
-          {!cancelled && `${c.noticeDays} days ${c.noticeIsDefault ? "(default)" : "(custom)"}`}
-        </Item>
-        {/* A cancelled row has no next charge; only a past charge is shown. */}
-        <Item label={c.anchorInFuture ? "Next charge" : "Last charge"}>
-          {s.lastRenewalDate && !(cancelled && c.anchorInFuture) && formatDayLong(s.lastRenewalDate)}
-        </Item>
-        <Item label="Trial ends">{s.trialEnds && formatDayLong(s.trialEnds)}</Item>
-        <Item label="Regular price">{money(s.regularPriceCents)}</Item>
-        <Item label="Promo ends">{s.promoEnds && formatDayLong(s.promoEnds)}</Item>
-        <Item label="Access until">{cancelled && s.accessUntil && formatDayLong(s.accessUntil)}</Item>
-        <Item label="Cancel link">
-          {s.cancelUrl && (
-            <a
-              href={s.cancelUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link"
-            >
-              {s.cancelUrl}
-            </a>
-          )}
-        </Item>
-        <Item label="Payment method">{s.paymentMethod}</Item>
-        <Item label="Category">{s.category}</Item>
-        <Item label="Scope">{s.scope && cap(s.scope)}</Item>
-        <Item label="Confidence">{s.confidence && cap(s.confidence)}</Item>
-        <Item label="Source">{cap(s.source)}</Item>
-        <Item label="Notes">{s.notes}</Item>
-      </dl>
-      {!cancelled && reminders}
+      <details className="group rounded-control border border-line">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
+          More details
+          <span className="text-mid transition-transform group-open:rotate-180">
+            <ChevronDownIcon />
+          </span>
+        </summary>
+        <dl className="border-t border-line px-3">
+          <Item label="Vendor">{s.vendor}</Item>
+          <Item label="Plan">{s.plan}</Item>
+          <Item label="Account">{s.accountLabel}</Item>
+          <Item label="Next renewal">
+            {c.nextRenewal && c.daysUntilRenewal !== null
+              ? `${formatDayLong(c.nextRenewal)} (${relativeDays(c.daysUntilRenewal)})`
+              : null}
+          </Item>
+          <Item label="Notice">
+            {!cancelled && `${c.noticeDays} days ${c.noticeIsDefault ? "(default)" : "(custom)"}`}
+          </Item>
+          {/* A cancelled row has no next charge; only a past charge is shown. */}
+          <Item label={c.anchorInFuture ? "Next charge" : "Last charge"}>
+            {s.lastRenewalDate && !(cancelled && c.anchorInFuture) && formatDayLong(s.lastRenewalDate)}
+          </Item>
+          <Item label="Trial ends">{s.trialEnds && formatDayLong(s.trialEnds)}</Item>
+          <Item label="Regular price">{money(s.regularPriceCents)}</Item>
+          <Item label="Promo ends">{s.promoEnds && formatDayLong(s.promoEnds)}</Item>
+          <Item label="Cancel link">
+            {s.cancelUrl && cancelled && (
+              <a href={s.cancelUrl} target="_blank" rel="noopener noreferrer" className="link">
+                {s.cancelUrl}
+              </a>
+            )}
+          </Item>
+          <Item label="Payment method">{s.paymentMethod}</Item>
+          <Item label="Category">{s.category}</Item>
+          <Item label="Scope">{s.scope && cap(s.scope)}</Item>
+          <Item label="Confidence">{s.confidence && cap(s.confidence)}</Item>
+          <Item label="Source">{cap(s.source)}</Item>
+          <Item label="Notes">{s.notes}</Item>
+        </dl>
+      </details>
+      {!cancelled && reminders && <div className="mt-4">{reminders}</div>}
       {events && events.length > 0 && (
         <section className="mt-5" aria-labelledby="history-heading">
           <h2 id="history-heading" className="section-label">

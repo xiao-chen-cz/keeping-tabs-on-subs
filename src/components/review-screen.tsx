@@ -2,12 +2,14 @@
 import { useState } from "react";
 import type { RequiredField } from "@/lib/domain/proposal";
 import Link from "next/link";
-import { confidenceFlags as flagsFor, isAnswered, proposalChanges } from "./review-values";
+import { confidenceFlags as flagsFor, isAnswered, previewCore, proposalChanges } from "./review-values";
 import { openFormFields, QuestionsPanel } from "./questions-panel";
 import { SubscriptionForm, type LookupOption } from "./subscription-form";
 import type { FormValues, SubscriptionFormState } from "./subscription-form-values";
 import type { Proposal } from "@/lib/dal/map-proposal";
-import type { Subscription } from "@/lib/domain/types";
+import type { PlainDate, Subscription } from "@/lib/domain/types";
+import { computeSubscription } from "@/lib/domain/compute";
+import { RenewalRow } from "./renewal-row";
 import { CaptureView, type CaptureFile } from "./capture-view";
 
 export interface ReviewScreenProps {
@@ -37,6 +39,8 @@ export interface ReviewScreenProps {
   readOnly?: boolean;
   /** Where Cancel / back goes; defaults to the signed-in queue. */
   backHref?: string;
+  /** The user's today: shows a live preview of the row as it will look in the list. */
+  today?: PlainDate;
 }
 
 export function ReviewScreen({
@@ -55,6 +59,7 @@ export function ReviewScreen({
   asNewHref,
   readOnly,
   backHref = "/review",
+  today,
 }: ReviewScreenProps) {
   const [vals, setVals] = useState<FormValues>(initialValues);
   const changes = existing ? proposalChanges(proposal, existing) : [];
@@ -63,10 +68,11 @@ export function ReviewScreen({
   return (
     <div className="flex flex-col gap-3">
       <h1 className="font-heading text-2xl font-semibold text-primary-ink">{vals.name.trim() || "Unnamed"}</h1>
-      {!readOnly && (
-        <p className="text-sm text-mid">
-          {updatesName ? "Check the change, then approve it." : "Not in your list yet. Check the fields, then approve or reject."}
-        </p>
+      {today && (
+        <section aria-label="Preview" className="rounded-xl border border-dashed border-line px-3 pt-2 [&>div:last-child]:border-b-0">
+          <p className="section-label">{updatesName ? "After the update" : "Preview · not in your list yet"}</p>
+          <RenewalRow row={computeSubscription(previewCore(vals), today)} />
+        </section>
       )}
       {extractionError && (
         <p role="status" className="rounded-control border border-line bg-light p-3 text-sm">
@@ -136,7 +142,6 @@ export function ReviewScreen({
         >
           Reject
         </button>
-        <p className="mt-1 text-xs text-mid">Rejecting discards this proposal. Nothing is added to your list.</p>
       </form>
       )}
     </div>

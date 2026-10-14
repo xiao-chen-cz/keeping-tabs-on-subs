@@ -36,14 +36,14 @@ describe("Due soon actions", () => {
 
 describe("KeptNotice", () => {
   it("confirms the Keep without an offer", () => {
-    render(<KeptNotice name="Notely" cancelBy="2026-10-04" undo={noop} />);
+    render(<KeptNotice name="Notely" undo={noop} />);
     expect(screen.getByRole("button", { name: "Undo keep Notely" })).toBeTruthy();
     expect(screen.getByRole("status").textContent).toContain("Kept Notely");
     expect(screen.queryByText(/Stop reminding/)).toBeNull();
   });
 
   it("asks once whether to stop reminders (E44)", () => {
-    render(<KeptNotice name="Notely" cancelBy="2026-10-04" undo={noop} offer={{ accept: noop, decline: noop }} />);
+    render(<KeptNotice name="Notely" undo={noop} offer={{ accept: noop, decline: noop }} />);
     expect(screen.getByText("Stop reminding you about Notely?")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Keep quietly" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Keep reminding me" })).toBeTruthy();
@@ -57,26 +57,26 @@ describe("Undo", () => {
   });
   it("KeptForRenewal offers Remind me again", () => {
     render(<KeptForRenewal cancelBy="2026-10-04" remindAgain={noop} />);
-    expect(screen.getByText(/no reminders before the cancel-by 4 Oct/)).toBeTruthy();
+    expect(screen.getByText("Kept · no reminders before 4 Oct")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Remind me again" })).toBeTruthy();
   });
 });
 
 describe("confirmations on the list", () => {
-  it("after approving: says the entry is in the list, with its dates and a link to open it", () => {
+  it("after approving: says the entry was added, with its cancel-by and a link to open it", () => {
     render(<AddedNotice name="Cloud Start" nextRenewal="2026-11-03" cancelBy="2026-10-31" href="/subscriptions/s1" />);
-    expect(screen.getByRole("status").textContent).toContain("Cloud Start is now in your list. Renews 3 Nov, cancel by 31 Oct.");
+    expect(screen.getByRole("status").textContent).toContain("Added Cloud Start · cancel by 31 Oct");
     expect(screen.getByRole("link", { name: "Open" }).getAttribute("href")).toBe("/subscriptions/s1");
   });
 
   it("after approving an entry without a schedule: no dates", () => {
     render(<AddedNotice name="Gymbox" nextRenewal={null} cancelBy={null} href="/subscriptions/s2/complete" />);
-    expect(screen.getByRole("status").textContent).toContain("Gymbox is now in your list.");
-    expect(screen.getByRole("status").textContent).not.toContain("Renews");
+    expect(screen.getByRole("status").textContent).toContain("Added Gymbox");
+    expect(screen.getByRole("status").textContent).not.toContain("cancel by");
   });
 
   it("after saving Remind me", () => {
     render(<RemindNotice name="Cloud Start" />);
-    expect(screen.getByRole("status").textContent).toBe("Saved. Cloud Start will remind you before each cancel-by.");
+    expect(screen.getByRole("status").textContent).toBe("Cloud Start will remind you before each cancel-by");
   });
 });

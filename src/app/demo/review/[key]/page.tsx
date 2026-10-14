@@ -10,7 +10,8 @@ import { DEMO_LOOKUPS, demoProposal } from "../../demo-data";
 export default async function DemoReviewProposalPage({ params, searchParams }: PageProps<"/demo/review/[key]">) {
   await connection(); // today changes daily: never prerender
   const { key } = await params;
-  const found = demoProposal(key, todayIn("Europe/Berlin", new Date()));
+  const today = todayIn("Europe/Berlin", new Date());
+  const found = demoProposal(key, today);
   if (!found) notFound();
 
   // ?as=new shows an update proposal as a new entry (client-side view only, nothing is saved).
@@ -32,6 +33,7 @@ export default async function DemoReviewProposalPage({ params, searchParams }: P
         asNewHref={`/demo/review/${found.key}?as=new`}
         captureText={found.captureText}
         initialValues={initialValues}
+        today={today}
         questions={missingFromValues(initialValues)}
         lookups={DEMO_LOOKUPS}
       />

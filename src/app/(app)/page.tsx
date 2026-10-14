@@ -54,7 +54,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       {keptRow && (
         <KeptNotice
           name={keptRow.name}
-          cancelBy={keptRow.keptForCancelBy}
           undo={undoKeepAction.bind(null, keptRow.id, "list")}
           offer={
             offerQuiet

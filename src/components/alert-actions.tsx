@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { describeReminders } from "@/lib/domain/alerts";
 import type { AlertMode, BillingCycle } from "@/lib/domain/types";
@@ -25,33 +26,39 @@ export function AlertActions({ keep, cancelHref, name }: { keep: () => Promise<v
   );
 }
 
-const noticeClass = "mb-4 rounded-control border border-green-ink/30 bg-green-light p-3 text-sm text-green-ink";
+const noticeClass = "mb-4 rounded-xl border border-green-ink/30 bg-green-light px-3 py-2 text-sm text-green-ink";
+
+/** One line: ✓, the message, and an optional Undo / Open on the right. */
+function NoticeLine({ children, end }: { children: ReactNode; end?: ReactNode }) {
+  return (
+    <div className="flex min-h-8 items-center gap-2">
+      <CheckIcon />
+      <p className="min-w-0 flex-1">{children}</p>
+      {end}
+    </div>
+  );
+}
 
 /** Shown on the list after Keep. With `offer`, asks once whether to stop routine reminders (D13, E44). */
 export function KeptNotice({
   name,
-  cancelBy,
   undo,
   offer,
 }: {
   name: string;
-  cancelBy: string | null;
   undo: () => Promise<void>;
   offer?: { accept: () => Promise<void>; decline: () => Promise<void> };
 }) {
   return (
     <div role="status" className={noticeClass}>
-      <div className="flex items-start justify-between gap-3">
-        <p>
-          Kept {name}
-          {cancelBy ? ` (cancel-by ${formatDay(cancelBy)})` : ""}. No more reminders for this renewal.
-        </p>
-        <UndoButton action={undo} label={`Undo keep ${name}`} />
-      </div>
+      <NoticeLine end={<UndoButton action={undo} label={`Undo keep ${name}`} />}>
+        Kept {name}
+        <span className="text-green-ink/80"> · no reminders this renewal</span>
+      </NoticeLine>
       {offer && (
         <div className="mt-2 border-t border-green-ink/20 pt-2">
           <p className="font-medium">Stop reminding you about {name}?</p>
-          <p className="mt-0.5">You&apos;ll still be alerted to captured price changes and promo endings.</p>
+          <p className="mt-0.5 text-xs">Price changes still alert you.</p>
           <div className="mt-2 flex gap-2">
             <form action={offer.accept}>
               <button type="submit" className="btn-primary min-h-10 px-4 text-sm">
@@ -73,11 +80,10 @@ export function KeptNotice({
 /** Shown on the list after switching a row to Keep quietly. */
 export function QuietNotice({ name, undo }: { name: string; undo: () => Promise<void> }) {
   return (
-    <div role="status" className={`${noticeClass} flex items-start justify-between gap-3`}>
-      <p>
-        {name} is now on Keep quietly. You&apos;ll still be alerted to captured price changes and promo endings.
-      </p>
-      <UndoButton action={undo} label={`Undo keep quietly for ${name}`} />
+    <div role="status" className={noticeClass}>
+      <NoticeLine end={<UndoButton action={undo} label={`Undo keep quietly for ${name}`} />}>
+        {name}: Keep quietly <span className="text-green-ink/80">· price changes still alert</span>
+      </NoticeLine>
     </div>
   );
 }
@@ -85,18 +91,18 @@ export function QuietNotice({ name, undo }: { name: string; undo: () => Promise<
 /** Shown on the list after switching a row back to Remind me (D13). */
 export function RemindNotice({ name }: { name: string }) {
   return (
-    <p role="status" className={noticeClass}>
-      Saved. {name} will remind you before each cancel-by.
-    </p>
+    <div role="status" className={noticeClass}>
+      <NoticeLine>{name} will remind you before each cancel-by</NoticeLine>
+    </div>
   );
 }
 
 /** Shown on the list after saving Settings. */
 export function SettingsSavedNotice() {
   return (
-    <p role="status" className={noticeClass}>
-      Settings saved.
-    </p>
+    <div role="status" className={noticeClass}>
+      <NoticeLine>Settings saved</NoticeLine>
+    </div>
   );
 }
 
@@ -113,15 +119,17 @@ export function AddedNotice({
   href: string;
 }) {
   return (
-    <div role="status" className={`${noticeClass} flex items-start justify-between gap-3`}>
-      <p>
-        {name} is now in your list.
-        {nextRenewal ? ` Renews ${formatDay(nextRenewal)}` : ""}
-        {nextRenewal && cancelBy ? `, cancel by ${formatDay(cancelBy)}.` : nextRenewal ? "." : ""}
-      </p>
-      <Link href={href} className="link -my-2 inline-flex min-h-10 shrink-0 items-center font-medium text-green-ink">
-        Open
-      </Link>
+    <div role="status" className={noticeClass}>
+      <NoticeLine
+        end={
+          <Link href={href} className="link -my-2 inline-flex min-h-10 shrink-0 items-center font-medium text-green-ink">
+            Open
+          </Link>
+        }
+      >
+        Added {name}
+        {nextRenewal && cancelBy && <span className="text-green-ink/80"> · cancel by {formatDay(cancelBy)}</span>}
+      </NoticeLine>
     </div>
   );
 }
@@ -140,7 +148,7 @@ function UndoButton({ action, label }: { action: () => Promise<void>; label: str
 export function KeptForRenewal({ cancelBy, remindAgain }: { cancelBy: string; remindAgain: () => Promise<void> }) {
   return (
     <div className="mb-3 flex items-center justify-between gap-3 rounded-control border border-line bg-surface p-3 text-sm">
-      <p className="text-mid">Kept for this renewal: no reminders before the cancel-by {formatDay(cancelBy)}.</p>
+      <p className="text-mid">Kept · no reminders before {formatDay(cancelBy)}</p>
       <form action={remindAgain} className="shrink-0">
         <button type="submit" className="btn-secondary min-h-10 px-3 text-sm">
           Remind me again
@@ -183,8 +191,7 @@ export function RemindersForm({
         {option("remind", "Remind me")}
         {option("quiet", "Keep quietly")}
         <p className="text-xs text-mid">
-          Keep quietly still alerts you to price changes and promo endings the app knows about, and to trials ending. The app
-          only sees prices you give it, so paste price-change emails under + New.
+          Price changes, promo endings and trials ending always alert. Got a price-change email? Add it under + New.
         </p>
         <div className="pt-1">
           <button type="submit" className="btn-secondary min-h-10 px-4 text-sm">
