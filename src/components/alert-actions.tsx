@@ -2,6 +2,7 @@ import Link from "next/link";
 import { describeReminders } from "@/lib/domain/alerts";
 import type { AlertMode, BillingCycle } from "@/lib/domain/types";
 import { formatDay } from "./format";
+import { CheckIcon, XIcon } from "./icons";
 
 /**
  * Keep / Cancelled under a Due soon row (logic-spec §3.2). Keep is a plain form post (works without JS);
@@ -9,13 +10,15 @@ import { formatDay } from "./format";
  */
 export function AlertActions({ keep, cancelHref, name }: { keep: () => Promise<void>; cancelHref: string; name: string }) {
   return (
-    <div className="flex gap-2 pb-2">
-      <form action={keep}>
-        <button type="submit" className="btn-secondary min-h-10 px-4 text-sm" aria-label={`Keep ${name}`}>
+    <div className="flex gap-2 border-t border-line py-2">
+      <form action={keep} className="flex-1">
+        <button type="submit" className="btn-secondary min-h-10 w-full gap-1.5 px-3 text-sm text-green-ink" aria-label={`Keep ${name}`}>
+          <CheckIcon />
           Keep
         </button>
       </form>
-      <Link href={cancelHref} className="btn-secondary min-h-10 px-4 text-sm" aria-label={`${name} cancelled`}>
+      <Link href={cancelHref} className="btn-secondary min-h-10 flex-1 gap-1.5 px-3 text-sm" aria-label={`${name} cancelled`}>
+        <XIcon />
         Cancelled
       </Link>
     </div>

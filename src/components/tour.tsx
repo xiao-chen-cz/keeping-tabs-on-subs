@@ -1,6 +1,8 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { CheckIcon, XIcon } from "./icons";
+import { AmountBlock, CountdownTile, RowLayout } from "./renewal-row";
 
 export interface TourStop {
   /** Page the stop is on. The tour moves there (with `?tour=<target>`) when it reaches the stop. */
@@ -31,11 +33,15 @@ export const APP_TOUR: TourStop[] = [
     path: "/",
     target: "first-row",
     title: "Next renewal first",
-    body: "Each line shows what the next payment costs, when it renews, and the cancel-by date: the last day you can cancel without paying again. The app works it out for you.",
+    body: "The box shows the days left to cancel without paying again. It turns amber in the last week and red on the last day. On the right: what the next payment costs.",
     example: (
       <Example>
-        <p className="font-semibold">CodePilot Pro</p>
-        <p className="text-sm text-mid">$20.00 · renews in 27 days · cancel by in 24 days</p>
+        <RowLayout
+          tile={<CountdownTile days={24} tone="calm" />}
+          name="CodePilot Pro"
+          sub={<p className="text-sm text-mid">Cancel by 7 Nov</p>}
+          amount={<AmountBlock cents={2000} currency="USD" />}
+        />
       </Example>
     ),
   },
@@ -46,15 +52,23 @@ export const APP_TOUR: TourStop[] = [
     body: "When a cancel-by date is close, the subscription moves up here. Tap Keep to let it renew, or Cancelled once you have cancelled it. If you do nothing, it renews.",
     example: (
       <Example>
-        <div className="rounded-control border-l-4 border-accent bg-accent-light p-2">
-          <p className="section-label">Due soon · 1</p>
-          <p className="mt-1 font-semibold">
-            The Daily Ledger <span className="pill border-accent-dark/30 bg-accent-light text-accent-dark">in 3 days</span>
-          </p>
-          <p className="text-sm text-mid">€2.00 · cancel by in 3 days</p>
-          <div className="mt-1.5 flex gap-2">
-            <span className={fakeButton}>Keep</span>
-            <span className={fakeButton}>Cancelled</span>
+        <div className="rounded-xl bg-accent-light p-2">
+          <p className="section-label pb-1.5">Due soon · 1</p>
+          <div className="rounded-xl border border-line bg-surface px-2 py-2">
+            <RowLayout
+              tile={<CountdownTile days={3} tone="soon" />}
+              name="The Daily Ledger"
+              sub={<p className="text-sm text-mid">Cancel by 17 Oct</p>}
+              amount={<AmountBlock cents={200} currency="EUR" />}
+            />
+            <div className="mt-2 flex gap-2">
+              <span className={`${fakeButton} flex-1 justify-center gap-1 text-green-ink`}>
+                <CheckIcon /> Keep
+              </span>
+              <span className={`${fakeButton} flex-1 justify-center gap-1`}>
+                <XIcon /> Cancelled
+              </span>
+            </div>
           </div>
         </div>
       </Example>

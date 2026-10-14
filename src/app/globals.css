@@ -21,6 +21,17 @@
   --green-light: #edf8ea;
   --green-ink: #2f6b22;
   --danger: #c0392b;
+  --danger-light: #fbeceb;
+  /* Spend-by-category bar: dataviz reference categorical palette, fixed order (validated light/dark). */
+  --cat-1: #2a78d6;
+  --cat-2: #eb6834;
+  --cat-3: #1baf7a;
+  --cat-4: #eda100;
+  --cat-5: #e87ba4;
+  --cat-6: #008300;
+  --cat-7: #4a3aa7;
+  --cat-8: #e34948;
+  --cat-other: #a3adb8;
   --warn-bg: #fdf3e1;
   --warn-line: #e8c27a;
   --warn-ink: #8a5a00;
@@ -47,6 +58,16 @@
     --green-light: #14301a;
     --green-ink: #9bdc8b;
     --danger: #ef7a6c;
+    --danger-light: #3a1d1a;
+    --cat-1: #3987e5;
+    --cat-2: #d95926;
+    --cat-3: #199e70;
+    --cat-4: #c98500;
+    --cat-5: #d55181;
+    --cat-6: #008300;
+    --cat-7: #9085e9;
+    --cat-8: #e66767;
+    --cat-other: #5c6b78;
     --warn-bg: #2d2412;
     --warn-line: #6b5420;
     --warn-ink: #f0c36a;
@@ -73,6 +94,7 @@
   --color-green-light: var(--green-light);
   --color-green-ink: var(--green-ink);
   --color-danger: var(--danger);
+  --color-danger-light: var(--danger-light);
   --color-warn-bg: var(--warn-bg);
   --color-warn-line: var(--warn-line);
   --color-warn-ink: var(--warn-ink);

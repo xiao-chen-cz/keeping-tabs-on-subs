@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { calc } from "./fixtures";
-import { formatMoney, totalsByCurrency } from "./totals";
+import { formatMoney, spendByCategory, totalsByCurrency } from "./totals";
 
 const T = "2026-10-01";
 
@@ -40,5 +40,30 @@ describe("totals", () => {
   it("formatMoney rounds only at display", () => {
     expect(formatMoney(2216.6667, "EUR")).toBe("€22.17");
     expect(formatMoney(26600, "USD")).toBe("$266.00");
+  });
+});
+
+describe("spendByCategory", () => {
+  it("sums monthly spend per category and currency, skipping trials and cancelled, largest first", () => {
+    const m = { currency: "EUR", billingCycle: "monthly", lastRenewalDate: "2026-09-15" } as const;
+    const withCat = (category: string | null, r: Parameters<typeof calc>[0]) => {
+      const c = calc(r, T);
+      return { ...c, input: { ...c.input, category } };
+    };
+    const s = spendByCategory([
+      withCat("AI", { ...m, amountCents: 1000 }),
+      withCat("AI", { ...m, amountCents: 500 }),
+      withCat("Insurance", { ...m, amountCents: 12000, billingCycle: "yearly" }),
+      withCat(null, { ...m, amountCents: 3000 }),
+      withCat("AI", { ...m, amountCents: 9900, status: "cancelled" }),
+      withCat("AI", { ...m, amountCents: 9900, trialEnds: "2026-10-20", lastRenewalDate: null }),
+      withCat("AI", { ...m, amountCents: 700, currency: "USD" }),
+    ]);
+    expect(s.EUR).toEqual([
+      { category: null, monthly: 3000 },
+      { category: "AI", monthly: 1500 },
+      { category: "Insurance", monthly: 1000 },
+    ]);
+    expect(s.USD).toEqual([{ category: "AI", monthly: 700 }]);
   });
 });

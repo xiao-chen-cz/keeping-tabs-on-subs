@@ -13,7 +13,7 @@ import {
   type ListFilters,
 } from "@/lib/domain/filters";
 import { duplicateNames } from "@/lib/domain/duplicates";
-import { totalsByCurrency } from "@/lib/domain/totals";
+import { spendByCategory, totalsByCurrency } from "@/lib/domain/totals";
 import { CategoryTabs, TabsSwitch } from "./category-tabs";
 import { FilterBar } from "./filter-bar";
 import { DueSoon } from "./due-soon";
@@ -84,6 +84,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
   const archived = keepAll(groups.archived);
   const filtered = f !== null && isFiltered(f);
   const shownTotals = filtered ? totalsByCurrency(filteredUpcomingAll) : totals;
+  const spend = spendByCategory(filteredUpcomingAll);
   const totalsLabel = f && filtered
     ? [
         f.category === NO_CATEGORY ? "No category" : f.category,
@@ -117,7 +118,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
   return (
     <div className="space-y-5 pb-8">
       {/* Without filters the totals lead the page; with filters they sit under the controls that change them. */}
-      {!f && <TotalsCard totals={shownTotals} label={totalsLabel} />}
+      {!f && <TotalsCard totals={shownTotals} label={totalsLabel} spend={spend} />}
 
       {unfilteredEmpty && inbox}
       {unfilteredEmpty ? (
@@ -151,7 +152,7 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
               clearHref={clearHref}
             />
           )}
-          {f && <TotalsCard totals={shownTotals} label={totalsLabel} />}
+          {f && <TotalsCard totals={shownTotals} label={totalsLabel} spend={spend} />}
           {nothingMatches && (
             <section className="py-8 text-center">
               <p className="font-semibold">Nothing matches these filters.</p>

@@ -10,12 +10,12 @@ afterEach(() => {
 const renderForm = () => render(<CaptureForm action={vi.fn(async () => ({ error: null }))} userId="u1" />);
 
 describe("CaptureForm", () => {
-  it("offers Take photo (phones only), Upload, and Type or paste, with Type or paste open", () => {
+  it("offers Take photo (phones only), Upload, and Enter text, with Enter text open", () => {
     renderForm();
     const tabs = screen.getAllByRole("button", { pressed: false }).concat(screen.getAllByRole("button", { pressed: true }));
-    expect(tabs.map((b) => b.textContent).sort()).toEqual(["Take photo", "Type or paste", "Upload"].sort());
+    expect(tabs.map((b) => b.textContent).sort()).toEqual(["Take photo", "Enter text", "Upload"].sort());
     expect(screen.getByRole("button", { name: "Take photo" }).className).toMatch(/\bhidden\b.*pointer-coarse:inline-flex/);
-    expect(screen.getByRole("button", { name: "Type or paste" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "Enter text" }).getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByLabelText(/Describe the subscription in a few words, or paste/)).toBeTruthy();
   });
 

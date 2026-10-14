@@ -11,11 +11,11 @@ export interface CaptureFormState {
 
 type Kind = "photo" | "upload" | "text";
 
-// Take photo is for phones only (touch screens); a desktop shows Upload and Type or paste.
+// Take photo is for phones only (touch screens); a desktop shows Upload and Enter text.
 const TABS: { kind: Kind; label: string; icon: ReactNode; className?: string }[] = [
   { kind: "photo", label: "Take photo", icon: <CameraIcon />, className: "hidden pointer-coarse:inline-flex" },
   { kind: "upload", label: "Upload", icon: <UploadIcon /> },
-  { kind: "text", label: "Type or paste", icon: <TextIcon /> },
+  { kind: "text", label: "Enter text", icon: <TextIcon /> },
 ];
 
 /**

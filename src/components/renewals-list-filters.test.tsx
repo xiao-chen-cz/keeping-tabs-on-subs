@@ -55,7 +55,9 @@ describe("RenewalsList filters and tabs", () => {
     list({ ...none, category: "AI" });
     const t = within(screen.getByRole("region", { name: "Totals" }));
     expect(t.getByText("AI · total")).toBeTruthy();
-    expect(t.getByText("€30.00 / month")).toBeTruthy();
+    expect(t.getByText("€30.00")).toBeTruthy();
+    // One category in view: no category bar.
+    expect(t.queryByRole("img")).toBeNull();
   });
 
   it("hides the tabs and ignores cat when tabsEnabled is false", () => {

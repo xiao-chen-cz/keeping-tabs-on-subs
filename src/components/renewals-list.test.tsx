@@ -62,12 +62,23 @@ describe("RenewalsList", () => {
     expect(href("Alpha")).toBe("/subscriptions/id0");
   });
 
-  it("shows the price rise, deadline passed and cancel-by", () => {
+  it("shows the price rise, too late to cancel and cancel-by", () => {
     render(<RenewalsList groups={groups} totals={totals} />);
-    expect(screen.getByText(/120\.00/).textContent).toBe("120.00");
-    expect(screen.getByText(/200\.00/)).toBeTruthy();
-    expect(screen.getByText("deadline passed")).toBeTruthy();
-    expect(screen.getByText("cancel by 5 Oct (in 2 days)")).toBeTruthy();
+    const pricey = within(screen.getByRole("region", { name: "Upcoming" })).getAllByRole("listitem").find((li) => li.textContent?.includes("Pricey"))!;
+    expect(pricey.textContent).toContain("rises to ↑ €200.00, was €120.00");
+    expect(screen.getByText("Too late to cancel")).toBeTruthy();
+    expect(screen.getByText("Cancel by 5 Oct").textContent).toBe("Cancel by 5 Oct (in 2 days)");
+  });
+
+  it("draws a category bar when two or more categories are counted", () => {
+    const f = fixture([
+      { name: "A", ...monthly, lastRenewalDate: "2026-09-20" },
+      { name: "B", ...monthly, lastRenewalDate: "2026-09-20" },
+    ]);
+    const [a, b] = f.groups.upcoming;
+    const withCat = (r: typeof a, category: string) => ({ ...r, input: { ...r.input, category } });
+    render(<RenewalsList groups={{ ...f.groups, upcoming: [withCat(a, "AI"), withCat(b, "Insurance")] }} totals={f.totals} />);
+    expect(screen.getByRole("img").getAttribute("aria-label")).toBe("Monthly spend by category: AI €10.00, Insurance €10.00");
   });
 
   it("renders the Ending group and totals", () => {
@@ -75,7 +86,7 @@ describe("RenewalsList", () => {
     const ending = screen.getByRole("region", { name: "Ending" });
     expect(ending.textContent).toContain("Gone");
     expect(ending.textContent).toContain("access until 20 Oct 2026");
-    expect(screen.getByText(/ \/ month/)).toBeTruthy();
+    expect(within(screen.getByRole("region", { name: "Totals" })).getByText("/ month", { exact: false })).toBeTruthy();
   });
 
   it("hides archived unless asked", () => {
@@ -135,13 +146,13 @@ describe("RenewalsList", () => {
     expect(screen.queryByText("No subscriptions yet")).toBeNull();
   });
 
-  it("on the day of a charge shows 'charged today · next …' instead of a red deadline", () => {
+  it("on the day of a charge shows 'Charged today · next …' instead of a red deadline", () => {
     const { groups, totals } = fixture([{ name: "Paid Today", ...monthly, lastRenewalDate: TODAY }]);
     render(<RenewalsList groups={groups} totals={totals} />);
     const upcoming = screen.getByRole("region", { name: "Upcoming" });
-    expect(within(upcoming).getByText("charged today")).toBeTruthy();
+    expect(within(upcoming).getByText("Charged today")).toBeTruthy();
     expect(within(upcoming).getByText("next 3 Nov")).toBeTruthy();
-    expect(within(upcoming).queryByText("deadline passed")).toBeNull();
+    expect(within(upcoming).queryByText("Too late to cancel")).toBeNull();
   });
 });
 

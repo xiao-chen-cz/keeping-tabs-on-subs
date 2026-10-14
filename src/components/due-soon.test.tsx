@@ -27,10 +27,9 @@ describe("DueSoon", () => {
     render(<DueSoon rows={rows} offsets={[3, 1, 0]} />);
     expect(screen.getByText("Due soon")).toBeTruthy();
     expect(screen.getByText("VoiceDraft")).toBeTruthy();
-    expect(screen.getByText("cancel by 3 Oct")).toBeTruthy();
-    expect(screen.getByText("today")).toBeTruthy(); // the days pill
-    expect(screen.getByText("120.00")).toBeTruthy();
-    expect(screen.getByText("200.00")).toBeTruthy();
+    expect(screen.getByText("Cancel by 3 Oct").textContent).toBe("Cancel by 3 Oct (today)");
+    expect(screen.getByText("Today")).toBeTruthy(); // the countdown tile
+    expect(screen.getByRole("listitem").textContent).toContain("rises to ↑ $200.00, was $120.00");
   });
 
   it("does not show a row outside its alert window (L = 10) and hides when empty", () => {
