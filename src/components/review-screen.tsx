@@ -64,6 +64,10 @@ export function ReviewScreen({
   const [vals, setVals] = useState<FormValues>(initialValues);
   const changes = existing ? proposalChanges(proposal, existing) : [];
   const allAnswered = questions.every((f) => isAnswered(vals, f));
+  // "Check" only means something on a filled field: an empty one has nothing to check.
+  const flags = Object.fromEntries(
+    Object.entries(flagsFor(proposal.draft.fieldConfidence)).filter(([field]) => vals[field as keyof FormValues].trim() !== ""),
+  );
 
   return (
     <div className="flex flex-col gap-3">
@@ -116,7 +120,7 @@ export function ReviewScreen({
         submitLabel="Approve"
         submitDisabled={!allAnswered}
         actionsAtTop
-        confidenceFlags={flagsFor(proposal.draft.fieldConfidence)}
+        confidenceFlags={flags}
       />
 
       {updatesName && (detachAction || asNewHref) && (

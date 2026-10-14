@@ -121,11 +121,19 @@ describe("ReviewScreen", () => {
     expect(screen.getByText("What the app read")).toBeTruthy();
     expect(screen.getByText("Your Gymbox membership: 30.00 per month")).toBeTruthy();
     expect(screen.getByText("This will update CodePilot Pro.")).toBeTruthy();
-    expect(document.querySelector('[data-confidence="medium"]')?.textContent).toBe("medium");
-    expect(document.querySelector('[data-confidence="low"]')?.textContent).toBe("low");
-    expect(document.querySelectorAll("[data-confidence]").length).toBe(2);
+    expect(document.querySelector('[data-confidence="medium"]')?.textContent).toBe("Check");
+    // Category is low but empty: nothing to check, so no marker.
+    expect(document.querySelector('[data-confidence="low"]')).toBeNull();
+    expect(document.querySelectorAll("[data-confidence]").length).toBe(1);
     expect(screen.getByRole("button", { name: "Reject" })).toBeTruthy();
     expect(screen.queryByText(/Status/)).toBeNull();
+  });
+
+  it("marks a filled low-confidence field Check", () => {
+    setup(proposal({ name: "CodePilot Pro", amountCents: 1900, currency: "EUR", fieldConfidence: { amountCents: "low" } }));
+    expect(document.querySelector('[data-confidence="low"]')?.textContent).toBe("Check");
+    fireEvent.change(screen.getByLabelText("Amount"), { target: { value: "" } });
+    expect(document.querySelector('[data-confidence="low"]')).toBeNull();
   });
 
   it("shows Unnamed until a name is answered", () => {

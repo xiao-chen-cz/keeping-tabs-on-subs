@@ -98,14 +98,14 @@ function Field({
         {flag && (
           <span
             data-confidence={flag}
-            title="How sure the capture reading was"
+            title={flag === "low" ? "The app was unsure about this: please check it" : "Please check this"}
             className={`pill ${
               flag === "low"
                 ? "border-danger text-danger"
                 : "border-warn-line bg-warn-bg text-warn-ink"
             }`}
           >
-            {flag}
+            Check
           </span>
         )}
       </div>
