@@ -44,3 +44,46 @@ LK tested alone on her phone, without a walkthrough. Her account shows 3 capture
 - Fix: "Trial ends" now shows only after ticking "Free trial"; unticking clears it.
 - The PDF looked like a real bill, although testers were asked to use made-up data. Its stored fields hold no personal data (no account label or payment method). On the owner's instruction the PDF file was deleted from storage on 2026-10-13 and the capture's file path cleared; the entry stays.
 - LK on screenshots of emails (2026-10-13): too many steps (screenshot, save, leave the app, find it in the gallery, upload). Fix: a "Paste screenshot" button on phones reads a copied screenshot from the clipboard. On iPhone: screenshot → tap the preview → Done → Copy and Delete → Paste screenshot. No gallery step.
+
+## Status 2026-10-15 (D21)
+
+- **JB:** looked at the app a few days ago but has not written it up yet. The owner told her what changed since (mainly the visual redesign); she will take another look.
+- **RG:** said the app was "not visual enough" (too much reading). The redesign shipped on 14 Oct. She promised another look.
+- **Lesson:** testers lose interest when testing with made-up data. A second look has to be quick and easy to ask for (see fix 4).
+
+## Fix list 2026-10-15 (D21)
+
+Evidence so far: 3 testers. LK gave written feedback twice, RG gave two points (Settings save, then "not visual enough"), and JB's write-up is still to come. The owner also tested on an iPhone. Most reported problems were fixed the same day, so this list is short on purpose.
+
+### Selected (in order)
+
+1. **Check the live phone fixes on an iPhone:** capture tiles, photo preview proportions, Free trial toggle, icons.
+   *Evidence:* shipped 13–14 Oct and seen only in a desktop browser. The preview distortion was found on the owner's phone.
+   *Why it matters:* testers use phones and the demo is recorded on one. A layout break on the capture screen blocks the core flow (capture → review → list).
+2. **Confirm the visual redesign with RG (who said "too much reading") and JB on their second look.**
+   *Evidence:* the redesign (`e8a8afe`, `a9f99b1`, `af1f5e2`) answers RG's comment and has not been confirmed with her.
+   *Why it matters:* it changed every main screen, so it is the biggest unchecked change before the demo.
+3. **Email-to-app friction: keep Paste screenshot as the answer and check it once more end to end** (screenshot → copy → Paste screenshot → review → approve).
+   *Evidence:* the only repeated problem. LK raised it twice (share from Gmail on 12 Oct; too many screenshot steps on 13 Oct). Paste screenshot (`88126fb`) verified on iPhone on 13 Oct.
+   *Why it matters:* capture from a real email is the demo's main promise. Manual entry is only a fallback.
+4. **Make the second look cheap:** send JB and RG a short checklist (about 5 minutes): add one subscription by Paste screenshot or Text, approve it, find it in Due soon, then answer 3 questions (what was confusing, what took too long, would you use it).
+   *Evidence:* JB has not written her feedback up yet. RG has given two short comments but has not looked at the app since the redesign.
+   *Why it matters:* D24–27 needs feedback from 2–3 users. Right now only LK has given detailed written feedback.
+
+Anything JB or RG report that blocks the core flow goes to the top of this list.
+
+### Fixed 2026-10-15
+
+- **The category bar is missing for a currency with only one category** (owner, iPhone check of the redesign). The USD total had no breakdown because the bar was only drawn for two or more categories. Every currency now gets a bar. With one category the legend shows only the name, because the amount would repeat the headline figure. A category tab still shows no bar, because its heading already names the category.
+
+### Deferred (with reasons)
+
+| Item | Source | Why deferred |
+|------|--------|--------------|
+| Share an email straight from the mail app (Android Web Share Target) | LK | New feature. iPhone websites cannot appear in the share menu, and Android needs a home-screen install. Paste screenshot covers both phones now. |
+| Forward-to-address email capture | LK (first request) | New feature, no inbound provider chosen (F2). Parked in `specs/todo/email-forward-capture.md`. |
+| Contract end / minimum term field | LK's energy bill | New field and logic change. The Free trial toggle stops the misuse that came up. Parked in `specs/todo/installments-and-intervals.md`. |
+| Installments | Owner | No tester has asked for it. Workaround: Yearly with a note. |
+| German / English | Owner | Testers are fine in English (`specs/todo/i18n-de-en.md`). |
+| Move the totals card up under Due soon | Owner (design idea) | No tester asked for it. Filtered totals would sit away from the filters. |
+| Shorten the edit form and Settings | Owner | No tester has complained. Revisit if the second looks call them wordy. |
