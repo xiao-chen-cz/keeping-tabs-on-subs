@@ -84,7 +84,8 @@ export function RenewalsList<T extends SubscriptionCore & Filterable & Accounted
   const archived = keepAll(groups.archived);
   const filtered = f !== null && isFiltered(f);
   const shownTotals = filtered ? totalsByCurrency(filteredUpcomingAll) : totals;
-  const spend = spendByCategory(filteredUpcomingAll);
+  // A category tab already names the one category in view, so no bar there.
+  const spend = f?.category ? undefined : spendByCategory(filteredUpcomingAll);
   const totalsLabel = f && filtered
     ? [
         f.category === NO_CATEGORY ? "No category" : f.category,

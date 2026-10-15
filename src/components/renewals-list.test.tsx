@@ -70,7 +70,7 @@ describe("RenewalsList", () => {
     expect(screen.getByText("Cancel by 5 Oct").textContent).toBe("Cancel by 5 Oct (in 2 days)");
   });
 
-  it("draws a category bar when two or more categories are counted", () => {
+  it("draws a category bar per counted category", () => {
     const f = fixture([
       { name: "A", ...monthly, lastRenewalDate: "2026-09-20" },
       { name: "B", ...monthly, lastRenewalDate: "2026-09-20" },
@@ -79,6 +79,14 @@ describe("RenewalsList", () => {
     const withCat = (r: typeof a, category: string) => ({ ...r, input: { ...r.input, category } });
     render(<RenewalsList groups={{ ...f.groups, upcoming: [withCat(a, "AI"), withCat(b, "Insurance")] }} totals={f.totals} />);
     expect(screen.getByRole("img").getAttribute("aria-label")).toBe("Monthly spend by category: AI €10.00, Insurance €10.00");
+  });
+
+  it("draws the category bar for a single category too", () => {
+    const f = fixture([{ name: "A", ...monthly, lastRenewalDate: "2026-09-20" }]);
+    const [a] = f.groups.upcoming;
+    const withCat = (r: typeof a, category: string) => ({ ...r, input: { ...r.input, category } });
+    render(<RenewalsList groups={{ ...f.groups, upcoming: [withCat(a, "AI")] }} totals={f.totals} />);
+    expect(screen.getByRole("img").getAttribute("aria-label")).toBe("Monthly spend by category: AI €10.00");
   });
 
   it("renders the Ending group and totals", () => {

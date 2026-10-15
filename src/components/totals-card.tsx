@@ -35,7 +35,7 @@ function segments(spend: CategorySpend[]): { label: string; category: string | n
 
 function CategoryBar({ spend, currency }: { spend: CategorySpend[]; currency: Currency }) {
   const segs = segments(spend);
-  if (segs.length < 2) return null;
+  if (segs.length === 0) return null;
   const total = segs.reduce((sum, s) => sum + s.monthly, 0);
   return (
     <div className="mt-3">
@@ -52,7 +52,8 @@ function CategoryBar({ spend, currency }: { spend: CategorySpend[]; currency: Cu
         {segs.map((s) => (
           <li key={s.label} className="flex items-center gap-1.5 whitespace-nowrap">
             <span className="size-2 rounded-full" style={{ background: colour(s.category) }} />
-            {s.label} <span className="font-medium text-text tabular-nums">{formatMoney(Math.round(s.monthly), currency)}</span>
+            {s.label}
+            {segs.length > 1 && <span className="font-medium text-text tabular-nums">{formatMoney(Math.round(s.monthly), currency)}</span>}
           </li>
         ))}
       </ul>
@@ -67,7 +68,7 @@ export function TotalsCard({
 }: {
   totals: CurrencyTotals;
   label?: string;
-  /** Monthly spend per category (spendByCategory); draws a bar per currency when there are two or more. */
+  /** Monthly spend per category (spendByCategory); draws a bar per currency, even with a single category. */
   spend?: Partial<Record<Currency, CategorySpend[]>>;
 }) {
   const entries = Object.entries(totals) as [Currency, { monthly: number; yearly: number }][];
