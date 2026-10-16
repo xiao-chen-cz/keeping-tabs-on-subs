@@ -31,7 +31,7 @@ export function SettingsForm({
           <span>
             <span className="font-medium text-text">In the app and by email</span>
             <span className="block text-mid">
-              At most one email a day{email ? `, to ${email}` : ""}, only on days something is due.
+              At most one a day{email ? `, to ${email}` : ""}, only when something is due.
             </span>
           </span>
         </label>
@@ -39,7 +39,7 @@ export function SettingsForm({
           <input type="radio" name="alertChannel" value="app" defaultChecked={alertChannel === "app"} className="mt-1 size-4" />
           <span>
             <span className="font-medium text-text">In the app only</span>
-            <span className="block text-mid">Alerts show under Due soon when you open the app.</span>
+            <span className="block text-mid">Shown under Due soon.</span>
           </span>
         </label>
       </fieldset>
@@ -54,7 +54,7 @@ export function SettingsForm({
           ))}
         </div>
         <p data-tour="quiet-note" className="mt-1 text-xs text-mid">
-          Subscriptions on Keep quietly get only the earliest of these, and only when they renew every 3 months or less often.
+          Keep quietly: only the earliest, and only for cycles of 3 months or longer.
         </p>
       </fieldset>
       {state.error && (

@@ -38,6 +38,28 @@ describe("SubscriptionForm", () => {
     expect(new FormData(form).get("trial_ends")).toBe("");
   });
 
+  it("keeps optional fields under a collapsed More details that still submits them", () => {
+    setup();
+    const more = screen.getByText("More details").closest("details")!;
+    expect(more.open).toBe(false);
+    fireEvent.change(screen.getByLabelText("Vendor"), { target: { value: "Acme" } });
+    expect(new FormData(more.closest("form")!).get("vendor")).toBe("Acme");
+  });
+
+  it("opens More details when a field in it has a Check marker", () => {
+    render(
+      <SubscriptionForm
+        mode="create"
+        action={vi.fn()}
+        initialValues={{ ...emptyFormValues(), status: "confirmed", category_id: "c1" }}
+        lookups={lookups}
+        cancelHref="/"
+        confidenceFlags={{ category_id: "low" }}
+      />,
+    );
+    expect(screen.getByText("More details").closest("details")!.open).toBe(true);
+  });
+
   it("ticks the trial box when the entry already has a trial end", () => {
     render(
       <SubscriptionForm
@@ -77,7 +99,7 @@ describe("SubscriptionForm", () => {
     const action = vi.fn<(p: SubscriptionFormState, f: FormData) => Promise<SubscriptionFormState>>(async () => ({ fieldErrors: {}, values: null }));
     setup(action);
     const account = screen.getByLabelText("Account (optional)") as HTMLInputElement;
-    expect(screen.getByText("The login email or username you use with this vendor. Never a password.")).toBeTruthy();
+    expect(screen.getByText("Login email or username. Never a password.")).toBeTruthy();
     const plan = screen.getByLabelText("Plan");
     expect(plan.compareDocumentPosition(account) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     fireEvent.change(screen.getByLabelText("Name *"), { target: { value: "Demo Sub" } });

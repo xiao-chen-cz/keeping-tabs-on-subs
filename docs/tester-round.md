@@ -76,6 +76,14 @@ Anything JB or RG report that blocks the core flow goes to the top of this list.
 
 - **The category bar is missing for a currency with only one category** (owner, iPhone check of the redesign). The USD total had no breakdown because the bar was only drawn for two or more categories. Every currency now gets a bar. With one category the legend shows only the name, because the amount would repeat the headline figure. A category tab still shows no bar, because its heading already names the category.
 
+### Fixed 2026-10-16 (D22)
+
+- **The edit form and Settings had too much reading.** This was pulled forward from the deferred list, based on RG's "too much reading" comment.
+  - The form now shows only what drives the renewal: Name, Amount, Currency, Billing cycle, Billing date and Free trial.
+  - Everything optional (Regular price, Promo ends, Cancel notice, Category, Payment method, Scope, Confidence, Vendor, Plan, Account, Cancel link, Notes) sits under a collapsed **More details**, the same pattern as the detail page. It opens by itself when a field in it has an error, a Missing marker or a Check marker, so review flags are never hidden.
+  - Hints that repeated the label were removed (billing date, cancel notice default, status). Account, promo and Settings hints were shortened.
+  - Checked with sample data on `/demo/review/P1` at phone width (390 px): the form is about half as long, and More details opens and submits its fields.
+
 ### Deferred (with reasons)
 
 | Item | Source | Why deferred |
@@ -86,4 +94,3 @@ Anything JB or RG report that blocks the core flow goes to the top of this list.
 | Installments | Owner | No tester has asked for it. Workaround: Yearly with a note. |
 | German / English | Owner | Testers are fine in English (`specs/todo/i18n-de-en.md`). |
 | Move the totals card up under Due soon | Owner (design idea) | No tester asked for it. Filtered totals would sit away from the filters. |
-| Shorten the edit form and Settings | Owner | No tester has complained. Revisit if the second looks call them wordy. |
