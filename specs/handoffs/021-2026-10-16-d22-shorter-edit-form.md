@@ -13,6 +13,7 @@ Daily challenge D22: fix the highest-priority issue from the D21 fix list. The o
   - Billing date | Free trial | Trial ends (or the promo hint when it is off) share one row on `sm:` and up, with the same `2fr_1fr_2fr` columns as Amount / Currency / Billing cycle. An invisible label-height spacer lines the checkbox up with the date inputs.
   - More details is in rows of three: Regular price · Promo ends · Cancel notice / Category · Scope · Confidence / Vendor · Plan · Payment method / Account · Cancel link (`sm:col-span-2`) / Notes. `Field` accepts a `className`.
   - On phones the fields stack, apart from the two-across price row. No horizontal overflow (checked at 390 px).
+- **Phone rows** (follow-up commit): Amount, Currency, Billing cycle, Billing date, Free trial and Trial ends are one grid. On phones it has 6 columns (Amount 4 + Currency 2 / Cycle 3 + Date 3 / Free trial 2 + Trial ends or hint 4). From `sm:` up it is the same 3 columns as before. It is bottom-aligned (`items-end`), so inputs line up when the "Billing date (last or next charge)" label wraps or a Missing pill shows. The checkbox spacer is gone.
 - Tests: two new (More details collapsed but submitted; opens on a Check marker). One test title corrected ("placed after Plan"). 373 tests pass; typecheck and lint are clean.
 - Checked with sample data on `/demo/review/P1` locally at 820 px and 390 px. Live on production about 45 s after each push.
 - `docs/tester-round.md`: "Fixed 2026-10-16 (D22)" added, and the item removed from the deferred table.

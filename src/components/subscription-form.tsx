@@ -263,23 +263,24 @@ export function SubscriptionForm({
         </p>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-[2fr_1fr_2fr]">
-        <div className="grid grid-cols-[2fr_1fr] gap-3 sm:contents">
-          <Field name="amount" missing={miss("amount")} flag={confidenceFlags?.amount} label="Amount" errors={errors.amount}>
-            <input {...bind("amount")} type="text" inputMode="decimal" placeholder="9.99" className={ic("amount")} />
-          </Field>
-          <Field name="currency" missing={miss("currency")} flag={confidenceFlags?.currency} label="Currency" errors={errors.currency}>
-            <select {...bind("currency")} className={ic("currency")}>
-              <option value="">-</option>
-              {CURRENCIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </Field>
-        </div>
-        <Field name="billing_cycle" missing={miss("billing_cycle")} flag={confidenceFlags?.billing_cycle} label="Billing cycle" errors={errors.billing_cycle}>
+      {/* One grid, bottom-aligned so inputs line up when a label wraps or carries a marker.
+          Phones (6 columns): amount | currency, cycle | billing date, Free trial | trial end.
+          Wider (3 columns): amount | currency | cycle, billing date | Free trial | trial end. */}
+      <div className="grid grid-cols-6 items-end gap-3 sm:grid-cols-[2fr_1fr_2fr]">
+        <Field name="amount" className="col-span-4 sm:col-span-1" missing={miss("amount")} flag={confidenceFlags?.amount} label="Amount" errors={errors.amount}>
+          <input {...bind("amount")} type="text" inputMode="decimal" placeholder="9.99" className={ic("amount")} />
+        </Field>
+        <Field name="currency" className="col-span-2 sm:col-span-1" missing={miss("currency")} flag={confidenceFlags?.currency} label="Currency" errors={errors.currency}>
+          <select {...bind("currency")} className={ic("currency")}>
+            <option value="">-</option>
+            {CURRENCIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field name="billing_cycle" className="col-span-3 sm:col-span-1" missing={miss("billing_cycle")} flag={confidenceFlags?.billing_cycle} label="Billing cycle" errors={errors.billing_cycle}>
           <select {...bind("billing_cycle")} className={ic("billing_cycle")}>
             <option value="">Choose...</option>
             {BILLING_CYCLES.map((c) => (
@@ -289,17 +290,11 @@ export function SubscriptionForm({
             ))}
           </select>
         </Field>
-      </div>
-
-      {/* Same columns as the row above: billing date | Free trial | trial end (or the promo hint). */}
-      <div className="grid items-start gap-3 sm:grid-cols-[2fr_1fr_2fr]">
-        <Field name="last_renewal_date" missing={miss("last_renewal_date")} flag={confidenceFlags?.last_renewal_date} label="Billing date (last or next charge)" errors={errors.last_renewal_date}>
+        <Field name="last_renewal_date" className="col-span-3 sm:col-span-1" missing={miss("last_renewal_date")} flag={confidenceFlags?.last_renewal_date} label="Billing date (last or next charge)" errors={errors.last_renewal_date}>
           <input {...bind("last_renewal_date")} type="date" className={ic("last_renewal_date")} />
         </Field>
 
-        <div className="flex flex-col gap-1">
-          {/* Spacer the height of a field label, so the checkbox lines up with the date inputs. */}
-          <span aria-hidden className="label invisible max-sm:hidden">&nbsp;</span>
+        <div className="col-span-2 sm:col-span-1">
           <label className="flex min-h-11 items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -316,13 +311,13 @@ export function SubscriptionForm({
         </div>
 
         {isTrial ? (
-          <Field name="trial_ends" missing={miss("trial_ends")} flag={confidenceFlags?.trial_ends} label="Trial ends" errors={errors.trial_ends}>
+          <Field name="trial_ends" className="col-span-4 sm:col-span-1" missing={miss("trial_ends")} flag={confidenceFlags?.trial_ends} label="Trial ends" errors={errors.trial_ends}>
             <input {...bind("trial_ends")} type="date" className={ic("trial_ends")} />
           </Field>
         ) : (
           <>
             <input type="hidden" name="trial_ends" value="" />
-            <p className="text-xs text-mid sm:pt-5">
+            <p className="col-span-4 self-center text-xs text-mid sm:col-span-1">
               Discounted, not free? Use Regular price and Promo ends under More details.
             </p>
           </>
