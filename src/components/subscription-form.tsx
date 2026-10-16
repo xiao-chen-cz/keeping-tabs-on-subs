@@ -86,6 +86,7 @@ function Field({
   hint,
   flag,
   missing,
+  className,
   children,
 }: {
   name: string;
@@ -94,10 +95,11 @@ function Field({
   hint?: string;
   flag?: "low" | "medium";
   missing?: boolean;
+  className?: string;
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className={`flex flex-col gap-1 ${className ?? ""}`}>
       <div className="flex items-center gap-2">
         <label htmlFor={name} className="label">
           {label}
@@ -289,12 +291,15 @@ export function SubscriptionForm({
         </Field>
       </div>
 
-      <div className="grid items-start gap-3 sm:grid-cols-2">
+      {/* Same columns as the row above: billing date | Free trial | trial end (or the promo hint). */}
+      <div className="grid items-start gap-3 sm:grid-cols-[2fr_1fr_2fr]">
         <Field name="last_renewal_date" missing={miss("last_renewal_date")} flag={confidenceFlags?.last_renewal_date} label="Billing date (last or next charge)" errors={errors.last_renewal_date}>
           <input {...bind("last_renewal_date")} type="date" className={ic("last_renewal_date")} />
         </Field>
 
         <div className="flex flex-col gap-1">
+          {/* Spacer the height of a field label, so the checkbox lines up with the date inputs. */}
+          <span aria-hidden className="label invisible max-sm:hidden">&nbsp;</span>
           <label className="flex min-h-11 items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -308,20 +313,20 @@ export function SubscriptionForm({
             />
             Free trial
           </label>
-          {!isTrial && (
-            <p className="text-xs text-mid">
-              Discounted, not free? Use Regular price and Promo ends under More details.
-            </p>
-          )}
-          {isTrial ? (
-            <Field name="trial_ends" missing={miss("trial_ends")} flag={confidenceFlags?.trial_ends} label="Trial ends" errors={errors.trial_ends}>
-              <input {...bind("trial_ends")} type="date" className={ic("trial_ends")} />
-            </Field>
-          ) : (
-            <input type="hidden" name="trial_ends" value="" />
-          )}
         </div>
 
+        {isTrial ? (
+          <Field name="trial_ends" missing={miss("trial_ends")} flag={confidenceFlags?.trial_ends} label="Trial ends" errors={errors.trial_ends}>
+            <input {...bind("trial_ends")} type="date" className={ic("trial_ends")} />
+          </Field>
+        ) : (
+          <>
+            <input type="hidden" name="trial_ends" value="" />
+            <p className="text-xs text-mid sm:pt-5">
+              Discounted, not free? Use Regular price and Promo ends under More details.
+            </p>
+          </>
+        )}
       </div>
 
       <details
@@ -336,7 +341,7 @@ export function SubscriptionForm({
           </span>
         </summary>
         <div className="flex flex-col gap-3 border-t border-line p-3">
-          <div className="grid grid-cols-2 items-start gap-3">
+          <div className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3">
             <Field name="regular_price" missing={miss("regular_price")} flag={confidenceFlags?.regular_price} label="Regular price" errors={errors.regular_price}>
               <input {...bind("regular_price")} type="text" inputMode="decimal" className={ic("regular_price")} />
             </Field>
@@ -358,7 +363,7 @@ export function SubscriptionForm({
             </Field>
           </div>
 
-          <div className="grid items-start gap-3 sm:grid-cols-2">
+          <div className="grid items-start gap-3 sm:grid-cols-3">
             <Field name="category_id" missing={miss("category_id")} flag={confidenceFlags?.category_id} label="Category" errors={errors.category_id}>
               <select {...bind("category_id")} className={ic("category_id")}>
                 <option value="">-</option>
@@ -369,18 +374,6 @@ export function SubscriptionForm({
                 ))}
               </select>
             </Field>
-
-            <Field name="payment_method_id" missing={miss("payment_method_id")} label="Payment method" errors={errors.payment_method_id}>
-              <select {...bind("payment_method_id")} className={ic("payment_method_id")}>
-                <option value="">-</option>
-                {lookups.paymentMethods.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-
             <Field name="scope" missing={miss("scope")} flag={confidenceFlags?.scope} label="Scope" errors={errors.scope}>
               <select {...bind("scope")} className={ic("scope")}>
                 <option value="">-</option>
@@ -391,7 +384,6 @@ export function SubscriptionForm({
                 ))}
               </select>
             </Field>
-
             <Field name="confidence" missing={miss("confidence")} label="Confidence" errors={errors.confidence}>
               <select {...bind("confidence")} className={ic("confidence")}>
                 <option value="">-</option>
@@ -404,15 +396,26 @@ export function SubscriptionForm({
             </Field>
           </div>
 
-          <div className="grid items-start gap-3 sm:grid-cols-2">
+          <div className="grid items-start gap-3 sm:grid-cols-3">
             <Field name="vendor" missing={miss("vendor")} label="Vendor" errors={errors.vendor}>
               <input {...bind("vendor")} type="text" className={ic("vendor")} />
             </Field>
-
             <Field name="plan" missing={miss("plan")} label="Plan" errors={errors.plan}>
               <input {...bind("plan")} type="text" className={ic("plan")} />
             </Field>
+            <Field name="payment_method_id" missing={miss("payment_method_id")} label="Payment method" errors={errors.payment_method_id}>
+              <select {...bind("payment_method_id")} className={ic("payment_method_id")}>
+                <option value="">-</option>
+                {lookups.paymentMethods.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
 
+          <div className="grid items-start gap-3 sm:grid-cols-3">
             <Field
               name="account_label"
               missing={miss("account_label")}
@@ -422,8 +425,7 @@ export function SubscriptionForm({
             >
               <input {...bind("account_label")} type="text" autoComplete="off" className={ic("account_label")} />
             </Field>
-
-            <Field name="cancel_url" missing={miss("cancel_url")} label="Cancel link" errors={errors.cancel_url}>
+            <Field name="cancel_url" className="sm:col-span-2" missing={miss("cancel_url")} label="Cancel link" errors={errors.cancel_url}>
               <input {...bind("cancel_url")} type="url" inputMode="url" placeholder="https://" className={ic("cancel_url")} />
             </Field>
           </div>

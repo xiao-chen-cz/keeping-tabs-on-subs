@@ -95,7 +95,7 @@ describe("SubscriptionForm", () => {
     expect(screen.queryByText(/Enter a name/)).toBeNull();
   });
 
-  it("has an Account field with a hint, placed right after Plan, that is submitted", async () => {
+  it("has an Account field with a hint, placed after Plan, that is submitted", async () => {
     const action = vi.fn<(p: SubscriptionFormState, f: FormData) => Promise<SubscriptionFormState>>(async () => ({ fieldErrors: {}, values: null }));
     setup(action);
     const account = screen.getByLabelText("Account (optional)") as HTMLInputElement;
