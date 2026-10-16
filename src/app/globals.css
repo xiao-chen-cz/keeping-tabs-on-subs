@@ -125,6 +125,17 @@ body {
   .input {
     @apply min-h-11 w-full rounded-control border border-line bg-surface px-3 py-2 text-base text-text;
   }
+  /* iOS Safari gives date inputs a wide minimum width that overruns narrow grid columns. */
+  @supports (-webkit-touch-callout: none) {
+    input[type="date"].input {
+      -webkit-appearance: none;
+      appearance: none;
+      min-width: 0;
+    }
+    input[type="date"].input::-webkit-date-and-time-value {
+      text-align: left;
+    }
+  }
   .label {
     @apply text-[13px] text-mid;
   }

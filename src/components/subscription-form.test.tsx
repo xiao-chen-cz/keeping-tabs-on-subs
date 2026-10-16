@@ -46,6 +46,20 @@ describe("SubscriptionForm", () => {
     expect(new FormData(more.closest("form")!).get("vendor")).toBe("Acme");
   });
 
+  it("has no Confidence control but keeps the stored value on save", () => {
+    render(
+      <SubscriptionForm
+        mode="edit"
+        action={vi.fn()}
+        initialValues={{ ...emptyFormValues(), status: "confirmed", confidence: "low" }}
+        lookups={lookups}
+        cancelHref="/"
+      />,
+    );
+    expect(screen.queryByLabelText("Confidence")).toBeNull();
+    expect(new FormData(screen.getByLabelText("Name *").closest("form")!).get("confidence")).toBe("low");
+  });
+
   it("opens More details when a field in it has a Check marker", () => {
     render(
       <SubscriptionForm

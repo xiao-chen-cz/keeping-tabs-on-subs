@@ -136,6 +136,7 @@ From the Rules tab. These apply to whoever adds rows, today the Gmail extraction
 4. Scope = Business if the invoice names the user's business or business domain, shows a VAT or reverse-charge number, was forwarded to the user's receipts address, or is paid with a payment method already used for business. Family only if the payment is visibly from the shared family account. Personal only if visibly private.
 5. No Scope evidence → still suggest a Scope, with Confidence = Low.
 6. Confidence = the lower of the Category and Scope confidence. High = explicit evidence in the email, Medium = indirect evidence, Low = guess.
+   App (2026-10-16): Confidence is still stored, but not shown on the detail page or edited in the form (owner: confusing without context). In review, the per-field Check markers show the same uncertainty. Saving the form keeps the stored value.
 7. Only write what the sources show. Never store card numbers or other payment details.
 8. Payment method only when the email or receipt shows it, as a nickname. A known payment method also counts as Scope evidence.
 9. Regular price and Promo ends only when a source states both the post-promo price and its start date; never estimate. Computed fields (H–L, U, V) are never written.

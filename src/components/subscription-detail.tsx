@@ -229,7 +229,6 @@ export function SubscriptionDetail({
           <Item label="Payment method">{s.paymentMethod}</Item>
           <Item label="Category">{s.category}</Item>
           <Item label="Scope">{s.scope && cap(s.scope)}</Item>
-          <Item label="Confidence">{s.confidence && cap(s.confidence)}</Item>
           <Item label="Source">{cap(s.source)}</Item>
           <Item label="Notes">{s.notes}</Item>
         </dl>

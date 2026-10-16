@@ -6,7 +6,6 @@ import { ChevronDownIcon } from "./icons";
 import {
   BILLING_CYCLES,
   BILLING_CYCLE_LABELS,
-  CONFIDENCES,
   CURRENCIES,
   SCOPES,
   type BillingCycle,
@@ -67,7 +66,6 @@ const MORE_FIELDS: readonly FormField[] = [
   "category_id",
   "payment_method_id",
   "scope",
-  "confidence",
   "vendor",
   "plan",
   "account_label",
@@ -99,7 +97,7 @@ function Field({
   children: ReactNode;
 }) {
   return (
-    <div className={`flex flex-col gap-1 ${className ?? ""}`}>
+    <div className={`flex min-w-0 flex-col gap-1 ${className ?? ""}`}>
       <div className="flex items-center gap-2">
         <label htmlFor={name} className="label">
           {label}
@@ -335,99 +333,82 @@ export function SubscriptionForm({
             <ChevronDownIcon />
           </span>
         </summary>
-        <div className="flex flex-col gap-3 border-t border-line p-3">
-          <div className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3">
-            <Field name="regular_price" missing={miss("regular_price")} flag={confidenceFlags?.regular_price} label="Regular price" errors={errors.regular_price}>
-              <input {...bind("regular_price")} type="text" inputMode="decimal" className={ic("regular_price")} />
-            </Field>
-            <Field name="promo_ends" missing={miss("promo_ends")} flag={confidenceFlags?.promo_ends} label="Promo ends" errors={errors.promo_ends}>
-              <input {...bind("promo_ends")} type="date" className={ic("promo_ends")} />
-            </Field>
-            <Field
-              name="cancel_notice_days"
-              label="Cancel notice (days)"
-              errors={errors.cancel_notice_days}
-            >
-              <input
-                {...bind("cancel_notice_days")}
-                type="text"
-                inputMode="numeric"
-                placeholder={`${noticeDefault} (default)`}
-                className={inputClass}
-              />
-            </Field>
-          </div>
-
-          <div className="grid items-start gap-3 sm:grid-cols-3">
-            <Field name="category_id" missing={miss("category_id")} flag={confidenceFlags?.category_id} label="Category" errors={errors.category_id}>
-              <select {...bind("category_id")} className={ic("category_id")}>
-                <option value="">-</option>
-                {lookups.categories.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field name="scope" missing={miss("scope")} flag={confidenceFlags?.scope} label="Scope" errors={errors.scope}>
-              <select {...bind("scope")} className={ic("scope")}>
-                <option value="">-</option>
-                {SCOPES.map((s) => (
-                  <option key={s} value={s}>
-                    {cap(s)}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field name="confidence" missing={miss("confidence")} label="Confidence" errors={errors.confidence}>
-              <select {...bind("confidence")} className={ic("confidence")}>
-                <option value="">-</option>
-                {CONFIDENCES.map((c) => (
-                  <option key={c} value={c}>
-                    {cap(c)}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </div>
-
-          <div className="grid items-start gap-3 sm:grid-cols-3">
-            <Field name="vendor" missing={miss("vendor")} label="Vendor" errors={errors.vendor}>
-              <input {...bind("vendor")} type="text" className={ic("vendor")} />
-            </Field>
-            <Field name="plan" missing={miss("plan")} label="Plan" errors={errors.plan}>
-              <input {...bind("plan")} type="text" className={ic("plan")} />
-            </Field>
-            <Field name="payment_method_id" missing={miss("payment_method_id")} label="Payment method" errors={errors.payment_method_id}>
-              <select {...bind("payment_method_id")} className={ic("payment_method_id")}>
-                <option value="">-</option>
-                {lookups.paymentMethods.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </div>
-
-          <div className="grid items-start gap-3 sm:grid-cols-3">
-            <Field
-              name="account_label"
-              missing={miss("account_label")}
-              label="Account (optional)"
-              hint="Login email or username. Never a password."
-              errors={errors.account_label}
-            >
-              <input {...bind("account_label")} type="text" autoComplete="off" className={ic("account_label")} />
-            </Field>
-            <Field name="cancel_url" className="sm:col-span-2" missing={miss("cancel_url")} label="Cancel link" errors={errors.cancel_url}>
-              <input {...bind("cancel_url")} type="url" inputMode="url" placeholder="https://" className={ic("cancel_url")} />
-            </Field>
-          </div>
-
-          <Field name="notes" missing={miss("notes")} label="Notes" errors={errors.notes}>
+        {/* Phones: 2 columns, wide fields (dates, long names, links) take a full row. Wider: 3 columns. */}
+        <div className="grid grid-cols-2 items-start gap-3 border-t border-line p-3 sm:grid-cols-3">
+          <Field name="regular_price" missing={miss("regular_price")} flag={confidenceFlags?.regular_price} label="Regular price" errors={errors.regular_price}>
+            <input {...bind("regular_price")} type="text" inputMode="decimal" className={ic("regular_price")} />
+          </Field>
+          <Field className="order-1 col-span-2 sm:order-none sm:col-span-1" name="promo_ends" missing={miss("promo_ends")} flag={confidenceFlags?.promo_ends} label="Promo ends" errors={errors.promo_ends}>
+            <input {...bind("promo_ends")} type="date" className={ic("promo_ends")} />
+          </Field>
+          <Field
+            name="cancel_notice_days"
+            label="Cancel notice (days)"
+            errors={errors.cancel_notice_days}
+          >
+            <input
+              {...bind("cancel_notice_days")}
+              type="text"
+              inputMode="numeric"
+              placeholder={`${noticeDefault} (default)`}
+              className={inputClass}
+            />
+          </Field>
+          <Field className="order-1 col-span-2 sm:order-none sm:col-span-1" name="category_id" missing={miss("category_id")} flag={confidenceFlags?.category_id} label="Category" errors={errors.category_id}>
+            <select {...bind("category_id")} className={ic("category_id")}>
+              <option value="">-</option>
+              {lookups.categories.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field className="order-1 sm:order-none" name="scope" missing={miss("scope")} flag={confidenceFlags?.scope} label="Scope" errors={errors.scope}>
+            <select {...bind("scope")} className={ic("scope")}>
+              <option value="">-</option>
+              {SCOPES.map((s) => (
+                <option key={s} value={s}>
+                  {cap(s)}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field className="order-1 sm:order-none" name="payment_method_id" missing={miss("payment_method_id")} label="Payment method" errors={errors.payment_method_id}>
+            <select {...bind("payment_method_id")} className={ic("payment_method_id")}>
+              <option value="">-</option>
+              {lookups.paymentMethods.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field className="order-1 sm:order-none" name="vendor" missing={miss("vendor")} label="Vendor" errors={errors.vendor}>
+            <input {...bind("vendor")} type="text" className={ic("vendor")} />
+          </Field>
+          <Field className="order-1 sm:order-none" name="plan" missing={miss("plan")} label="Plan" errors={errors.plan}>
+            <input {...bind("plan")} type="text" className={ic("plan")} />
+          </Field>
+          <Field
+            className="order-1 col-span-2 sm:order-none sm:col-span-1"
+            name="account_label"
+            missing={miss("account_label")}
+            label="Account (optional)"
+            hint="Login email or username. Never a password."
+            errors={errors.account_label}
+          >
+            <input {...bind("account_label")} type="text" autoComplete="off" className={ic("account_label")} />
+          </Field>
+          <Field className="order-1 col-span-2 sm:order-none sm:col-span-3" name="cancel_url" missing={miss("cancel_url")} label="Cancel link" errors={errors.cancel_url}>
+            <input {...bind("cancel_url")} type="url" inputMode="url" placeholder="https://" className={ic("cancel_url")} />
+          </Field>
+          <Field className="order-1 col-span-2 sm:order-none sm:col-span-3" name="notes" missing={miss("notes")} label="Notes" errors={errors.notes}>
             <textarea {...bind("notes")} rows={3} className={ic("notes")} />
           </Field>
+          {/* Confidence (how sure the extraction was about Category and Scope) is kept but not edited here:
+              the review form's Check markers already show it per field. */}
+          <input type="hidden" name="confidence" value={vals.confidence} />
         </div>
       </details>
 
