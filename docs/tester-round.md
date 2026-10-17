@@ -84,6 +84,15 @@ Anything JB or RG report that blocks the core flow goes to the top of this list.
   - Hints that repeated the label were removed (billing date, cancel notice default, status). Account, promo and Settings hints were shortened.
   - Checked with sample data on `/demo/review/P1` at phone width (390 px): the form is about half as long, and More details opens and submits its fields.
 
+### Verified and released 2026-10-17 (D23)
+
+The D22 fix (shorter edit form) and its follow-ups are live: `f3013b8`, `419ae78`, `19252c7`, `9efd4da`, `b64a1aa`. Checked on production with sample data (`/demo/review/P1`, `/demo/review/P3`):
+
+- **Phone, 360 px (Chromium):** no horizontal scroll, and no field runs past the form edge, including all three date fields with Free trial ticked and More details open. Layout: Amount | Currency, Cycle | Billing date, Free trial | Trial ends. More details starts closed. Flow: answered the missing cycle question → Approve → the demo confirmation shows.
+- **Desktop, 1280 px:** three columns. Amount, Currency and Cycle share a row, More details is in rows of three, and nothing overflows. Check markers on Name and Amount (P3) leave More details closed, because nothing in it needs attention. Confidence is not shown; a hidden input keeps the stored value.
+- **iPhone Safari (owner):** before the iOS date fix, Billing date, Trial ends and Promo ends ran past the right edge (screenshot 2026-10-16). The fix (`appearance: none`, `display: block`, `min-width: 0`, `max-width: 100%` on date inputs, iOS only; `min-w-0` on field wrappers) is live, but **not yet confirmed on the iPhone**. Chromium can't reproduce the iOS date width.
+  - **Fallback if it still overflows:** on phones, give each date field a full row (`col-span-6` / `col-span-2` instead of half width). That's a class-only change, and Promo ends already works this way.
+
 ### Deferred (with reasons)
 
 | Item | Source | Why deferred |
