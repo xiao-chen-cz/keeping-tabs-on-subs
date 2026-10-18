@@ -93,6 +93,10 @@ The D22 fix (shorter edit form) and its follow-ups are live: `f3013b8`, `419ae78
 - **iPhone Safari (owner):** before the iOS date fix, Billing date, Trial ends and Promo ends ran past the right edge (screenshot 2026-10-16). The fix (`appearance: none`, `display: block`, `min-width: 0`, `max-width: 100%` on date inputs, iOS only; `min-w-0` on field wrappers) is live and **confirmed by the owner on the iPhone (2026-10-17): all date fields fit**.
   - Fallback, not needed: on phones, give each date field a full row (`col-span-6` / `col-span-2` instead of half width). That's a class-only change, and Promo ends already works this way.
 
+### Verified 2026-10-18 (D24): email screenshot capture on iPhone
+
+Fix list item 3. The owner ran the full flow on an iPhone with sample data: open a subscription email → screenshot → copy → Paste screenshot → review the extracted details → approve. **It worked end to end.** Nothing blocked the flow and no new friction was found, so no fix was needed.
+
 ### Deferred (with reasons)
 
 | Item | Source | Why deferred |
