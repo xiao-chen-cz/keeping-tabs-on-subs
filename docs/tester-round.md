@@ -105,5 +105,6 @@ Fix list item 3. The owner ran the full flow on an iPhone with sample data: open
 | Forward-to-address email capture | LK (first request) | New feature, no inbound provider chosen (F2). Parked in `specs/todo/email-forward-capture.md`. |
 | Contract end / minimum term field | LK's energy bill | New field and logic change. The Free trial toggle stops the misuse that came up. Parked in `specs/todo/installments-and-intervals.md`. |
 | Installments | Owner | No tester has asked for it. Workaround: Yearly with a note. |
+| Keep vs Keep quietly: rename both, or merge into one permanent quiet setting | Owner (2026-10-19, EuroServer kept but looked missing from Due soon) | Owner unsure the one-renewal Keep is needed. Ask testers first. Parked in `specs/todo/keep-vs-quiet.md`. |
 | German / English | Owner | Testers are fine in English (`specs/todo/i18n-de-en.md`). |
 | Move the totals card up under Due soon | Owner (design idea) | No tester asked for it. Filtered totals would sit away from the filters. |
