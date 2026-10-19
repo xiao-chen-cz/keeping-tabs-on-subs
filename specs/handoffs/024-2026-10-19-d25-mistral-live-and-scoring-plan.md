@@ -67,3 +67,4 @@ D25 (Mon). Planned task: move extraction from Claude to Mistral for EU data resi
 - Mistral retention period not verified. The UI only claims "in the EU". Mistral processes API data in the EU by default and does not train on API content unless you opt in.
 - Mistral prices in handoff 023 come from third-party pages; not checked on mistral.ai.
 - Only fictional seed data goes into the video, screenshots and contact sheet.
+- **Screenshot uploads are capped at 10, and all 10 are used.** The D25 slot holds the model comparison table (artifact https://claude.ai/artifact/J666PHQc4HeyST9tNg734u, private). Each upload is tied to a day, and only the current day is open. When the video contact sheet is ready (D27/D28), it replaces the old AppSheet screenshot.
