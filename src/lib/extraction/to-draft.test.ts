@@ -1,6 +1,7 @@
 // @vitest-environment node
-// Recorded model outputs (fixtures/, from `pnpm extract:live --sample … --today 2026-10-02 --save …`)
-// and hand-made bad outputs. No live calls.
+// Recorded model outputs (fixtures/ for Claude, fixtures/mistral/ for Mistral, from
+// `pnpm extract:live --sample … --today 2026-10-02 --save …`) and hand-made bad outputs. No live calls.
+// Both providers must pass the same sample-capture checks.
 import { describe, expect, it } from "vitest";
 import { missingRequired } from "@/lib/domain/proposal";
 import { buildSeed } from "@/lib/seed/build-seed";
@@ -11,6 +12,12 @@ import noteforge from "./fixtures/noteforge-billing.text.json";
 import gymboxPdf from "./fixtures/gymbox-invoice.file.json";
 import noteforgePng from "./fixtures/noteforge-billing.file.json";
 import readloop from "./fixtures/readloop-trial-email.text.json";
+import mCodepilot from "./fixtures/mistral/codepilot-receipt.text.json";
+import mGymbox from "./fixtures/mistral/gymbox-invoice.text.json";
+import mNoteforge from "./fixtures/mistral/noteforge-billing.text.json";
+import mGymboxPdf from "./fixtures/mistral/gymbox-invoice.file.json";
+import mNoteforgePng from "./fixtures/mistral/noteforge-billing.file.json";
+import mReadloop from "./fixtures/mistral/readloop-trial-email.text.json";
 import { extractionSchema, type Extraction } from "./schema";
 import { extractionToDraft, lowerConfidence, redactPaymentNumbers, type DraftContext } from "./to-draft";
 
@@ -29,7 +36,13 @@ const blank: Extraction = {
   field_confidence: { name: null, amount: null, currency: null, billing_cycle: null, date: null }, notes: null,
 };
 
-describe("recorded sample captures", () => {
+type Recorded = { today: string; output: unknown };
+const providers: [string, Record<"codepilot" | "gymbox" | "noteforge" | "readloop" | "noteforgePng" | "gymboxPdf", Recorded>][] = [
+  ["Claude", { codepilot, gymbox, noteforge, readloop, noteforgePng, gymboxPdf }],
+  ["Mistral", { codepilot: mCodepilot, gymbox: mGymbox, noteforge: mNoteforge, readloop: mReadloop, noteforgePng: mNoteforgePng, gymboxPdf: mGymboxPdf }],
+];
+
+describe.each(providers)("recorded sample captures (%s)", (_provider, { codepilot, gymbox, noteforge, readloop, noteforgePng, gymboxPdf }) => {
   it("fixtures were recorded on the test date", () => {
     for (const f of [codepilot, gymbox, noteforge, readloop, noteforgePng, gymboxPdf]) expect(f.today).toBe(T);
   });

@@ -1,5 +1,6 @@
 // The extraction request: a fixed system prompt (logic-spec §4) and one user turn holding the capture,
 // today's date and the category list. Nothing else about the user is sent (plan d16-20 B8).
+// Shared by both providers (claude.ts, mistral.ts).
 import type Anthropic from "@anthropic-ai/sdk";
 import type { PlainDate } from "@/lib/domain/types";
 
@@ -15,34 +16,42 @@ Fields:
 - cancel_notice_days: only when a notice period is stated, in days. cancel_url: a link to manage or cancel the subscription, when shown.
 - payment_method_label: the payment method's name exactly as shown, but never a card number, last digits, IBAN or account number. If only those are shown, null.
 - category: one name from the category list, inferred from the service name, plan and sender; null if none fits (then suggest a category in notes). category_confidence: high for explicit evidence, medium for indirect, low for a guess.
-- scope: business when the capture names a business, shows a VAT or reverse-charge number or a company address; family only when a shared family account visibly pays; personal only when visibly private. With no evidence, still suggest a scope with scope_confidence low.
+- scope: business when the capture names a business, shows a VAT or reverse-charge number or a company address; family only when a shared family account visibly pays; personal only when visibly private. With no evidence, still suggest a scope with scope_confidence low; scope is never null.
 - field_confidence: for name, amount, currency, billing_cycle and the date you filled: high when stated plainly, medium when read from layout or context, low when unclear. Null for fields you left empty.
 - notes: one short sentence with anything useful the form cannot hold (a price change, a new category suggestion). Never payment details. Never remarks about what is missing or not stated (the app asks for missing fields itself); if nothing useful remains, null.
-- is_subscription: false when the capture is not about a recurring charge at all.`;
+- is_subscription: false only when the capture is clearly not about a recurring charge (a one-off purchase, a newsletter). A membership, plan or service fee counts, even on a single invoice with no cycle shown. Fill the fields either way.`;
 
 export type CaptureContent =
   | { kind: "text"; text: string }
   | { kind: "image"; mediaType: "image/png" | "image/jpeg" | "image/webp"; base64: string }
   | { kind: "pdf"; base64: string };
 
+/** The user turn's text, the same for every provider; an image or PDF goes in its own block before it. */
+export function extractionUserText(capture: CaptureContent, today: PlainDate, categories: readonly string[]): string {
+  const context = `Today is ${today}.\nCategory list: ${categories.join("; ")}.`;
+  switch (capture.kind) {
+    case "text":
+      return `${context}\n\nThe capture:\n<capture>\n${capture.text}\n</capture>`;
+    case "image":
+      return `${context}\n\nThe capture is the image above.`;
+    case "pdf":
+      return `${context}\n\nThe capture is the PDF above.`;
+  }
+}
+
+/** The user turn for Claude. */
 export function extractionUserContent(
   capture: CaptureContent,
   today: PlainDate,
   categories: readonly string[],
 ): Anthropic.ContentBlockParam[] {
-  const context = `Today is ${today}.\nCategory list: ${categories.join("; ")}.`;
+  const text: Anthropic.TextBlockParam = { type: "text", text: extractionUserText(capture, today, categories) };
   switch (capture.kind) {
     case "text":
-      return [{ type: "text", text: `${context}\n\nThe capture:\n<capture>\n${capture.text}\n</capture>` }];
+      return [text];
     case "image":
-      return [
-        { type: "image", source: { type: "base64", media_type: capture.mediaType, data: capture.base64 } },
-        { type: "text", text: `${context}\n\nThe capture is the image above.` },
-      ];
+      return [{ type: "image", source: { type: "base64", media_type: capture.mediaType, data: capture.base64 } }, text];
     case "pdf":
-      return [
-        { type: "document", source: { type: "base64", media_type: "application/pdf", data: capture.base64 } },
-        { type: "text", text: `${context}\n\nThe capture is the PDF above.` },
-      ];
+      return [{ type: "document", source: { type: "base64", media_type: "application/pdf", data: capture.base64 } }, text];
   }
 }

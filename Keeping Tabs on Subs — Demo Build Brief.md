@@ -28,7 +28,7 @@ Committed for D21–23: email alerts. A daily job emails one alert per row when 
 
 All capture paths end in the same place: one extraction call, then a proposed entry in the review queue. Nothing reaches the subscription list without the user's approval.
 
-1. **Type, upload or paste.** User types a short description ("Notion Plus, 8 EUR a month, renews on the 15th"), uploads a screenshot or PDF, or pastes email text, in the app. The file goes to private storage, then one LLM API call (Claude, vision for images and PDFs) returns structured JSON in the subscription schema. The result is saved as a proposed entry.
+1. **Type, upload or paste.** User types a short description ("Notion Plus, 8 EUR a month, renews on the 15th"), uploads a screenshot or PDF, or pastes email text, in the app. The file goes to private storage, then one LLM API call (Mistral Medium 3.5, hosted in the EU, reading images and PDFs directly; changed from Claude on 2026-10-19 for EU data residency, Claude stays available behind a switch) returns structured JSON in the subscription schema. The result is saved as a proposed entry.
 
 Shared rules for all paths:
 
@@ -59,7 +59,7 @@ Each item below is a real feature for later, but would not fit into 22 days safe
 - Every demo account starts with the seeded sample dataset in `specs/seed-data.md`. Testers get the starter set (4 common fictional subscriptions incl. one price-rise alert, plus 1 pending proposal); my demo account gets the full set (13 subscriptions covering every flag and alert, plus 3 proposals). Dates are computed from the day the account is created.
 - Sample captures (screenshots, PDFs, pasted email text) are written for the demo; none come from my real inbox.
 - Testers may try their own screenshots or text. They are told this up front, and all tester data is deleted after the test round.
-- Data stays in the EU: database, file storage and hosting in an EU region; the LLM call sends only the capture being extracted.
+- Data stays in the EU: database, file storage, hosting and extraction (Mistral) in the EU; the LLM call sends only the capture being extracted.
 - My real subscriptions and receipts never enter the demo instance or any public copy, screenshot or video.
 - Real data is used only as a local dev fixture: a copy of the Sheet imported into a local Supabase (Supabase CLI, Docker), gitignored, never deployed. Interesting real cases are turned into fictional seed rows and tests.
 

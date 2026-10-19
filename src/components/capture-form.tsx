@@ -3,12 +3,18 @@ import { startTransition, useActionState, useEffect, useRef, useState, type Form
 import { CameraIcon, TextIcon, UploadIcon } from "@/components/icons";
 import { ScreenshotField, usePastedFile } from "@/components/screenshot-field";
 import { uploadCaptureFile } from "@/lib/capture-upload";
+import type { ExtractionProvider } from "@/lib/extraction/extract";
 
 export interface CaptureFormState {
   error: string | null;
 }
 
 type Kind = "photo" | "upload" | "text";
+
+const READER: Record<ExtractionProvider, string> = {
+  mistral: "Mistral AI (in the EU)",
+  claude: "Anthropic's Claude (outside the EU)",
+};
 
 // Take photo is for phones only (touch screens); a desktop shows Upload and Enter text.
 const TABS: { kind: Kind; label: string; icon: ReactNode; className?: string }[] = [
@@ -24,9 +30,11 @@ const TABS: { kind: Kind; label: string; icon: ReactNode; className?: string }[]
 export function CaptureForm({
   action,
   userId,
+  provider,
 }: {
   action: (prev: CaptureFormState, formData: FormData) => Promise<CaptureFormState>;
   userId: string;
+  provider: ExtractionProvider;
 }) {
   const [state, formAction, pending] = useActionState(action, { error: null });
   const [kind, setKind] = useState<Kind>("text");
@@ -149,8 +157,7 @@ export function CaptureForm({
       )}
 
       <p className="text-xs text-mid">
-        Only this capture is sent, once, to Anthropic&apos;s Claude (outside the EU) to read it. Nothing is added until you
-        approve it.
+        Only this capture is sent, once, to {READER[provider]} to read it. Nothing is added until you approve it.
       </p>
 
       {error && (

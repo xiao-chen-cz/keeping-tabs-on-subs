@@ -7,9 +7,17 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const renderForm = () => render(<CaptureForm action={vi.fn(async () => ({ error: null }))} userId="u1" />);
+const renderForm = () => render(<CaptureForm action={vi.fn(async () => ({ error: null }))} userId="u1" provider="mistral" />);
 
 describe("CaptureForm", () => {
+  it("names the service that reads the capture", () => {
+    renderForm();
+    expect(screen.getByText(/sent, once, to Mistral AI \(in the EU\)/)).toBeTruthy();
+    cleanup();
+    render(<CaptureForm action={vi.fn(async () => ({ error: null }))} userId="u1" provider="claude" />);
+    expect(screen.getByText(/Anthropic's Claude \(outside the EU\)/)).toBeTruthy();
+  });
+
   it("offers Take photo (phones only), Upload, and Enter text, with Enter text open", () => {
     renderForm();
     const tabs = screen.getAllByRole("button", { pressed: false }).concat(screen.getAllByRole("button", { pressed: true }));

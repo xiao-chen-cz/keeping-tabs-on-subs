@@ -9,7 +9,7 @@ Mobile-first subscription tracker. Pain point: forgetting subscriptions until th
 **Goal:** by 2026-10-24 ship a private, invite-only demo where subscriptions arrive by capture (type a short description, upload a screenshot/PDF, or paste email text), land in a review queue, and approved entries show in a renewal-sorted list with cancel-by dates. Manual entry is only a fallback and for corrections. Brief: `Keeping Tabs on Subs — Demo Build Brief.md` (authoritative for scope and milestones).
 
 ## Stack
-Next.js (TypeScript strict, Tailwind, mobile-first), Supabase (Postgres, auth, storage, EU region, RLS on `user_id`), Claude API for extraction (vision for images/PDFs), One Vercel project (Frankfurt functions) and one hosted Supabase project for demo and tester accounts. Vitest, pnpm.
+Next.js (TypeScript strict, Tailwind, mobile-first), Supabase (Postgres, auth, storage, EU region, RLS on `user_id`), Mistral API for extraction (Mistral Medium 3.5, EU-hosted; images and PDFs sent directly; Claude kept behind `EXTRACTION_PROVIDER=claude`, decided 2026-10-19), One Vercel project (Frankfurt functions) and one hosted Supabase project for demo and tester accounts. Vitest, pnpm.
 
 ## Source of truth
 - `specs/logic-spec.md`: data model, computed fields, edge cases E1–E27, open decisions D1–D11. Port this logic; keep it in sync when behaviour changes.
@@ -41,7 +41,7 @@ Next.js (TypeScript strict, Tailwind, mobile-first), Supabase (Postgres, auth, s
 - Invite-only: no public sign-up, accounts created by the owner. Each account is seeded from `specs/seed-data.md` (fictional only); sample captures are written for the demo.
 - Real data lives only in a local, gitignored Supabase/dev DB imported from the Sheet, as a dev fixture. Never deploy it, commit it or show it.
 - The repo is meant to be public. Tracked files (code, specs, handoffs, commit messages) never contain the owner's real subscription names, prices, dates, account nicknames, the Sheet ID, or the owner's email address and business domain; use the fictional seed names. Private notes go to `/local-data/` (gitignored).
-- EU only for database, storage and hosting; the LLM call sends only the capture being extracted.
+- EU only for database, storage, hosting and extraction (Mistral); the LLM call sends only the capture being extracted.
 - The owner's real subscriptions and receipts never enter the demo instance or any public copy, screenshot or video. Tester data is deleted after the test round.
 
 ## Out of scope (do not build)

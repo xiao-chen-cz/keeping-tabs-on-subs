@@ -29,6 +29,6 @@
       "billing_cycle": null,
       "date": null
     },
-    "notes": "Gym membership invoice with no currency, billing cycle or date shown."
+    "notes": null
   }
 }

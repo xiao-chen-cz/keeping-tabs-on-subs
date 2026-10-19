@@ -29,6 +29,6 @@
       "billing_cycle": null,
       "date": null
     },
-    "notes": "Invoice shows no currency, billing cycle or date; a Health / Fitness category might fit better."
+    "notes": null
   }
 }

@@ -57,7 +57,7 @@ Reading your inbox, scanning bank or card statements, cancelling on your behalf,
 
 ## For developers
 
-Next.js (TypeScript, Tailwind), Supabase (Postgres, auth, storage; EU), Claude API for extraction, Vitest, hosted on Vercel (Frankfurt). Business rules live in `specs/logic-spec.md`; fictional demo data in `specs/seed-data.md`; project rules for AI-assisted development in `CLAUDE.md`.
+Next.js (TypeScript, Tailwind), Supabase (Postgres, auth, storage; EU), Mistral API for extraction (EU; Claude as a fallback behind a switch), Vitest, hosted on Vercel (Frankfurt). Business rules live in `specs/logic-spec.md`; fictional demo data in `specs/seed-data.md`; project rules for AI-assisted development in `CLAUDE.md`.
 
 Requires Node and pnpm.
 

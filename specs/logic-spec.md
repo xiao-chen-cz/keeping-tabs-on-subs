@@ -143,6 +143,8 @@ From the Rules tab. These apply to whoever adds rows, today the Gmail extraction
 
 10. **Required fields and missing-field questions (app).** A proposal can be approved only when it has name, amount, currency, billing cycle and one date (Last renewal date, or Trial ends for an active trial). For each required field that is empty, the app asks a fixed question (e.g. cycle: Monthly / Quarterly / Every 4 weeks / Yearly; "When was the last charge?"). The model only parses free-text answers. Optional fields (notice days, cancel URL, payment method, Regular price + Promo ends) are never forced. Applies to every input type: typed description, upload, paste.
 
+11. **Extraction provider (app, 2026-10-19).** Mistral Medium 3.5 (`mistral-medium-2604`, EU-hosted) by default; `EXTRACTION_PROVIDER=claude` switches back to Claude. Both get the same prompt and JSON schema (`src/lib/extraction/prompt.ts`, `schema.ts`) and must pass the same recorded sample-capture tests (`to-draft.test.ts`). Mistral Small 4 was tried and rejected: it filled cycles and next-charge dates the captures did not state (against rule 7).
+
 App implications: Scope, Confidence, Billing cycle, Status and Currency become enum/check constraints. Category and Payment method become lookup tables with foreign keys. Computed fields become a database view (or generated logic), not stored columns.
 
 ## 5. Edge cases and expected results

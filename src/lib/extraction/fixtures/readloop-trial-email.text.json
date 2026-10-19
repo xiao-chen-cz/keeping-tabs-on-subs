@@ -11,7 +11,7 @@
     "currency": "EUR",
     "billing_cycle": "monthly",
     "last_charge_date": null,
-    "next_charge_date": "2026-10-05",
+    "next_charge_date": null,
     "trial_ends": "2026-10-05",
     "regular_price": null,
     "promo_ends": null,
@@ -29,6 +29,6 @@
       "billing_cycle": "high",
       "date": "high"
     },
-    "notes": "Free trial converts to paid ReadLoop Plus at 6.99 EUR/month after 2026-10-05; cancel via Settings > Subscription."
+    "notes": "Cancel via Settings > Subscription in the app."
   }
 }

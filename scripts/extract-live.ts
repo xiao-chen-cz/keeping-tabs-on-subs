@@ -1,4 +1,5 @@
-// One real extraction call, run by hand (about $0.05). Prints the model output and the resulting draft.
+// One real extraction call, run by hand (Mistral about $0.01, Claude about $0.05). Prints the model output and the draft.
+// The provider follows EXTRACTION_PROVIDER (default mistral); MISTRAL_MODEL overrides the Mistral model.
 //   pnpm extract:live <file.png|.jpg|.webp|.pdf|.txt> [--today YYYY-MM-DD]
 //   pnpm extract:live --sample codepilot-receipt|noteforge-billing|gymbox-invoice|readloop-trial-email [--today …]
 //   --save <path.json> writes the model output as a recorded fixture for tests.
@@ -6,7 +7,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { extname } from "node:path";
 import { todayIn } from "../src/lib/dates/plain-date";
-import { extractCapture } from "../src/lib/extraction/claude";
+import { extractCapture, extractionProvider } from "../src/lib/extraction/extract";
 import type { CaptureContent } from "../src/lib/extraction/prompt";
 import { extractionToDraft } from "../src/lib/extraction/to-draft";
 import { SEED_CATEGORIES, SEED_PAYMENT_METHODS } from "../src/lib/seed/sets";
@@ -47,7 +48,7 @@ async function main() {
     console.error("Extraction failed:", result.error);
     process.exit(1);
   }
-  console.log("Model:", result.model);
+  console.log("Provider:", extractionProvider(), "Model:", result.model);
   console.log("Output:", JSON.stringify(result.extraction, null, 2));
   const save = arg("--save");
   if (save) writeFileSync(save, JSON.stringify({ today, model: result.model, output: result.extraction }, null, 2) + "\n");

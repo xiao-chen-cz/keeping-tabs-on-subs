@@ -3,13 +3,10 @@ import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import type { PlainDate } from "@/lib/domain/types";
 import { EXTRACTION_SYSTEM, extractionUserContent, type CaptureContent } from "./prompt";
-import { extractionSchema, type Extraction } from "./schema";
+import type { ExtractionResult } from "./extract";
+import { extractionSchema } from "./schema";
 
 export const EXTRACTION_MODEL = "claude-opus-5-5";
-
-export type ExtractionResult =
-  | { ok: true; extraction: Extraction; model: string }
-  | { ok: false; error: string };
 
 let client: Anthropic | null = null;
 

@@ -11,7 +11,7 @@ import {
 import { getProfile } from "@/lib/dal/profile";
 import { todayIn } from "@/lib/dates/plain-date";
 import { parseCaptureForm } from "@/lib/extraction/capture-form";
-import { extractCapture } from "@/lib/extraction/claude";
+import { extractCapture } from "@/lib/extraction/extract";
 import { DAILY_CAPTURE_CAP, MAX_UPLOAD_BYTES, bytesMatchType, capReached, capturePath } from "@/lib/extraction/limits";
 import type { CaptureContent } from "@/lib/extraction/prompt";
 import { emptyDraft, extractionToDraft } from "@/lib/extraction/to-draft";

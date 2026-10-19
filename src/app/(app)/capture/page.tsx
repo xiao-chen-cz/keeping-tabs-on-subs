@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { CaptureForm } from "@/components/capture-form";
 import { requireUser } from "@/lib/dal/auth";
+import { extractionProvider } from "@/lib/extraction/extract";
 import { captureAction } from "./actions";
 
-// The extraction call takes about 3-15 s; leave room for a slow PDF (plan d16-20 step 3).
+// The extraction call takes about 2-15 s (Mistral 2-3 s); leave room for a slow PDF (plan d16-20 step 3).
 export const maxDuration = 60;
 
 export default async function CapturePage() {
@@ -11,7 +12,7 @@ export default async function CapturePage() {
   return (
     <main className="flex flex-1 flex-col gap-3">
       <h1 className="font-heading text-2xl font-semibold text-primary-ink">Add a subscription</h1>
-      <CaptureForm action={captureAction} userId={user.id} />
+      <CaptureForm action={captureAction} userId={user.id} provider={extractionProvider()} />
       <p className="text-sm text-mid">
         Prefer a form?{" "}
         <Link href="/subscriptions/new" className="link">
