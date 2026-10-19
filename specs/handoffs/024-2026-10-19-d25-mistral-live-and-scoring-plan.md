@@ -24,6 +24,11 @@ D25 (Mon). Planned task: move extraction from Claude to Mistral for EU data resi
   - Ask testers before deciding.
 - **Grader account dropped** (`specs/todo/grader-demo-account.md`, uncommitted): the AI review cannot open links. Mark gets `/demo`.
 - D25 check-in text drafted for the owner (the owner posts it). It includes the required "what I tested / result / what's still done by hand" sections.
+- **Model comparison table** rendered as a private artifact (https://claude.ai/artifact/J666PHQc4HeyST9tNg734u; source in the session scratchpad, not in the repo). The owner uploaded a screenshot of it as the D25 proof screenshot.
+  - Mistral Small 4 was rerun with the final prompt for a fair comparison. It still invented 5 values: GBP on both Gymbox captures, a charge date (the test day) on the Gymbox PDF, a monthly cycle on the NoteForge PNG, a 5 Nov next charge for ReadLoop.
+  - Checks passed on 24 table rows: Medium 3.5 24/24, Claude 24/24, Small 4 19/24.
+  - Speed: Claude 3–4 s per text capture, Medium 1.4–2.6 s, Small 1.3–2.1 s.
+- **Score after the upload: still 75.** Proof of work 19/20: 16 proof items, 10 screenshots, 21 check-ins. The D25 check-in was not counted yet at that run (data as of Oct 19, 4:42 AM Toronto). The missing proof point probably depends on that check-in ("name what you tested, the result, and what is still done by hand").
 
 ## Scoring facts (from the challenge dashboard, 2026-10-19)
 - **Shipped: 8/25, capped until the final submission is saved.** 17 points open up only when it is saved. The form is open now. "A private tool you actually use counts as shipped."
@@ -34,7 +39,7 @@ D25 (Mon). Planned task: move extraction from Claude to Mistral for EU data resi
 
 ## Next Steps
 1. **Final submission:** the owner pastes the form's fields and Claude drafts the answers. Find out whether a saved submission can still be edited. If yes, save a solid version on D25/D26 and refine it; if no, finish it by Wed 21.
-2. **New kind of proof:** a screenshot of the test run ("393 passed") and/or a rendered Mistral vs Claude comparison table to screenshot. The field differences are in this handoff and in logic-spec §4.11.
+2. **Check the score once the D25 check-in is counted** (it should say 22 check-ins). If Proof of work is still 19/20, the remaining lever is the video contact sheet. No upload slot is free until then.
 3. **Daily check-ins D26–D29** (owner).
 4. **HyperFrames explainer video (Wed–Thu), kept as the owner's own challenge and for Mark:**
    - Use fictional `/demo` data only.
