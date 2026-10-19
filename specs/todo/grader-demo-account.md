@@ -2,6 +2,8 @@
 
 Decided 2026-10-11. The final submission gives the AI grader its own sign-in to the production app, with fictional data only.
 
+**DROPPED (2026-10-19).** The challenge's AI review cannot open links, watch videos or read linked documents; it scores only check-ins, proof items and uploaded screenshots. Mark (who confirms winners) gets the public `/demo` link instead: no login, sample data, read-only. If he asks to try capture, create an account for him then. Also avoids posting shared credentials (password change via the Supabase API, vandalised data, uploads into storage). The plan below is kept for reference; captures now run on Mistral, not Claude.
+
 ## Plan
 - **Account:** `pnpm create-account --email grader@example.com --set full --out local-data/accounts.jsonl`. No real mailbox needed: the script creates the user already confirmed, and sign-in is email plus password, so the address is only a login name (same as `guide-walk@example.com` in D15).
 - **Data:** the full set from `specs/seed-data.md` (13 subscriptions and 3 proposals), so every flag, tag, alert and total shows. Fictional only, like every other account.
