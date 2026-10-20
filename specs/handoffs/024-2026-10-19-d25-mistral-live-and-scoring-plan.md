@@ -69,7 +69,7 @@ D25 (Mon). Planned task: move extraction from Claude to Mistral for EU data resi
 
 ## Blockers / Notes
 - **Don't press Vercel's "Redeploy" after changing env vars when a push follows:** the push already builds with the new vars, and two builds race for the alias. Claude Code cannot run `vercel promote` (auto-mode classifier: production deploy); the owner runs it with `!`.
-- Mistral retention period not verified. The UI only claims "in the EU". Mistral processes API data in the EU by default and does not train on API content unless you opt in.
+- Mistral privacy checked 2026-10-20: training on API calls is off in the admin settings; inputs and outputs are kept 30 rolling days for abuse monitoring (zero data retention is on request only). The UI claims only "in the EU".
 - Mistral prices in handoff 023 come from third-party pages; not checked on mistral.ai.
 - Only fictional seed data goes into the video, screenshots and contact sheet.
 - **Screenshot uploads are capped at 10, and all 10 are used.** The D25 slot holds the model comparison table (artifact https://claude.ai/artifact/J666PHQc4HeyST9tNg734u, private). Each upload is tied to a day, and only the current day is open. When the video contact sheet is ready (D27/D28), it replaces the old AppSheet screenshot.
