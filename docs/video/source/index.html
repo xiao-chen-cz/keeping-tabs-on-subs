@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Poppins:wght@400;500;600&display=block" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f5f7f8; }
+      :root {
+        --text: #3a4758; --mid: #6b7889; --line: #dde3e8; --light: #f5f7f8;
+        --primary: #0b435e; --primary-light: #e8f1f5; --accent: #419f8b; --accent-light: #eaf4f2;
+        --danger: #c0392b; --warn: #fdf3e1; --warn-ink: #8a5a00;
+      }
+      #root { position: relative; width: 1080px; height: 1920px; font-family: Poppins, system-ui, sans-serif; color: var(--text); }
+      .clip { position: absolute; inset: 0; }
+      .serif { font-family: Lora, Georgia, serif; }
+
+      /* captions */
+      .cap { position: absolute; left: 80px; right: 80px; top: 150px; font-size: 64px; line-height: 1.18; font-weight: 600; color: var(--primary); letter-spacing: -0.01em; }
+      .cap small { display: block; margin-top: 22px; font-size: 38px; font-weight: 400; color: var(--mid); line-height: 1.35; letter-spacing: 0; }
+      .cap.center { text-align: center; }
+
+      /* phone */
+      .phone { position: absolute; left: 150px; top: 540px; width: 780px; height: 1360px; border-radius: 72px; background: #0d1b24; padding: 16px; box-shadow: 0 40px 90px rgba(11, 67, 94, 0.25); }
+      .screen { position: relative; width: 748px; height: 1328px; border-radius: 58px; overflow: hidden; background: #fff; }
+      .shot { position: absolute; left: 0; top: 0; width: 748px; }
+      .shot img { display: block; width: 748px; }
+      .ring { position: absolute; border: 7px solid var(--accent); border-radius: 26px; box-shadow: 0 0 0 9999px rgba(13, 27, 36, 0.28); opacity: 0; }
+      .tap { position: absolute; width: 110px; height: 110px; margin: -55px 0 0 -55px; border-radius: 50%; background: rgba(65, 159, 139, 0.45); border: 5px solid #fff; opacity: 0; }
+
+      /* scene 1 and 2 cards */
+      .card { position: absolute; background: #fff; border: 2px solid var(--line); border-radius: 32px; padding: 40px 48px; box-shadow: 0 20px 50px rgba(11, 67, 94, 0.1); }
+      .kicker { font-size: 28px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); }
+      .big { font-size: 56px; font-weight: 600; color: var(--primary); margin-top: 10px; }
+      .line { font-size: 36px; margin-top: 10px; }
+
+      /* app mock (capture, email) */
+      .mockhead { height: 150px; padding: 76px 40px 0; font-family: Lora, serif; font-size: 34px; font-weight: 600; color: var(--primary); border-bottom: 2px solid var(--line); }
+      .mockbody { padding: 40px; }
+      .h2 { font-family: Lora, serif; font-size: 46px; font-weight: 600; color: var(--primary); margin-bottom: 30px; }
+      .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+      .tile { height: 170px; border: 3px solid var(--line); border-radius: 26px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; font-size: 28px; font-weight: 500; color: var(--primary); background: #fff; }
+      .tile svg { width: 54px; height: 54px; stroke: var(--primary); fill: none; stroke-width: 1.8; }
+      .tile.on { border-color: var(--primary); background: var(--primary-light); }
+      .panel { position: absolute; left: 40px; right: 40px; top: 470px; opacity: 0; }
+      .label { font-size: 28px; color: var(--mid); margin-bottom: 14px; }
+      .textarea { border: 3px solid var(--line); border-radius: 22px; padding: 28px; font-size: 36px; line-height: 1.4; min-height: 260px; color: var(--text); }
+      .btn { display: inline-block; padding: 26px 40px; border-radius: 22px; background: var(--primary); color: #fff; font-size: 32px; font-weight: 500; }
+      .btn.ghost { background: #fff; color: var(--primary); border: 3px solid var(--primary); }
+      .thumb { margin-top: 30px; border: 3px solid var(--line); border-radius: 22px; padding: 28px; display: flex; gap: 26px; align-items: center; }
+      .thumb .paper { width: 120px; height: 160px; border-radius: 10px; background: linear-gradient(#e8ecf0 0 14px, transparent 14px 30px, #e8ecf0 30px 40px, transparent 40px 56px, #e8ecf0 56px 66px, transparent 66px) 16px 20px / 88px 100% no-repeat, #fff; border: 2px solid var(--line); }
+      .reading { margin-top: 30px; font-size: 30px; color: var(--mid); }
+      .bar { margin-top: 16px; height: 14px; border-radius: 7px; background: var(--line); overflow: hidden; }
+      .bar i { display: block; height: 100%; width: 0; background: var(--accent); }
+
+      .mail { border-top: 2px solid var(--line); padding-top: 30px; }
+      .mailbtn { display: inline-block; padding: 20px 32px; border-radius: 16px; font-size: 30px; margin-right: 14px; margin-top: 22px; }
+      .toast { position: absolute; left: 40px; right: 40px; bottom: 60px; padding: 34px 40px; border-radius: 26px; background: var(--primary); color: #fff; font-size: 34px; opacity: 0; }
+      .toast b { display: block; font-size: 40px; font-weight: 600; margin-bottom: 6px; }
+
+      /* scene 8 */
+      .badge { position: absolute; left: 120px; right: 120px; height: 200px; border-radius: 36px; background: #fff; border: 2px solid var(--line); display: flex; align-items: center; gap: 40px; padding: 0 50px; font-size: 44px; font-weight: 500; color: var(--primary); opacity: 0; }
+      .badge .dot { width: 110px; height: 110px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; flex: none; }
+      .badge svg { width: 60px; height: 60px; stroke: var(--accent); fill: none; stroke-width: 2; }
+      .badge small { display: block; font-size: 30px; color: var(--mid); font-weight: 400; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="63.1" data-width="1080" data-height="1920">
+
+      <!-- 1 · Hook (0–6) -->
+      <div id="s1" class="clip" data-start="0" data-duration="3.41" data-track-index="0">
+        <div id="s1-brand" style="position:absolute;left:0;right:0;top:300px;text-align:center;">
+          <img src="shots/icon.png" style="width:200px;height:200px;border-radius:46px;box-shadow:0 20px 50px rgba(11,67,94,.2);" />
+          <div class="serif" style="font-size:72px;font-weight:600;color:var(--primary);margin-top:40px;">Keeping Tabs on Subs</div>
+        </div>
+        <div id="s1-receipt" class="card" style="left:150px;right:150px;top:900px;">
+          <div class="kicker">Receipt</div>
+          <div class="big">Your plan renewed</div>
+          <div class="line">VoiceDraft Pro · yearly</div>
+          <div class="line" style="color:var(--danger);font-weight:600;">$200.00 charged</div>
+        </div>
+        <div id="s1-cap" class="cap center" style="top:1380px;">Subscriptions don't<br />remind you.<br />They renew.</div>
+      </div>
+
+      <!-- 2 · Pitch (6–13) -->
+      <div id="s2" class="clip" data-start="3.41" data-duration="5.28" data-track-index="0">
+        <div id="s2-cap" class="cap">A bank shows<br />what you paid.<br />This shows what<br />you can still stop.</div>
+        <div id="s2-bank" class="card" style="left:100px;right:100px;top:700px;background:#eef1f3;">
+          <div class="kicker">Bank statement</div>
+          <div class="line" style="font-size:42px;">14 Oct · VoiceDraft Pro <span style="float:right;">−$120.00</span></div>
+          <div class="line" style="color:var(--mid);">Already gone.</div>
+        </div>
+        <div id="s2-app" class="card" style="left:100px;right:100px;top:1120px;border-color:var(--accent);">
+          <div class="kicker" style="color:var(--accent);">Keeping Tabs on Subs</div>
+          <div class="big">Cancel by 23 Oct</div>
+          <div class="line">VoiceDraft Pro · rises to <b style="color:var(--danger);">$200.00</b></div>
+          <div class="line" style="color:var(--accent);font-weight:600;">Still yours to stop.</div>
+        </div>
+      </div>
+
+      <!-- 3 · Capture (13–30) -->
+      <div id="s3" class="clip" data-start="8.69" data-duration="9.95" data-track-index="0">
+        <div class="cap">Add a subscription in one step.<small>Type a sentence, paste a screenshot, or upload a receipt.</small></div>
+        <div class="phone"><div class="screen">
+          <div class="mockhead">Keeping Tabs on Subs</div>
+          <div class="mockbody">
+            <div class="h2">Add a subscription</div>
+            <div class="tiles">
+              <div class="tile" id="t-photo"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Take photo</div>
+              <div class="tile" id="t-upload"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4"/></svg>Upload</div>
+              <div class="tile" id="t-text"><svg viewBox="0 0 24 24"><path d="M5 6h14M5 11h14M5 16h9"/></svg>Enter text</div>
+            </div>
+          </div>
+          <div class="panel" id="p-text">
+            <div class="label">Describe it in a few words, or paste an email</div>
+            <div class="textarea"><span id="typed1" style="opacity:0">NoteForge Pro, 12 dollars a month,</span> <span id="typed2" style="opacity:0">next charge on the 30th</span></div>
+            <div style="margin-top:30px;"><span class="btn">Read it</span></div>
+          </div>
+          <div class="panel" id="p-paste">
+            <div class="label">Screenshot, photo or PDF (max 10 MB)</div>
+            <span class="btn ghost">Paste screenshot</span>
+            <div class="thumb" id="thumb1" style="opacity:0"><div class="paper"></div><div><div style="font-size:34px;font-weight:600;color:var(--primary);">Screenshot</div><div style="font-size:28px;color:var(--mid);">Receipt email · pasted</div></div></div>
+          </div>
+          <div class="panel" id="p-pdf">
+            <div class="label">Screenshot, photo or PDF (max 10 MB)</div>
+            <div class="thumb"><div class="paper"></div><div><div style="font-size:34px;font-weight:600;color:var(--primary);">invoice.pdf</div><div style="font-size:28px;color:var(--mid);">84 KB · uploaded</div></div></div>
+            <div class="reading">Reading your capture…</div>
+            <div class="bar"><i id="bar"></i></div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 4 · Review (30–46) -->
+      <div id="s4" class="clip" data-start="18.64" data-duration="11.79" data-track-index="0">
+        <div id="s4-cap1" class="cap">AI reads it and proposes an entry.<small>It never guesses: anything missing becomes a short question.</small></div>
+        <div id="s4-cap2" class="cap" style="opacity:0">Already tracked?<small>It proposes an update and shows the price change.</small></div>
+        <div class="phone"><div class="screen">
+          <div class="shot" id="shot-p1"><img src="shots/p1.png" />
+            <div class="ring" id="ring-p1" style="left:26px;top:788px;width:696px;height:404px;"></div>
+          </div>
+          <div class="shot" id="shot-p2" style="opacity:0"><img src="shots/p2.png" />
+            <div class="ring" id="ring-p2" style="left:26px;top:604px;width:696px;height:146px;"></div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 5 · Approve (46–52) -->
+      <div id="s5" class="clip" data-start="30.43" data-duration="3.04" data-track-index="0">
+        <div class="cap">Nothing is added<br />until you approve it.</div>
+        <div class="phone"><div class="screen">
+          <div class="shot"><img src="shots/p2.png" />
+            <div class="tap" id="tap-approve" style="left:195px;top:945px;"></div>
+          </div>
+          <div class="toast" id="toast-approve"><b>Updated: CodePilot Pro</b>$25.00 a month · cancel by 13 Nov</div>
+        </div></div>
+      </div>
+
+      <!-- 6 · List (52–66) -->
+      <div id="s6" class="clip" data-start="33.47" data-duration="9.85" data-track-index="0">
+        <div id="s6-cap1" class="cap">Sorted by what to act on first.<small>Every row shows the date to cancel by.</small></div>
+        <div id="s6-cap2" class="cap" style="opacity:0">Nothing slips through.<small>Trials, price rises, missing dates and ending plans are flagged.</small></div>
+        <div class="phone"><div class="screen">
+          <div class="shot" id="shot-list"><img src="shots/list.png" />
+            <div class="ring" id="ring-due" style="left:14px;top:220px;width:720px;height:578px;"></div>
+            <div class="ring" id="ring-vd" style="left:30px;top:616px;width:688px;height:152px;"></div>
+            <div class="ring" id="ring-px" style="left:14px;top:2164px;width:720px;height:168px;"></div>
+            <div class="ring" id="ring-sb" style="left:14px;top:2836px;width:720px;height:132px;"></div>
+            <div class="ring" id="ring-fc" style="left:14px;top:3676px;width:720px;height:112px;"></div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 7 · Reminders (66–78) -->
+      <div id="s7" class="clip" data-start="43.32" data-duration="8.43" data-track-index="0">
+        <div class="cap">Reminders 3, 1 and 0 days before the deadline.<small>One tap: keep it, or mark it cancelled, with proof logged.</small></div>
+        <div class="phone"><div class="screen">
+          <div class="mockhead" style="font-family:Poppins,sans-serif;font-size:30px;color:var(--mid);font-weight:500;">Mail</div>
+          <div class="mockbody">
+            <div style="font-size:28px;color:var(--mid);">From: Keeping Tabs on Subs</div>
+            <div style="font-size:40px;font-weight:600;color:var(--primary);margin:12px 0 30px;">The Daily Ledger: cancel by 23 Oct</div>
+            <div class="mail">
+              <div style="font-size:36px;font-weight:600;color:var(--primary);">The Daily Ledger</div>
+              <div style="font-size:30px;color:var(--mid);margin-top:6px;">cancel by 23 Oct (in 3 days) · renews 26 Oct · €2.00</div>
+              <span class="mailbtn" style="background:var(--primary);color:#fff;">Keep it</span><span class="mailbtn" id="btn-cancelled" style="border:3px solid var(--primary);color:var(--primary);">I cancelled it</span>
+            </div>
+          </div>
+          <div class="tap" id="tap-cancel" style="left:344px;top:636px;"></div>
+          <div class="toast" id="toast-cancel" style="background:var(--accent);"><b>Cancelled: The Daily Ledger</b>Logged as proof · 20 Oct 2026 · no more reminders</div>
+        </div></div>
+      </div>
+
+      <!-- 8 · Privacy (78–85) -->
+      <div id="s8" class="clip" data-start="51.75" data-duration="6.06" data-track-index="0">
+        <div class="cap">Private by design.</div>
+        <div class="badge" id="b1" style="top:680px;"><div class="dot"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg></div><div>EU-hosted<small>Database, files, hosting and AI in the EU</small></div></div>
+        <div class="badge" id="b2" style="top:920px;"><div class="dot"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div>Invite-only<small>No public sign-up; you see only your data</small></div></div>
+        <div class="badge" id="b3" style="top:1160px;"><div class="dot"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div><div>One capture at a time<small>The AI sees only what you hand it</small></div></div>
+      </div>
+
+      <!-- Voiceover (Kokoro, voice af_heart, generated locally) -->
+      <audio id="vo01" src="vo/01.wav" data-start="0.4" data-duration="2.47" data-track-index="9"></audio>
+      <audio id="vo02" src="vo/02.wav" data-start="3.62" data-duration="4.78" data-track-index="9"></audio>
+      <audio id="vo03" src="vo/03.wav" data-start="9.15" data-duration="3.14" data-track-index="9"></audio>
+      <audio id="vo04" src="vo/04.wav" data-start="13.04" data-duration="2.45" data-track-index="9"></audio>
+      <audio id="vo05" src="vo/05.wav" data-start="16.24" data-duration="1.37" data-track-index="9"></audio>
+      <audio id="vo06" src="vo/06.wav" data-start="18.84" data-duration="6.21" data-track-index="9"></audio>
+      <audio id="vo07" src="vo/07.wav" data-start="25.8" data-duration="4.12" data-track-index="9"></audio>
+      <audio id="vo08" src="vo/08.wav" data-start="30.67" data-duration="2.22" data-track-index="9"></audio>
+      <audio id="vo09" src="vo/09.wav" data-start="33.67" data-duration="4.16" data-track-index="9"></audio>
+      <audio id="vo10" src="vo/10.wav" data-start="38.58" data-duration="4.25" data-track-index="9"></audio>
+      <audio id="vo11" src="vo/11.wav" data-start="43.58" data-duration="7.70" data-track-index="9"></audio>
+      <audio id="vo12" src="vo/12.wav" data-start="52.03" data-duration="5.38" data-track-index="9"></audio>
+      <audio id="vo13" src="vo/13.wav" data-start="58.16" data-duration="3.54" data-track-index="9"></audio>
+
+      <!-- 9 · End (85–90) -->
+      <div id="s9" class="clip" data-start="57.81" data-duration="5.29" data-track-index="0">
+        <div id="s9-in" style="position:absolute;left:0;right:0;top:560px;text-align:center;">
+          <img src="shots/icon.png" style="width:240px;height:240px;border-radius:54px;box-shadow:0 20px 50px rgba(11,67,94,.2);" />
+          <div class="serif" style="font-size:80px;font-weight:600;color:var(--primary);margin-top:50px;">Keeping Tabs on Subs</div>
+          <div style="font-size:52px;color:var(--text);margin-top:30px;">Know what renews,<br />and cancel in time.</div>
+          <div style="font-size:34px;color:var(--mid);margin-top:80px;">Add it to your Home Screen: Share → Add to Home Screen</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const OLD = [0.0, 0.4, 6.4, 13.6, 19.6, 25.2, 30.4, 38.2, 46.4, 52.4, 58.8, 66.4, 78.4, 85.4, 90.0], NEW = [0.0, 0.4, 3.62, 9.15, 13.04, 16.24, 18.84, 25.8, 30.67, 33.67, 38.58, 43.58, 52.03, 58.16, 63.1];
+      const M = (t) => { for (let i = 0; i < OLD.length - 1; i++) if (t <= OLD[i + 1]) return NEW[i] + ((t - OLD[i]) * (NEW[i + 1] - NEW[i])) / (OLD[i + 1] - OLD[i]); return NEW[NEW.length - 1]; };
+      const fadeUp = (sel, t, d = 0.6) => tl.fromTo(sel, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: d, ease: "power2.out" }, M(t));
+      const fadeOut = (sel, t, d = 0.4) => tl.to(sel, { opacity: 0, duration: d }, M(t));
+      const fadeIn = (sel, t, d = 0.5) => tl.fromTo(sel, { opacity: 0 }, { opacity: 1, duration: d }, M(t));
+
+      // scene entrances: each scene fades in its whole layer
+      ["#s2", "#s3", "#s4", "#s5", "#s6", "#s7", "#s8", "#s9"].forEach((s, i) => {
+        const starts = [6, 13, 30, 46, 52, 66, 78, 85];
+        fadeIn(s, starts[i], 0.5);
+      });
+
+      // 1
+      fadeUp("#s1-brand", 0.2, 0.8);
+      fadeUp("#s1-receipt", 1.4, 0.7);
+      fadeUp("#s1-cap", 2.6, 0.7);
+      fadeOut("#s1", 5.5);
+
+      // 2
+      fadeUp("#s2-bank", 7.0);
+      fadeUp("#s2-app", 8.6);
+      tl.to("#s2-bank", { opacity: 0.45, duration: 0.6 }, M(10));
+      fadeOut("#s2", 12.6);
+
+      // 3 capture
+      tl.set("#t-text", { className: "tile on" }, M(13.8));
+      fadeIn("#p-text", 13.8, 0.3);
+      fadeIn("#typed1", 14.6, 0.8);
+      fadeIn("#typed2", 16.0, 0.8);
+      fadeOut("#p-text", 19.0, 0.3);
+      tl.set("#t-text", { className: "tile" }, M(19.0));
+      tl.set("#t-upload", { className: "tile on" }, M(19.2));
+      fadeIn("#p-paste", 19.3, 0.3);
+      fadeUp("#thumb1", 20.6, 0.5);
+      fadeOut("#p-paste", 24.6, 0.3);
+      fadeIn("#p-pdf", 25.0, 0.3);
+      tl.fromTo("#bar", { width: "0%" }, { width: "85%", duration: 4, ease: "power1.out" }, M(25.4));
+      fadeOut("#s3", 29.6);
+
+      // 4 review
+      tl.fromTo("#shot-p1", { y: 0 }, { y: -260, duration: 1.4, ease: "power2.inOut" }, M(31.5));
+      fadeIn("#ring-p1", 33.0);
+      fadeOut("#s4-cap1", 37.6, 0.3);
+      fadeOut("#shot-p1", 37.8, 0.4);
+      fadeIn("#shot-p2", 37.9, 0.4);
+      fadeUp("#s4-cap2", 38.0, 0.5);
+      fadeIn("#ring-p2", 39.5);
+      fadeOut("#s4", 45.6);
+
+      // 5 approve
+      tl.fromTo("#tap-approve", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.35 }, M(47.4));
+      fadeOut("#tap-approve", 47.9, 0.3);
+      fadeUp("#toast-approve", 48.2, 0.5);
+      fadeOut("#s5", 51.6);
+
+      // 6 list
+      fadeIn("#ring-due", 53.5);
+      fadeIn("#ring-vd", 56.0);
+      fadeOut("#ring-due", 56.0, 0.3);
+      fadeOut("#ring-vd", 58.4, 0.3);
+      fadeOut("#s6-cap1", 58.4, 0.3);
+      fadeUp("#s6-cap2", 58.7, 0.5);
+      tl.fromTo("#shot-list", { y: 0 }, { y: -1980, duration: 1.6, ease: "power2.inOut" }, M(58.6));
+      fadeIn("#ring-px", 60.4);
+      fadeIn("#ring-sb", 61.4);
+      fadeOut("#ring-px", 62.6, 0.3);
+      fadeOut("#ring-sb", 62.6, 0.3);
+      tl.to("#shot-list", { y: -2960, duration: 1.2, ease: "power2.inOut" }, M(62.8));
+      fadeIn("#ring-fc", 64.1);
+      fadeOut("#s6", 65.6);
+
+      // 7 reminders
+      tl.fromTo("#tap-cancel", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.35 }, M(71.0));
+      fadeOut("#tap-cancel", 71.5, 0.3);
+      fadeUp("#toast-cancel", 71.8, 0.5);
+      fadeOut("#s7", 77.6);
+
+      // 8 privacy
+      fadeUp("#b1", 78.6);
+      fadeUp("#b2", 79.6);
+      fadeUp("#b3", 80.6);
+      fadeOut("#s8", 84.6);
+
+      // 9 end
+      fadeUp("#s9-in", 85.3, 0.8);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
