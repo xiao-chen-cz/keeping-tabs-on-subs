@@ -30,3 +30,9 @@ Both labels start with "Keep" (as does the app name), so they read as two streng
 ## Question for testers
 
 "When a reminder comes up for a subscription you want to keep, would you rather (a) silence it just for this renewal and be reminded next time, or (b) stop the reminders for that subscription until you switch them back on?" Also ask whether they noticed the Quiet pill and what they thought it meant.
+
+## Tester status (2026-10-21)
+
+- RG and LK watched the explainer video and were very positive. Neither raised an issue, so nothing needs a fixed, deferred or not-reproducible status.
+- JB has not replied; the owner sees her on Sat 24 Oct and can ask her then.
+- No tester has answered the Keep vs Keep quietly question. It stays parked; the decision waits for real answers (ask JB on Saturday, and RG/LK in a second-look message).
